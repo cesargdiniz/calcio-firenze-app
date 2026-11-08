@@ -21,8 +21,10 @@ class LoginScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) =>
-      BlocProvider(create: (c) => LoginController(c.read<AuthRepository>()), child: const _Login());
+  Widget build(BuildContext context) => BlocProvider(
+    create: (c) => LoginController(c.read<AuthRepository>()),
+    child: _Login(titulo: titulo, subtitulo: subtitulo),
+  );
 }
 
 class _Login extends StatefulWidget {
