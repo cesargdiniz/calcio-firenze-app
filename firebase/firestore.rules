@@ -33,8 +33,9 @@ service cloud.firestore {
       match /ajustes/{id}   { allow read: if true; allow write: if organizacao(); }
       match /publico/{doc}  { allow read: if true; allow write: if organizacao(); }
 
-      // Nomes dos elencos: participantes logados e Organização.
-      match /pessoas/{id}   { allow read: if logado(); allow write: if organizacao(); }
+      // Elencos: nome e número são públicos (aparecem na súmula e na lista de
+      // suspensos); só a Organização grava.
+      match /pessoas/{id}   { allow read: if true; allow write: if organizacao(); }
 
       // Financeiro e documentos: só a Organização.
       match /pagamentos/{id}    { allow read, write: if organizacao(); }

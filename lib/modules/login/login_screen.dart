@@ -11,7 +11,14 @@ import 'login_controller.dart';
 
 /// 03 · Login do Participante e 03b · Link enviado.
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  final String titulo;
+  final String subtitulo;
+
+  const LoginScreen({
+    super.key,
+    this.titulo = 'Entrar como Participante',
+    this.subtitulo = 'Atletas, técnicos e dirigentes inscritos na temporada.',
+  });
 
   @override
   Widget build(BuildContext context) =>
@@ -19,7 +26,9 @@ class LoginScreen extends StatelessWidget {
 }
 
 class _Login extends StatefulWidget {
-  const _Login();
+  final String titulo;
+  final String subtitulo;
+  const _Login({required this.titulo, required this.subtitulo});
 
   @override
   State<_Login> createState() => _LoginState();
@@ -66,12 +75,9 @@ class _LoginState extends State<_Login> {
                 const SizedBox(height: AppSpacing.md),
                 const Align(alignment: Alignment.centerLeft, child: LogoCalcio()),
                 const SizedBox(height: AppSpacing.lg),
-                const Text('Entrar como Participante', style: AppTextStyles.tituloTela),
+                Text(widget.titulo, style: AppTextStyles.tituloTela),
                 const SizedBox(height: AppSpacing.xs),
-                const Text(
-                  'Atletas, técnicos e dirigentes inscritos na temporada.',
-                  style: AppTextStyles.corpo,
-                ),
+                Text(widget.subtitulo, style: AppTextStyles.corpo),
                 const SizedBox(height: AppSpacing.xl),
                 OutlinedButton.icon(
                   onPressed: ocupado ? null : controller.entrarComGoogle,

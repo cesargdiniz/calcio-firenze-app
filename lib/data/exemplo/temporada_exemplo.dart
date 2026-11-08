@@ -15,7 +15,9 @@ class TemporadaExemploRepository implements TemporadaRepository {
   Stream<DadosTemporada> observar() => Stream.value(montarTemporadaExemplo());
 }
 
-const _times = [
+/// Os 10 clubes do Master 2027, com as cores do Figma.
+/// Os 10 clubes do Master 2027, com as cores do Figma.
+const timesMaster2027 = [
   Time(id: 'INT', nome: 'Inter', sigla: 'INT', cor: 0xFF0A3D91),
   Time(id: 'FIO', nome: 'Fiorentina', sigla: 'FIO', cor: 0xFF5B2A86),
   Time(id: 'SAM', nome: 'Sampdoria', sigla: 'SAM', cor: 0xFF1B5CC1),
@@ -104,7 +106,7 @@ List<Pessoa> _elencos() {
     return n;
   }
 
-  for (final t in _times) {
+  for (final t in timesMaster2027) {
     final ocupados = {
       for (final p in _destaques)
         if (p.timeId == t.id && p.numero != null) p.numero!,
@@ -141,7 +143,7 @@ List<Pessoa> _elencos() {
 
 /// Calendário pelo método do círculo: 10 times, 9 rodadas, só ida (art. 16).
 List<(String, String)> _confrontos(int rodada) {
-  final ids = _times.map((t) => t.id).toList();
+  final ids = timesMaster2027.map((t) => t.id).toList();
   final fixo = ids.first;
   final roda = ids.sublist(1);
   final r = rodada - 1;
@@ -218,9 +220,10 @@ DadosTemporada montarTemporadaExemplo() {
 
   return DadosTemporada(
     id: 'master-2027',
+    demonstracao: true,
     nome: 'Master · Temporada 2027',
     local: 'Arena Gugu',
-    times: _times,
+    times: timesMaster2027,
     pessoas: _elencos(),
     partidas: partidas,
     decisoes: [

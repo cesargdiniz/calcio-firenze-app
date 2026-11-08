@@ -2,6 +2,12 @@ import 'package:go_router/go_router.dart';
 
 import '../modules/entrada/entrada_screen.dart';
 import '../modules/entrada/splash_screen.dart';
+import '../modules/organizacao/organizacao_shell.dart';
+import '../modules/organizacao/screens/gestao_screen.dart';
+import '../modules/organizacao/screens/importar_elencos_screen.dart';
+import '../modules/organizacao/screens/org_inicio_screen.dart';
+import '../modules/organizacao/screens/pedidos_screen.dart';
+import '../modules/organizacao/screens/times_screen.dart';
 import '../modules/participante/participante_shell.dart';
 import '../modules/participante/screens/meu_time_screen.dart';
 import '../modules/participante/screens/participante_inicio_screen.dart';
@@ -72,6 +78,57 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
         ),
         StatefulShellBranch(
           routes: [GoRoute(path: '/participante/perfil', builder: (_, _) => const PerfilScreen())],
+        ),
+      ],
+    ),
+
+    // Organização: acesso restrito a quem está em organizacao/{uid}.
+    StatefulShellRoute.indexedStack(
+      builder: (_, _, navegacao) => OrganizacaoShell(navegacao: navegacao),
+      branches: [
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/organizacao', builder: (_, _) => const OrgInicioScreen())],
+        ),
+        StatefulShellBranch(routes: [_jogos('/organizacao/jogos')]),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/organizacao/disciplina',
+              builder: (_, _) => const EmBreveScreen(
+                titulo: 'Disciplina',
+                texto:
+                    'Pendências, quitações e suspensões aparecem aqui assim que as súmulas '
+                    'passarem a ser lançadas no app (próxima etapa).',
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: '/organizacao/tabela', builder: (_, _) => const ClassificacaoScreen()),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/organizacao/gestao',
+              builder: (_, _) => const GestaoScreen(),
+              routes: [
+                GoRoute(path: 'pedidos', builder: (_, _) => const PedidosScreen()),
+                GoRoute(path: 'elencos', builder: (_, _) => const ImportarElencosScreen()),
+                GoRoute(
+                  path: 'times',
+                  builder: (_, _) => const TimesScreen(),
+                  routes: [
+                    GoRoute(
+                      path: ':id',
+                      builder: (_, e) => EditarTimeScreen(timeId: e.pathParameters['id']!),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ],
     ),

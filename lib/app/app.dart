@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../domain/repositories/auth_repository.dart';
+import '../domain/repositories/organizacao_repository.dart';
 import '../domain/repositories/temporada_repository.dart';
 import '../domain/repositories/usuario_repository.dart';
 import '../domain/usecases/montar_painel.dart';
 import '../domain/usecases/montar_situacao.dart';
+import '../modules/organizacao/organizacao_controller.dart';
 import '../modules/participante/participante_controller.dart';
 import '../modules/torcedor/torcedor_controller.dart';
 import '../shared/theme/app_theme.dart';
@@ -18,6 +20,8 @@ class CalcioApp extends StatefulWidget {
   final TemporadaRepository temporada;
   final AuthRepository auth;
   final UsuarioRepository usuarios;
+  final OrganizacaoRepository organizacao;
+  final GestaoRepository gestao;
   final MontarPainel montarPainel;
   final MontarSituacao montarSituacao;
   final String initialLocation;
@@ -27,6 +31,8 @@ class CalcioApp extends StatefulWidget {
     required this.temporada,
     required this.auth,
     required this.usuarios,
+    required this.organizacao,
+    required this.gestao,
     required this.montarPainel,
     required this.montarSituacao,
     this.initialLocation = '/',
@@ -63,6 +69,14 @@ class _CalcioAppState extends State<CalcioApp> {
             widget.usuarios,
             widget.temporada,
             widget.montarSituacao,
+          )..iniciar(),
+        ),
+        BlocProvider(
+          create: (_) => OrganizacaoController(
+            widget.auth,
+            widget.organizacao,
+            widget.gestao,
+            widget.temporada,
           )..iniciar(),
         ),
       ],

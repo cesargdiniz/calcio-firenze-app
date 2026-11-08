@@ -11,10 +11,6 @@ import '../../shared/widgets/logo_calcio.dart';
 class EntradaScreen extends StatelessWidget {
   const EntradaScreen({super.key});
 
-  void _emBreve(BuildContext context, String perfil) =>
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('O acesso de $perfil chega na próxima versão.')));
-
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
@@ -44,7 +40,7 @@ class EntradaScreen extends StatelessWidget {
             titulo: 'Organização',
             tag: 'Acesso restrito',
             descricao: 'Súmulas, disciplina e gestão da temporada.',
-            onTap: () => _emBreve(context, 'Organização'),
+            onTap: () => context.go('/organizacao'),
           ),
         ],
       ),

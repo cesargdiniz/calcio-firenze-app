@@ -57,6 +57,10 @@ class DadosTemporada {
   final List<AjustePontos> ajustes;
   final List<String> ordemSorteio;
 
+  /// Verdadeiro enquanto o app mostra a temporada de exemplo (antes de a
+  /// Organização importar os elencos reais).
+  final bool demonstracao;
+
   const DadosTemporada({
     required this.id,
     required this.nome,
@@ -68,5 +72,6 @@ class DadosTemporada {
     this.pagamentos = const [],
     this.ajustes = const [],
     this.ordemSorteio = const [],
+    this.demonstracao = false,
   });
 }

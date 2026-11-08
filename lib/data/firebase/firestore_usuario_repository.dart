@@ -12,7 +12,7 @@ class FirestoreUsuarioRepository implements UsuarioRepository {
 
   @override
   Stream<Usuario?> observar(String uid) =>
-      _doc(uid).snapshots().map((s) => s.exists ? _deMapa(uid, s.data()!) : null);
+      _doc(uid).snapshots().map((s) => s.exists ? deMapa(uid, s.data()!) : null);
 
   @override
   Future<void> pedirVinculo(Usuario u) => _doc(u.uid).set({
@@ -32,7 +32,7 @@ class FirestoreUsuarioRepository implements UsuarioRepository {
   @override
   Future<void> excluir(String uid) => _doc(uid).delete();
 
-  static Usuario _deMapa(String uid, Map<String, dynamic> m) {
+  static Usuario deMapa(String uid, Map<String, dynamic> m) {
     final v = m['vinculo'] as Map<String, dynamic>?;
     T porNome<T extends Enum>(List<T> valores, Object? nome, T padrao) =>
         valores.where((e) => e.name == nome).firstOrNull ?? padrao;
