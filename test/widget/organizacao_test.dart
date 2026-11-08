@@ -20,6 +20,9 @@ const _pedido = Usuario(
 
 /// Rola a lista até o item ficar no meio da tela, longe da barra de abas.
 Future<void> _mostrar(WidgetTester tester, Finder alvo) async {
+  // O campo de texto com foco puxa a rolagem de volta para ele; solta o foco.
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pumpAndSettle();
   await tester.scrollUntilVisible(alvo, 200, scrollable: find.byType(Scrollable).first);
   await tester.ensureVisible(alvo);
   await tester.drag(find.byType(ListView).first, const Offset(0, -250));
