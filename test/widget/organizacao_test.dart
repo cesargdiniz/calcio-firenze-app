@@ -70,11 +70,13 @@ void main() {
     await tester.enterText(find.byType(TextField), linhas.toString());
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
-    // Aciona os botões direto: o teclado/foco simulado interfere na rolagem.
+    // Rola até o botão existir na lista e aciona direto (o foco simulado do
+    // campo de texto atrapalha o toque nesta tela longa).
+    final lista = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(find.text('Conferir'), 200, scrollable: lista);
     tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'Conferir')).onPressed!();
     await tester.pumpAndSettle();
 
-    final lista = find.byType(Scrollable).first;
     await tester.scrollUntilVisible(find.text('Pronto'), 200, scrollable: lista);
     expect(find.text('Pronto'), findsOneWidget);
     expect(find.text('12 atletas · 13 pessoas'), findsOneWidget);
