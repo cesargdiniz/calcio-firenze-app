@@ -9,16 +9,21 @@ import '../widgets/com_painel.dart';
 
 /// T2 · Torcedor · Jogos
 class JogosScreen extends StatelessWidget {
-  const JogosScreen({super.key});
+  /// Rota da lista, para abrir o detalhe dentro da navegação certa
+  /// (Torcedor ou Participante).
+  final String rotaBase;
+  const JogosScreen({super.key, this.rotaBase = '/torcedor/jogos'});
 
   @override
-  Widget build(BuildContext context) =>
-      ComPainel(builder: (context, painel) => _Jogos(painel: painel));
+  Widget build(BuildContext context) => ComPainel(
+    builder: (context, painel) => _Jogos(painel: painel, rotaBase: rotaBase),
+  );
 }
 
 class _Jogos extends StatefulWidget {
   final Painel painel;
-  const _Jogos({required this.painel});
+  final String rotaBase;
+  const _Jogos({required this.painel, required this.rotaBase});
 
   @override
   State<_Jogos> createState() => _JogosState();
@@ -63,7 +68,7 @@ class _JogosState extends State<_Jogos> {
             mandante: painel.time(p.mandanteId),
             visitante: painel.time(p.visitanteId),
             local: painel.local,
-            onTap: () => context.go('/torcedor/jogos/${p.id}'),
+            onTap: () => context.go('${widget.rotaBase}/${p.id}'),
           ),
           const SizedBox(height: AppSpacing.md),
         ],

@@ -1,12 +1,21 @@
 rules_version = '2';
 
-// Rascunho das regras de acesso. Perfis: Torcedor (sem login), Participante
-// (login + vínculo aprovado) e Organização (custom claim `org == true`).
+// Regras de acesso. Perfis: Torcedor (sem login), Participante (login +
+// vínculo aprovado) e Organização (quem tem documento em organizacao/{uid},
+// criado à mão no console do Firebase).
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function logado() { return request.auth != null; }
-    function organizacao() { return logado() && request.auth.token.org == true; }
+    function organizacao() {
+      return logado() && exists(/databases/$(database)/documents/organizacao/$(request.auth.uid));
+    }
+
+    // Lista de quem é da Organização: só leitura do próprio registro.
+    match /organizacao/{uid} {
+      allow read: if logado() && request.auth.uid == uid;
+      allow write: if false;
+    }
 
     // Dados públicos: qualquer pessoa lê; só a Organização escreve.
     match /clubes/{id} {
@@ -33,16 +42,16 @@ service cloud.firestore {
       match /privado/{doc}      { allow read, write: if organizacao(); }
     }
 
-    // Cada usuário lê o próprio cadastro e pede vínculo; a Organização aprova.
+    // Cada usuário lê o próprio cadastro e pede (ou refaz) o vínculo, sempre
+    // como pendente. Só a Organização aprova ou recusa.
     match /usuarios/{uid} {
+      function pedidoValido() {
+        return request.resource.data.perfil == 'participante'
+          && request.resource.data.vinculo.status == 'pendente';
+      }
       allow read: if organizacao() || (logado() && request.auth.uid == uid);
-      allow create: if logado() && request.auth.uid == uid
-                    && request.resource.data.perfil == 'participante'
-                    && request.resource.data.vinculo.status == 'pendente';
-      allow update: if organizacao()
-                    || (logado() && request.auth.uid == uid
-                        && request.resource.data.perfil == resource.data.perfil
-                        && request.resource.data.vinculo == resource.data.vinculo);
+      allow create: if logado() && request.auth.uid == uid && pedidoValido();
+      allow update: if organizacao() || (logado() && request.auth.uid == uid && pedidoValido());
       allow delete: if organizacao() || (logado() && request.auth.uid == uid);
 
       match /situacao/{doc} {

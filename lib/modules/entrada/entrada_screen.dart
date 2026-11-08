@@ -38,7 +38,7 @@ class EntradaScreen extends StatelessWidget {
             titulo: 'Participante',
             tag: 'Com login',
             descricao: 'Atletas, técnicos e dirigentes: sua situação e a do seu time.',
-            onTap: () => _emBreve(context, 'Participante'),
+            onTap: () => context.go('/participante'),
           ),
           _Opcao(
             titulo: 'Organização',

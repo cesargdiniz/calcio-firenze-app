@@ -29,6 +29,9 @@ class Pessoa {
   final int? numero;
   final bool goleiro;
 
+  /// Dirigente do time na temporada (pode também ser atleta).
+  final bool dirigente;
+
   const Pessoa({
     required this.id,
     required this.nome,
@@ -36,11 +39,14 @@ class Pessoa {
     this.funcao = Funcao.atleta,
     this.numero,
     this.goleiro = false,
+    this.dirigente = false,
   });
 }
 
 /// Tudo o que o app precisa saber de uma temporada para calcular as telas.
 class DadosTemporada {
+  /// Ex.: "master-2027".
+  final String id;
   final String nome;
   final String local;
   final List<Time> times;
@@ -52,6 +58,7 @@ class DadosTemporada {
   final List<String> ordemSorteio;
 
   const DadosTemporada({
+    required this.id,
     required this.nome,
     required this.local,
     required this.times,

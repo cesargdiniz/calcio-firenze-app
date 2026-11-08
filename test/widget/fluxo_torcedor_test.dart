@@ -1,37 +1,16 @@
-import 'package:calcio_firenze/app/app.dart';
-import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
-import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> abrirComoTorcedor(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(414 * 3, 896 * 3);
-  tester.view.devicePixelRatio = 3;
-  addTearDown(tester.view.reset);
+import 'apoio.dart';
 
-  await tester.pumpWidget(
-    CalcioApp(
-      repository: TemporadaExemploRepository(),
-      montarPainel: MontarPainel(agora: () => TemporadaExemploRepository.agora),
-    ),
-  );
-  await tester.pump(const Duration(milliseconds: 1300)); // Splash
-  await tester.pumpAndSettle();
+Future<void> abrirComoTorcedor(WidgetTester tester) async {
+  await abrirApp(tester);
   await tester.tap(find.text('Torcedor'));
   await tester.pumpAndSettle();
 }
 
 void main() {
   testWidgets('Splash leva a "Como você quer entrar?"', (tester) async {
-    await tester.pumpWidget(
-      CalcioApp(
-        repository: TemporadaExemploRepository(),
-        montarPainel: MontarPainel(agora: () => TemporadaExemploRepository.agora),
-      ),
-    );
-    expect(find.text('Como você quer entrar?'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 1300));
-    await tester.pumpAndSettle();
+    await abrirApp(tester);
     expect(find.text('Como você quer entrar?'), findsOneWidget);
   });
 

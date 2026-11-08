@@ -13,7 +13,12 @@ import '../widgets/com_painel.dart';
 /// S3 · Jogo · Detalhe
 class JogoDetalheScreen extends StatelessWidget {
   final String partidaId;
-  const JogoDetalheScreen({super.key, required this.partidaId});
+  final String voltarPara;
+  const JogoDetalheScreen({
+    super.key,
+    required this.partidaId,
+    this.voltarPara = '/torcedor/jogos',
+  });
 
   @override
   Widget build(BuildContext context) => ComPainel(
@@ -30,7 +35,7 @@ class JogoDetalheScreen extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
-              onPressed: () => context.canPop() ? context.pop() : context.go('/torcedor/jogos'),
+              onPressed: () => context.canPop() ? context.pop() : context.go(voltarPara),
               icon: const Icon(Icons.chevron_left_rounded, color: AppColors.oliva),
               label: Text('Jogos', style: AppTextStyles.subtitulo.copyWith(fontSize: 14)),
             ),

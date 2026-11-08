@@ -1,1 +1,17 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"calcio-firenze","configurations":{"web":"1:1010799319095:web:48186951bf26f4dcba47b2"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "calcio-firenze",
+          "configurations": {
+            "web": "1:1010799319095:web:48186951bf26f4dcba47b2"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firebase/firestore.rules"
+  }
+}

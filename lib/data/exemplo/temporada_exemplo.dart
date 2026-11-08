@@ -28,7 +28,8 @@ const _times = [
   Time(id: 'SAS', nome: 'Sassuolo', sigla: 'SAS', cor: 0xFF00A752),
 ];
 
-const _pessoas = [
+/// Atletas com papel na história de exemplo (cartões e suspensões).
+const _destaques = [
   Pessoa(id: 'marcos-lima', nome: 'Marcos Lima', timeId: 'UDI', numero: 5),
   Pessoa(id: 'paulo-ribeiro', nome: 'Paulo Ribeiro', timeId: 'CAS', numero: 8),
   Pessoa(id: 'ricardo-alves', nome: 'Ricardo Alves', timeId: 'MON', numero: 6),
@@ -38,6 +39,105 @@ const _pessoas = [
   Pessoa(id: 'leandro-paiva', nome: 'Leandro Paiva', timeId: 'INT', numero: 3),
   Pessoa(id: 'helio-ramos', nome: 'Hélio Ramos', timeId: 'SAM', funcao: Funcao.tecnico),
 ];
+
+const _nomes = [
+  'André',
+  'Bruno',
+  'Caio',
+  'Daniel',
+  'Eduardo',
+  'Felipe',
+  'Gustavo',
+  'Henrique',
+  'Igor',
+  'João',
+  'Lucas',
+  'Mateus',
+  'Nelson',
+  'Otávio',
+  'Pedro',
+  'Renato',
+  'Sérgio',
+  'Thiago',
+  'Vinícius',
+  'Wagner',
+  'Alex',
+  'Diego',
+  'Fernando',
+  'Gilberto',
+];
+const _sobrenomes = [
+  'Almeida',
+  'Barbosa',
+  'Cardoso',
+  'Dias',
+  'Esteves',
+  'Ferreira',
+  'Gomes',
+  'Holanda',
+  'Lacerda',
+  'Martins',
+  'Nogueira',
+  'Oliveira',
+  'Pereira',
+  'Queiroz',
+  'Rocha',
+  'Santana',
+  'Teixeira',
+  'Vieira',
+  'Xavier',
+  'Moreira',
+  'Campos',
+  'Freitas',
+  'Pinto',
+  'Rezende',
+  'Nunes',
+];
+
+/// Elencos completos: 12 atletas (o nº 1 é o goleiro), técnico e dirigente.
+List<Pessoa> _elencos() {
+  final pessoas = <Pessoa>[..._destaques];
+  var k = 0;
+  String proximoNome() {
+    final n = '${_nomes[k % _nomes.length]} ${_sobrenomes[(k * 7 + 3) % _sobrenomes.length]}';
+    k++;
+    return n;
+  }
+
+  for (final t in _times) {
+    final ocupados = {
+      for (final p in _destaques)
+        if (p.timeId == t.id && p.numero != null) p.numero!,
+    };
+    var atletas = pessoas.where((p) => p.timeId == t.id && p.funcao == Funcao.atleta).length;
+    for (var numero = 1; atletas < 12; numero++) {
+      if (ocupados.contains(numero)) continue;
+      pessoas.add(
+        Pessoa(
+          id: '${t.id.toLowerCase()}-$numero',
+          nome: proximoNome(),
+          timeId: t.id,
+          numero: numero,
+          goleiro: numero == 1,
+          // O nº 9 de cada time é também o dirigente.
+          dirigente: numero == 9,
+        ),
+      );
+      atletas++;
+    }
+    if (!pessoas.any((p) => p.timeId == t.id && p.funcao == Funcao.tecnico)) {
+      pessoas.add(
+        Pessoa(
+          id: '${t.id.toLowerCase()}-tecnico',
+          nome: proximoNome(),
+          timeId: t.id,
+          funcao: Funcao.tecnico,
+        ),
+      );
+    }
+  }
+  return pessoas;
+}
 
 /// Calendário pelo método do círculo: 10 times, 9 rodadas, só ida (art. 16).
 List<(String, String)> _confrontos(int rodada) {
@@ -117,10 +217,11 @@ DadosTemporada montarTemporadaExemplo() {
   final jogoMonzaR3 = partidas.firstWhere((p) => p.rodada == 3 && p.envolve('MON'));
 
   return DadosTemporada(
+    id: 'master-2027',
     nome: 'Master · Temporada 2027',
     local: 'Arena Gugu',
     times: _times,
-    pessoas: _pessoas,
+    pessoas: _elencos(),
     partidas: partidas,
     decisoes: [
       DecisaoDisciplinar(
