@@ -24,9 +24,9 @@ class EntradaScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.xl),
           const Align(alignment: Alignment.centerLeft, child: LogoCalcio()),
           const SizedBox(height: AppSpacing.xl),
-          Text('Como você quer entrar?', style: AppTextStyles.tituloTela),
+          const Text('Como você quer entrar?', style: AppTextStyles.tituloTela),
           const SizedBox(height: AppSpacing.sm),
-          Text('Escolha o seu perfil. Dá para trocar depois.', style: AppTextStyles.corpo),
+          const Text('Escolha o seu perfil. Dá para trocar depois.', style: AppTextStyles.corpo),
           const SizedBox(height: AppSpacing.xl),
           _Opcao(
             titulo: 'Torcedor',

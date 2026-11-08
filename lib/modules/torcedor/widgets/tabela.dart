@@ -63,7 +63,7 @@ class TabelaClassificacao extends StatelessWidget {
             child: Row(
               children: [
                 const SizedBox(width: 26),
-                Expanded(child: Text('Clube', style: AppTextStyles.pequeno)),
+                const Expanded(child: Text('Clube', style: AppTextStyles.pequeno)),
                 for (final c in colunas)
                   SizedBox(
                     width: 30,

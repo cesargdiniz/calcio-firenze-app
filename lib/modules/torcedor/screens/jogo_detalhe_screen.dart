@@ -112,7 +112,7 @@ class JogoDetalheScreen extends StatelessWidget {
           if (s != null && s.ausenteWo == null) ...[
             const TituloSecao('Gols'),
             s.gols.isEmpty
-                ? Text('Autores dos gols ainda não lançados.', style: AppTextStyles.pequeno)
+                ? const Text('Autores dos gols ainda não lançados.', style: AppTextStyles.pequeno)
                 : _Lista([
                     for (final g in s.gols)
                       (
@@ -124,7 +124,7 @@ class JogoDetalheScreen extends StatelessWidget {
                   ]),
             const TituloSecao('Cartões'),
             s.cartoes.isEmpty
-                ? Text('Nenhum cartão.', style: AppTextStyles.pequeno)
+                ? const Text('Nenhum cartão.', style: AppTextStyles.pequeno)
                 : _Lista([
                     for (final c in s.cartoes)
                       (

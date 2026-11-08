@@ -25,8 +25,8 @@ class ClassificacaoScreen extends StatelessWidget {
         const _Legenda(AppColors.verde, '1º e 2º vão direto às semifinais'),
         const _Legenda(AppColors.oliva, '3º ao 6º jogam as quartas de final'),
         if (painel.tabela.any((l) => l.aguardaSorteio))
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.sm),
+          const Padding(
+            padding: EdgeInsets.only(top: AppSpacing.sm),
             child: Text(
               '* Empate em todos os critérios: decidido por sorteio (art. 42).',
               style: AppTextStyles.pequeno,

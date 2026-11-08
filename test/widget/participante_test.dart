@@ -49,10 +49,12 @@ void main() {
 
     await tester.tap(find.text('Sampdoria'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('RAFAEL SOUZA'), 200);
+    await tester.ensureVisible(find.text('RAFAEL SOUZA'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('RAFAEL SOUZA'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Enviar para aprovação'), 200);
+    await tester.ensureVisible(find.text('Enviar para aprovação'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Enviar para aprovação'));
     await tester.pumpAndSettle();
 
