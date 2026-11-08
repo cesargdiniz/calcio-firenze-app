@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  regras:
+    name: Regras (Dart)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/calcio_regras
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub get
+      - run: dart analyze
+      - run: dart test
+
+  app:
+    name: App (Flutter)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
+      - name: Gerar pastas de plataforma, se ainda não existirem
+        run: |
+          if [ ! -d web ]; then
+            flutter create . --platforms web --org br.com.calciofirenze --project-name calcio_firenze
+            rm -f test/widget_test.dart
+          fi
+      - run: flutter build web --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: calcio-firenze-web
+          path: build/web

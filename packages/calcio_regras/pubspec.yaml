@@ -1,0 +1,11 @@
+name: calcio_regras
+description: Regras do Calcio Firenze (Master 2027) em Dart puro — motor disciplinar, classificação, mata-mata e rebaixamento.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.0

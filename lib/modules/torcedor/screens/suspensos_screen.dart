@@ -1,0 +1,134 @@
+import 'package:flutter/material.dart';
+
+import '../../../domain/entities/temporada.dart';
+import '../../../domain/usecases/montar_painel.dart';
+import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text_styles.dart';
+import '../../../shared/widgets/basicos.dart';
+import '../../../shared/widgets/escudo.dart';
+import '../widgets/com_painel.dart';
+
+/// T4 · Torcedor · Suspensos. Mostra quem NÃO joga a próxima rodada.
+class SuspensosScreen extends StatelessWidget {
+  const SuspensosScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) =>
+      ComPainel(builder: (context, painel) => _Suspensos(painel: painel));
+}
+
+class _Suspensos extends StatefulWidget {
+  final Painel painel;
+  const _Suspensos({required this.painel});
+
+  @override
+  State<_Suspensos> createState() => _SuspensosState();
+}
+
+class _SuspensosState extends State<_Suspensos> {
+  bool _verPendurados = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.painel;
+    final rodada = p.proximaRodada;
+    return ListView(
+      padding: AppSpacing.tela,
+      children: [
+        CabecalhoTela(
+          'Suspensos',
+          subtitulo: rodada == null ? 'Sem jogos marcados' : 'Para a Rodada $rodada · 1º Turno',
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          children: [
+            ChipFiltro(
+              'Suspensos (${p.suspensos.length})',
+              ativo: !_verPendurados,
+              onTap: () => setState(() => _verPendurados = false),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            ChipFiltro(
+              'Pendurados (${p.pendurados.length})',
+              ativo: _verPendurados,
+              onTap: () => setState(() => _verPendurados = true),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        if (!_verPendurados && p.suspensos.isEmpty)
+          const ListaVazia(
+            titulo: 'Ninguém suspenso',
+            texto:
+                'Todos os atletas podem jogar a próxima rodada. '
+                'A lista aparece aqui quando houver suspensões.',
+          ),
+        if (_verPendurados && p.pendurados.isEmpty)
+          const ListaVazia(
+            titulo: 'Ninguém pendurado',
+            texto: 'Nenhum atleta está a um amarelo da suspensão.',
+          ),
+        if (!_verPendurados)
+          for (final s in p.suspensos)
+            _Linha(
+              pessoa: s.pessoa,
+              time: s.time,
+              detalhe: s.motivo,
+              lateral: s.retorno ?? '',
+              corLateral: AppColors.vermelho,
+            ),
+        if (_verPendurados)
+          for (final x in p.pendurados)
+            _Linha(
+              pessoa: x.pessoa,
+              time: x.time,
+              detalhe: '${x.amarelos} amarelos',
+              lateral: 'Pendurado',
+              corLateral: AppColors.amareloEscuro,
+            ),
+      ],
+    );
+  }
+}
+
+/// Componente "Lista/Suspenso" do Figma.
+class _Linha extends StatelessWidget {
+  final Pessoa pessoa;
+  final Time time;
+  final String detalhe;
+  final String lateral;
+  final Color corLateral;
+
+  const _Linha({
+    required this.pessoa,
+    required this.time,
+    required this.detalhe,
+    required this.lateral,
+    required this.corLateral,
+  });
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+    child: Cartao(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        children: [
+          Escudo(time),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(pessoa.nome.toUpperCase(), style: AppTextStyles.nome),
+                Text('${time.nome} · $detalhe', style: AppTextStyles.pequeno),
+              ],
+            ),
+          ),
+          Text(lateral, style: AppTextStyles.rotulo.copyWith(fontSize: 11, color: corLateral)),
+        ],
+      ),
+    ),
+  );
+}
