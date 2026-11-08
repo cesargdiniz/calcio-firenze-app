@@ -77,10 +77,12 @@ class _Opcao extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(titulo, style: AppTextStyles.tituloSecao),
-                    const SizedBox(width: AppSpacing.sm),
                     Etiqueta.verde(tag),
                   ],
                 ),

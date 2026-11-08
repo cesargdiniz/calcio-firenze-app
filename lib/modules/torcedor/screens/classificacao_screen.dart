@@ -49,7 +49,9 @@ class _Legenda extends StatelessWidget {
       children: [
         Container(width: 10, height: 10, color: cor),
         const SizedBox(width: AppSpacing.sm),
-        Text(texto, style: AppTextStyles.pequeno.copyWith(color: AppColors.texto2)),
+        Expanded(
+          child: Text(texto, style: AppTextStyles.pequeno.copyWith(color: AppColors.texto2)),
+        ),
       ],
     ),
   );

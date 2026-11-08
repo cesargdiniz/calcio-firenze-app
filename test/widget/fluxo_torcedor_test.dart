@@ -46,7 +46,12 @@ void main() {
     await tester.tap(find.text('Suspensos').last);
     await tester.pumpAndSettle();
     expect(find.text('MARCOS LIMA'), findsOneWidget);
-    expect(find.text('Volta na Rodada 5'), findsOneWidget);
+    expect(find.text('PAULO RIBEIRO'), findsOneWidget);
+    expect(find.text('RICARDO ALVES'), findsOneWidget);
+    // Marcos (vermelho) e Paulo (3 amarelos) voltam na Rodada 5; Ricardo
+    // (decisão de 2 jogos) só na Rodada 6.
+    expect(find.text('Volta na Rodada 5'), findsNWidgets(2));
+    expect(find.text('Volta na Rodada 6'), findsOneWidget);
 
     await tester.tap(find.text('Pendurados (2)'));
     await tester.pumpAndSettle();

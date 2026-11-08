@@ -41,14 +41,15 @@ class _SuspensosState extends State<_Suspensos> {
           subtitulo: rodada == null ? 'Sem jogos marcados' : 'Para a Rodada $rodada · 1º Turno',
         ),
         const SizedBox(height: AppSpacing.md),
-        Row(
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: [
             ChipFiltro(
               'Suspensos (${p.suspensos.length})',
               ativo: !_verPendurados,
               onTap: () => setState(() => _verPendurados = false),
             ),
-            const SizedBox(width: AppSpacing.sm),
             ChipFiltro(
               'Pendurados (${p.pendurados.length})',
               ativo: _verPendurados,
