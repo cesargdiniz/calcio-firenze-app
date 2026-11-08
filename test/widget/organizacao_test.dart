@@ -18,6 +18,14 @@ const _pedido = Usuario(
   ),
 );
 
+/// Rola a lista até o item ficar no meio da tela, longe da barra de abas.
+Future<void> _mostrar(WidgetTester tester, Finder alvo) async {
+  await tester.scrollUntilVisible(alvo, 200, scrollable: find.byType(Scrollable).first);
+  await tester.ensureVisible(alvo);
+  await tester.drag(find.byType(ListView).first, const Offset(0, -250));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('conta que não é da Organização vê "acesso restrito" com o UID', (tester) async {
     await abrirApp(tester, inicio: '/organizacao', sessao: _org);
@@ -68,13 +76,12 @@ void main() {
     }
     linhas.writeln('SAM\t\tHélio Ramos\t\tTécnico');
     await tester.enterText(find.byType(TextField), linhas.toString());
-    await tester.ensureVisible(find.text('Conferir'));
+    await _mostrar(tester, find.text('Conferir'));
     await tester.tap(find.text('Conferir'));
     await tester.pumpAndSettle();
 
     expect(find.text('Pronto'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Importar 1 time'), 200);
-    await tester.ensureVisible(find.text('Importar 1 time'));
+    await _mostrar(tester, find.text('Importar 1 time'));
     await tester.tap(find.text('Importar 1 time'));
     await tester.pumpAndSettle();
 
