@@ -17,7 +17,7 @@ DadosTemporada _real({List<Partida> Function(List<Partida>)? ajustar}) {
   var partidas = const GerarCalendario()(
     turno: 1,
     times: [for (final t in exemplo.times) t.id],
-    datas: datasMaster2027[1]!,
+    horarios: horariosMaster2027[1]!,
     sorteio: Random(1),
   );
   if (ajustar != null) partidas = ajustar(partidas);

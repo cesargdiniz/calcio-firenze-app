@@ -156,7 +156,7 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     final novos = const GerarCalendario()(
       turno: turno,
       times: [for (final t in d.times) t.id],
-      datas: datasMaster2027[turno]!,
+      horarios: horariosMaster2027[turno]!,
       sorteio: Random(),
     );
     final ids = {for (final p in novos) p.id};

@@ -46,9 +46,8 @@ class _JogosState extends State<_Jogos> {
         content: Text(
           [
             'O app sorteia os confrontos (todos contra todos, 9 rodadas, 45 jogos) e '
-                'distribui nas datas do Master do regulamento, 2 jogos por noite '
-                '(19h30 e 20h45), na Arena Gugu. Depois dá para mudar data, hora e local '
-                'de cada jogo.',
+                'ocupa os horários oficiais do calendário do Master, na Arena Gugu. '
+                'Depois dá para mudar data, hora e local de cada jogo.',
             if (refazer) 'Os confrontos atuais deste turno serão substituídos.',
             if (demo) 'Os jogos e cartões de exemplo saem do app.',
           ].join('\n\n'),
