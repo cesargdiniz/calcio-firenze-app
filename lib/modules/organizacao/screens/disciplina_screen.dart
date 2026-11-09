@@ -87,14 +87,15 @@ class _DisciplinaState extends State<_Disciplina> {
             ),
           ),
         const SizedBox(height: AppSpacing.md),
-        Row(
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: [
             ChipFiltro(
               'Em aberto (${abertas.length})',
               ativo: !_quitadas,
               onTap: () => setState(() => _quitadas = false),
             ),
-            const SizedBox(width: AppSpacing.sm),
             ChipFiltro(
               'Quitadas (${quitadas.length})',
               ativo: _quitadas,

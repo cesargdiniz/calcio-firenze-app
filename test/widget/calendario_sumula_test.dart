@@ -60,10 +60,14 @@ void main() {
       organizacao: {'org1'},
       dados: dados,
     );
-    await tester.tap(find.byTooltip('Mais um gol').first);
-    await tester.tap(find.byTooltip('Mais um gol').first);
-    await tester.tap(find.byTooltip('Mais um gol').last);
-    await tester.pumpAndSettle();
+    for (final botao in [
+      find.byTooltip('Mais um gol').first,
+      find.byTooltip('Mais um gol').first,
+      find.byTooltip('Mais um gol').last,
+    ]) {
+      await tester.tap(botao);
+      await tester.pumpAndSettle();
+    }
     await acionar(tester, 'Encerrar súmula');
 
     final salvo = gestao.temporada.dados.partidas.firstWhere((p) => p.id == jogo.id);
