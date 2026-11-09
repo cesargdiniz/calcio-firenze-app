@@ -1,9 +1,14 @@
+import 'package:calcio_regras/calcio_regras.dart';
 import 'package:go_router/go_router.dart';
 
 import '../modules/entrada/entrada_screen.dart';
 import '../modules/entrada/splash_screen.dart';
 import '../modules/organizacao/organizacao_shell.dart';
+import '../modules/organizacao/screens/disciplina_screen.dart';
 import '../modules/organizacao/screens/gestao_screen.dart';
+import '../modules/organizacao/screens/jogo_org_screen.dart';
+import '../modules/organizacao/screens/org_jogos_screen.dart';
+import '../modules/organizacao/screens/sumula_screen.dart';
 import '../modules/organizacao/screens/importar_elencos_screen.dart';
 import '../modules/organizacao/screens/org_inicio_screen.dart';
 import '../modules/organizacao/screens/pedidos_screen.dart';
@@ -89,18 +94,32 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
         StatefulShellBranch(
           routes: [GoRoute(path: '/organizacao', builder: (_, _) => const OrgInicioScreen())],
         ),
-        StatefulShellBranch(routes: [_jogos('/organizacao/jogos')]),
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/organizacao/disciplina',
-              builder: (_, _) => const EmBreveScreen(
-                titulo: 'Disciplina',
-                texto:
-                    'Pendências, quitações e suspensões aparecem aqui assim que as súmulas '
-                    'passarem a ser lançadas no app (próxima etapa).',
-              ),
+              path: '/organizacao/jogos',
+              builder: (_, _) => const OrgJogosScreen(),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  builder: (_, e) => JogoOrgScreen(partidaId: e.pathParameters['id']!),
+                  routes: [
+                    GoRoute(
+                      path: 'sumula',
+                      builder: (_, e) => SumulaScreen(
+                        partidaId: e.pathParameters['id']!,
+                        inicial: e.extra is Sumula ? e.extra! as Sumula : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: '/organizacao/disciplina', builder: (_, _) => const DisciplinaScreen()),
           ],
         ),
         StatefulShellBranch(

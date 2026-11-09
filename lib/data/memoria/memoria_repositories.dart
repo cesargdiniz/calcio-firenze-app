@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:calcio_regras/calcio_regras.dart';
+
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -172,19 +174,73 @@ class MemoriaGestaoRepository implements GestaoRepository {
     );
   }
 
+  @override
+  Future<void> salvarPartidas(String temporadaId, List<Partida> partidas) async {
+    final d = temporada.dados;
+    final base = d.demonstracao ? <Partida>[] : d.partidas;
+    final porId = {for (final p in base) p.id: p, for (final p in partidas) p.id: p};
+    temporada.substituir(
+      _copiar(
+        d,
+        pessoas: d.demonstracao ? const [] : d.pessoas,
+        partidas: porId.values.toList(),
+        demonstracao: false,
+      ),
+    );
+  }
+
+  @override
+  Future<void> excluirPartidas(String temporadaId, List<String> ids) async {
+    final d = temporada.dados;
+    temporada.substituir(
+      _copiar(d, partidas: d.partidas.where((p) => !ids.contains(p.id)).toList()),
+    );
+  }
+
+  @override
+  Future<void> registrarPagamento(String temporadaId, String pendenciaId, DateTime pagoEm) async {
+    final d = temporada.dados;
+    temporada.substituir(
+      _copiar(
+        d,
+        pagamentos: [
+          ...d.pagamentos.where((p) => p.pendenciaId != pendenciaId),
+          Pagamento(pendenciaId, pagoEm),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Future<void> desfazerPagamento(String temporadaId, String pendenciaId) async {
+    final d = temporada.dados;
+    temporada.substituir(
+      _copiar(d, pagamentos: d.pagamentos.where((p) => p.pendenciaId != pendenciaId).toList()),
+    );
+  }
+
   static DadosTemporada _copiar(
     DadosTemporada d, {
     List<Time>? times,
     List<Pessoa>? pessoas,
+    List<Partida>? partidas,
+    List<Pagamento>? pagamentos,
     bool? demonstracao,
-  }) => DadosTemporada(
-    id: d.id,
-    nome: d.nome,
-    local: d.local,
-    times: times ?? d.times,
-    pessoas: pessoas ?? d.pessoas,
-    partidas: (demonstracao ?? d.demonstracao) ? d.partidas : const [],
-    decisoes: (demonstracao ?? d.demonstracao) ? d.decisoes : const [],
-    demonstracao: demonstracao ?? d.demonstracao,
-  );
+  }) {
+    final demo = demonstracao ?? d.demonstracao;
+    // Ao sair da demonstração, jogos e cartões de exemplo saem junto.
+    final saindoDaDemo = d.demonstracao && !demo;
+    return DadosTemporada(
+      id: d.id,
+      nome: d.nome,
+      local: d.local,
+      times: times ?? d.times,
+      pessoas: pessoas ?? d.pessoas,
+      partidas: partidas ?? (saindoDaDemo ? const [] : d.partidas),
+      pagamentos: pagamentos ?? (saindoDaDemo ? const [] : d.pagamentos),
+      decisoes: saindoDaDemo ? const [] : d.decisoes,
+      demonstracao: demo,
+      relogio: demo ? d.relogio : null,
+    );
+  }
 }

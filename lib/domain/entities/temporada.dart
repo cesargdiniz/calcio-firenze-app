@@ -61,6 +61,9 @@ class DadosTemporada {
   /// Organização importar os elencos reais).
   final bool demonstracao;
 
+  /// Relógio fixo da temporada de exemplo; nulo = hora atual.
+  final DateTime? relogio;
+
   const DadosTemporada({
     required this.id,
     required this.nome,
@@ -73,5 +76,6 @@ class DadosTemporada {
     this.ajustes = const [],
     this.ordemSorteio = const [],
     this.demonstracao = false,
+    this.relogio,
   });
 }

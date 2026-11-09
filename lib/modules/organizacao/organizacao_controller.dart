@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:math';
+
+import 'package:calcio_regras/calcio_regras.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,6 +10,7 @@ import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/organizacao_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
+import '../../domain/usecases/gerar_calendario.dart';
 
 sealed class OrgStatus {
   const OrgStatus();
@@ -137,6 +141,40 @@ class OrganizacaoController extends Cubit<OrgStatus> {
 
   Future<void> importarElencos(Map<String, List<Pessoa>> porTime) =>
       _gestao.importarElencos(_dados!.id, porTime);
+
+  /// Sorteia os confrontos e grava as 9 rodadas do turno nas datas do
+  /// regulamento. Substitui jogos do turno que ainda não tenham súmula.
+  Future<void> gerarTurno(int turno) async {
+    final d = _dados!;
+    // Na demonstração, os jogos de exemplo não contam (saem ao gerar).
+    final antigos = d.demonstracao
+        ? const <Partida>[]
+        : d.partidas.where((p) => p.turno == turno && p.fase == Fase.classificatoria);
+    if (antigos.any((p) => p.encerrada)) {
+      throw StateError('O turno já tem súmulas encerradas.');
+    }
+    final novos = const GerarCalendario()(
+      turno: turno,
+      times: [for (final t in d.times) t.id],
+      datas: datasMaster2027[turno]!,
+      sorteio: Random(),
+    );
+    final ids = {for (final p in novos) p.id};
+    final remover = [
+      for (final p in antigos)
+        if (!ids.contains(p.id)) p.id,
+    ];
+    if (remover.isNotEmpty) await _gestao.excluirPartidas(d.id, remover);
+    await _gestao.salvarPartidas(d.id, novos);
+  }
+
+  Future<void> salvarPartida(Partida p) => _gestao.salvarPartidas(_dados!.id, [p]);
+
+  Future<void> registrarPagamento(String pendenciaId) =>
+      _gestao.registrarPagamento(_dados!.id, pendenciaId, DateTime.now());
+
+  Future<void> desfazerPagamento(String pendenciaId) =>
+      _gestao.desfazerPagamento(_dados!.id, pendenciaId);
 
   Future<void> sair() => _auth.sair();
 

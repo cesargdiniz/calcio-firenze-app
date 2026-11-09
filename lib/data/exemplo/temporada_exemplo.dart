@@ -221,6 +221,7 @@ DadosTemporada montarTemporadaExemplo() {
   return DadosTemporada(
     id: 'master-2027',
     demonstracao: true,
+    relogio: TemporadaExemploRepository.agora,
     nome: 'Master · Temporada 2027',
     local: 'Arena Gugu',
     times: timesMaster2027,

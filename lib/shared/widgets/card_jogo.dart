@@ -94,7 +94,7 @@ class CardJogo extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
-              Expanded(child: Text(local, style: AppTextStyles.pequeno)),
+              Expanded(child: Text(partida.local ?? local, style: AppTextStyles.pequeno)),
               if (s != null) ...[
                 const Icon(Icons.download_rounded, size: 14, color: AppColors.verde),
                 const SizedBox(width: 4),

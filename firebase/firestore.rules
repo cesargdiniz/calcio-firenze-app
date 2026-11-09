@@ -38,7 +38,9 @@ service cloud.firestore {
       match /pessoas/{id}   { allow read: if true; allow write: if organizacao(); }
 
       // Financeiro e documentos: só a Organização.
-      match /pagamentos/{id}    { allow read, write: if organizacao(); }
+      // Quitações: quem tem login lê (para ver a própria situação); só a
+      // Organização registra.
+      match /pagamentos/{id}    { allow read: if logado(); allow write: if organizacao(); }
       match /movimentacoes/{id} { allow read, write: if organizacao(); }
       match /privado/{doc}      { allow read, write: if organizacao(); }
     }

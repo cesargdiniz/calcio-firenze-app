@@ -78,6 +78,12 @@ class Sumula {
   /// reduzida a menos de 4 atletas (art. 4).
   final Set<String> timesSemPontos;
 
+  /// Ocorrências registradas pela arbitragem ou pela Organização.
+  final String? observacoes;
+
+  /// Link da transmissão, quando o lançamento foi feito pelo vídeo.
+  final String? youtubeUrl;
+
   const Sumula({
     this.golsMandante = 0,
     this.golsVisitante = 0,
@@ -86,6 +92,8 @@ class Sumula {
     this.cartoes = const [],
     this.gols = const [],
     this.timesSemPontos = const {},
+    this.observacoes,
+    this.youtubeUrl,
   });
 }
 
@@ -99,6 +107,7 @@ class Partida {
   final String mandanteId;
   final String visitanteId;
   final DateTime inicio;
+  final String? local;
 
   /// Nula enquanto a súmula não foi encerrada.
   final Sumula? sumula;
@@ -111,6 +120,7 @@ class Partida {
     required this.visitanteId,
     required this.inicio,
     this.rodada,
+    this.local,
     this.sumula,
   });
 
@@ -118,7 +128,7 @@ class Partida {
   bool envolve(String timeId) => mandanteId == timeId || visitanteId == timeId;
   String adversario(String timeId) => timeId == mandanteId ? visitanteId : mandanteId;
 
-  Partida comSumula(Sumula s) => Partida(
+  Partida comSumula(Sumula? s) => Partida(
     id: id,
     turno: turno,
     fase: fase,
@@ -126,7 +136,20 @@ class Partida {
     mandanteId: mandanteId,
     visitanteId: visitanteId,
     inicio: inicio,
+    local: local,
     sumula: s,
+  );
+
+  Partida comAgenda({DateTime? inicio, String? local}) => Partida(
+    id: id,
+    turno: turno,
+    fase: fase,
+    rodada: rodada,
+    mandanteId: mandanteId,
+    visitanteId: visitanteId,
+    inicio: inicio ?? this.inicio,
+    local: local ?? this.local,
+    sumula: sumula,
   );
 }
 

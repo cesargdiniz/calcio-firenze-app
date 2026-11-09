@@ -1,3 +1,5 @@
+import 'package:calcio_regras/calcio_regras.dart';
+
 import '../entities/temporada.dart';
 import '../entities/usuario.dart';
 
@@ -21,4 +23,14 @@ abstract interface class GestaoRepository {
 
   /// Substitui o elenco de cada time informado.
   Future<void> importarElencos(String temporadaId, Map<String, List<Pessoa>> porTime);
+
+  /// Cria ou substitui partidas (calendário, agenda e súmula).
+  Future<void> salvarPartidas(String temporadaId, List<Partida> partidas);
+
+  Future<void> excluirPartidas(String temporadaId, List<String> ids);
+
+  /// Quitação de uma pendência (o pagamento é feito fora do app).
+  Future<void> registrarPagamento(String temporadaId, String pendenciaId, DateTime pagoEm);
+
+  Future<void> desfazerPagamento(String temporadaId, String pendenciaId);
 }

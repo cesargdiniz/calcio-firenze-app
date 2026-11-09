@@ -112,7 +112,7 @@ class MontarSituacao {
     String pessoaId, {
     bool verPendenciasDoTime = false,
   }) {
-    final agora = _agora();
+    final agora = d.relogio ?? _agora();
     final pessoa = d.pessoas.firstWhere((p) => p.id == pessoaId);
     final times = {for (final t in d.times) t.id: t};
     final time = times[pessoa.timeId]!;

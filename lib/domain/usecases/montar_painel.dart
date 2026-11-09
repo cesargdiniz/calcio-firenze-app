@@ -90,7 +90,7 @@ class MontarPainel {
       partidas: partidas,
       pagamentos: d.pagamentos,
       decisoes: d.decisoes,
-      agora: _agora(),
+      agora: d.relogio ?? _agora(),
       params: params,
     );
 

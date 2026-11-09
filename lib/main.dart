@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'app/app.dart';
-import 'data/exemplo/temporada_exemplo.dart';
 import 'data/firebase/firebase_auth_repository.dart';
 import 'data/firebase/firestore_temporada_repository.dart';
 import 'data/firebase/firestore_usuario_repository.dart';
@@ -26,12 +25,12 @@ Future<void> main() async {
     debugPrint('Link de acesso: $e');
   }
 
-  // Times e elencos vêm do Firestore. Enquanto a Organização não importar os
-  // elencos, o app mostra a temporada de exemplo, com o relógio parado no dia
-  // seguinte à Rodada 3.
+  // Times, elencos, jogos e quitações vêm do Firestore. Enquanto não houver
+  // elencos nem jogos, o app mostra a temporada de exemplo (com relógio
+  // próprio, parado no dia seguinte à Rodada 3).
   final db = FirebaseFirestore.instance;
   final temporada = FirestoreTemporadaRepository(db);
-  DateTime agora() => TemporadaExemploRepository.agora;
+  DateTime agora() => DateTime.now();
   runApp(
     CalcioApp(
       temporada: temporada,
