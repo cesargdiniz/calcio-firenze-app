@@ -140,10 +140,10 @@ class JogoOrgScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  const Row(
                     children: [
-                      const Expanded(child: Text('Encerrada', style: AppTextStyles.nome)),
-                      const Etiqueta.verde('Publicada'),
+                      Expanded(child: Text('Encerrada', style: AppTextStyles.nome)),
+                      Etiqueta.verde('Publicada'),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.sm),

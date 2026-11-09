@@ -5,7 +5,6 @@ import 'package:calcio_firenze/domain/entities/temporada.dart';
 import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:calcio_firenze/domain/usecases/gerar_calendario.dart';
 import 'package:calcio_regras/calcio_regras.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'apoio.dart';
