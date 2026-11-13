@@ -7,6 +7,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
+import '../avisos.dart';
 import '../participante_controller.dart';
 import 'participante_inicio_screen.dart';
 
@@ -47,6 +48,7 @@ class PerfilScreen extends StatelessWidget {
   Widget build(BuildContext context) => ComParticipante(
     builder: (context, p) {
       final s = p.pessoal;
+      final avisos = montarAvisos(s, p.time, veTime: p.papel.veTime).length;
       final iniciais = s.pessoa.nome
           .split(' ')
           .where((x) => x.isNotEmpty)
@@ -90,9 +92,13 @@ class PerfilScreen extends StatelessWidget {
             ],
           ),
           const TituloSecao('Avisos'),
-          const Text(
-            'Avisos de cartões, pendências e jogos do seu time chegam pelo app na próxima versão.',
-            style: AppTextStyles.corpo,
+          Cartao(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+            child: item(
+              avisos == 0 ? 'Pendências e suspensões' : 'Pendências e suspensões ($avisos)',
+              Icons.notifications_none_rounded,
+              () => context.go('/participante/avisos'),
+            ),
           ),
           const TituloSecao('Conta'),
           Cartao(

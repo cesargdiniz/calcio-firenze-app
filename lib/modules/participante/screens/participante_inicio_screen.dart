@@ -11,6 +11,7 @@ import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/card_jogo.dart';
 import '../../../shared/widgets/logo_calcio.dart';
 import '../../torcedor/torcedor_controller.dart';
+import '../avisos.dart';
 import '../participante_controller.dart';
 import '../widgets/pendencia_card.dart';
 
@@ -40,6 +41,7 @@ class ParticipanteInicioScreen extends StatelessWidget {
         _ => null,
       };
       final rodada = s.proximoJogo?.rodada;
+      final avisos = montarAvisos(s, p.time, veTime: p.papel.veTime).length;
 
       return ListView(
         padding: AppSpacing.tela,
@@ -61,11 +63,14 @@ class ParticipanteInicioScreen extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: 'Avisos',
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Os avisos chegam na próxima versão.')),
+                tooltip: avisos == 0 ? 'Avisos' : 'Avisos ($avisos)',
+                onPressed: () => context.go('/participante/avisos'),
+                icon: Badge(
+                  isLabelVisible: avisos > 0,
+                  backgroundColor: AppColors.vermelho,
+                  label: Text('$avisos'),
+                  child: const Icon(Icons.notifications_none_rounded, color: AppColors.tinta),
                 ),
-                icon: const Icon(Icons.notifications_none_rounded, color: AppColors.tinta),
               ),
             ],
           ),

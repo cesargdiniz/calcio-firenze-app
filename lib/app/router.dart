@@ -17,6 +17,7 @@ import '../modules/organizacao/screens/parametros_screen.dart';
 import '../modules/organizacao/screens/pedidos_screen.dart';
 import '../modules/organizacao/screens/times_screen.dart';
 import '../modules/participante/participante_shell.dart';
+import '../modules/participante/screens/avisos_screen.dart';
 import '../modules/participante/screens/meu_time_screen.dart';
 import '../modules/participante/screens/participante_inicio_screen.dart';
 import '../modules/participante/screens/perfil_screen.dart';
@@ -72,7 +73,11 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
       branches: [
         StatefulShellBranch(
           routes: [
-            GoRoute(path: '/participante', builder: (_, _) => const ParticipanteInicioScreen()),
+            GoRoute(
+              path: '/participante',
+              builder: (_, _) => const ParticipanteInicioScreen(),
+              routes: [GoRoute(path: 'avisos', builder: (_, _) => const AvisosScreen())],
+            ),
           ],
         ),
         StatefulShellBranch(
