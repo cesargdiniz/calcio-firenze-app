@@ -69,6 +69,20 @@ void main() {
       expect(salvos.prazoQuitacao, const Duration(hours: 24));
     });
 
+    testWidgets('patrocinador dá nome à competição na súmula', (tester) async {
+      final gestao = await abrirApp(
+        tester,
+        inicio: '/organizacao/gestao/parametros',
+        sessao: _org,
+        organizacao: {'org1'},
+      );
+      await tester.enterText(find.widgetWithText(TextField, 'Patrocinador'), 'CASA ASSIS');
+      await tester.pumpAndSettle();
+      expect(find.text('Na súmula: CF CASA ASSIS 2027'), findsOneWidget);
+      await acionar(tester, 'Salvar parâmetros');
+      expect(gestao.temporada.dados.patrocinador, 'CASA ASSIS');
+    });
+
     testWidgets('valor inválido bloqueia o salvamento', (tester) async {
       await abrirApp(
         tester,

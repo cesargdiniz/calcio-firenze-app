@@ -200,6 +200,8 @@ class OrganizacaoController extends Cubit<OrgStatus> {
 
   Future<void> salvarParametros(Parametros p) => _gestao.salvarParametros(_dados!.id, p);
 
+  Future<void> salvarPatrocinador(String? nome) => _gestao.salvarPatrocinador(_dados!.id, nome);
+
   Future<void> registrarMovimentacao(Movimentacao m, {Pessoa? substituto}) =>
       _gestao.registrarMovimentacao(_dados!.id, m, substituto: substituto);
 

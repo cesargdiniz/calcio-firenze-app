@@ -23,6 +23,22 @@ void main() {
     expect(s.nomeArquivo, startsWith('sumula-'));
   });
 
+  test('competição leva o patrocinador e o ano; categoria sai sem o ponto', () {
+    DadosTemporada com(String? patrocinador) => DadosTemporada(
+      id: dados.id,
+      nome: dados.nome,
+      local: dados.local,
+      times: dados.times,
+      pessoas: dados.pessoas,
+      partidas: dados.partidas,
+      relogio: dados.relogio,
+      patrocinador: patrocinador,
+    );
+    expect(montar(com('CASA ASSIS'), proximoDoMonza.id).competicao, 'CF CASA ASSIS 2027');
+    expect(montar(com(null), proximoDoMonza.id).competicao, 'CF 2027');
+    expect(montar(com(null), proximoDoMonza.id).categoria, 'Master Temporada 2027');
+  });
+
   test('risca quem está suspenso na partida', () {
     final ricardo = monza(montar(dados, proximoDoMonza.id)).jogadores.firstWhere(
       (j) => j.nome == 'Ricardo Alves',

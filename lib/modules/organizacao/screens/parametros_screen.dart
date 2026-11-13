@@ -92,12 +92,16 @@ class ParametrosScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      ComOrg(builder: (context, o) => _Formulario(atuais: o.dados.parametros));
+      ComOrg(
+        builder: (context, o) =>
+            _Formulario(atuais: o.dados.parametros, patrocinador: o.dados.patrocinador),
+      );
 }
 
 class _Formulario extends StatefulWidget {
   final Parametros atuais;
-  const _Formulario({required this.atuais});
+  final String? patrocinador;
+  const _Formulario({required this.atuais, required this.patrocinador});
 
   @override
   State<_Formulario> createState() => _FormularioState();
@@ -108,10 +112,12 @@ class _FormularioState extends State<_Formulario> {
     for (final s in _secoes)
       for (final c in s.campos) c.chave: TextEditingController(text: c.texto(widget.atuais)),
   };
+  late final _patrocinador = TextEditingController(text: widget.patrocinador ?? '');
   bool _salvando = false;
 
   @override
   void dispose() {
+    _patrocinador.dispose();
     for (final t in _textos.values) {
       t.dispose();
     }
@@ -157,15 +163,23 @@ class _FormularioState extends State<_Formulario> {
       rebaixados: _valor('rebaixados')!,
     );
     final controller = context.read<OrganizacaoController>();
+    final patrocinador = _patrocinador.text.trim();
     setState(() => _salvando = true);
     try {
       await controller.salvarParametros(novos);
+      await controller.salvarPatrocinador(patrocinador.isEmpty ? null : patrocinador);
       if (mounted) _avisar('Parâmetros salvos.');
     } catch (_) {
       if (mounted) _avisar('Não foi possível salvar. Tente de novo.');
     } finally {
       if (mounted) setState(() => _salvando = false);
     }
+  }
+
+  /// Como o nome da competição sai na súmula.
+  String get _previaCompeticao {
+    final nome = _patrocinador.text.trim();
+    return ['CF', if (nome.isNotEmpty) nome, '2027'].join(' ');
   }
 
   @override
@@ -186,6 +200,17 @@ class _FormularioState extends State<_Formulario> {
           'rebaixamento. Ao salvar, a temporada inteira é recalculada, inclusive os jogos já '
           'encerrados. O regulamento não permite mudar regra com a edição em andamento.',
           style: AppTextStyles.corpo.copyWith(color: AppColors.tinta),
+        ),
+      ),
+      const TituloSecao('Nome da competição'),
+      TextField(
+        controller: _patrocinador,
+        textCapitalization: TextCapitalization.characters,
+        onChanged: (_) => setState(() {}),
+        decoration: InputDecoration(
+          labelText: 'Patrocinador',
+          helperText: 'Na súmula: $_previaCompeticao',
+          border: const OutlineInputBorder(borderRadius: AppRadius.botao),
         ),
       ),
       for (final s in _secoes) ...[

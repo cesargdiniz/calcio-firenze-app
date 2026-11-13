@@ -143,8 +143,11 @@ class DadosTemporada {
   final List<AjustePontos> ajustes;
   final List<String> ordemSorteio;
 
-  /// Valores do regulamento em vigor na temporada (pontos, R\$, prazos).
+  /// Valores do regulamento em vigor na temporada (pontos, reais, prazos).
   final Parametros parametros;
+
+  /// Patrocinador que dá nome à competição na súmula ("CF Casa Assis 2027").
+  final String? patrocinador;
 
   /// Verdadeiro enquanto o app mostra a temporada de exemplo (antes de a
   /// Organização importar os elencos reais).
@@ -165,6 +168,7 @@ class DadosTemporada {
     this.ajustes = const [],
     this.ordemSorteio = const [],
     this.parametros = Parametros.master2027,
+    this.patrocinador,
     this.demonstracao = false,
     this.relogio,
   });

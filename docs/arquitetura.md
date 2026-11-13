@@ -25,8 +25,8 @@ O Firebase gratuito (plano Spark) não roda Cloud Functions, e as regras estão 
 ```
 clubes/{clubeId}                      nome, sigla, cor, escudoUrl, historico[]   (cadastrado uma vez)
 
-temporadas/{temporadaId}              nome, categoria, ano, local, turnoAtual,
-                                      parametros{...}, ordemSorteio[]
+temporadas/{temporadaId}              parametros{...}, patrocinador? (nome da competição
+                                      na súmula: "CF <patrocinador> <ano>")
   times/{clubeId}                     dirigenteId, rebaixadoNoAnoAnterior
   pessoas/{pessoaId}                  nome, timeId, funcao (atleta|tecnico), numero,
                                       goleiro, dirigente, saiuEm? (data da saída do elenco)

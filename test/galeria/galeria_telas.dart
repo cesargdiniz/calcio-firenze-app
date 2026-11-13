@@ -50,6 +50,7 @@ DadosTemporada _real() {
     partidas: e.partidas,
     decisoes: e.decisoes,
     relogio: e.relogio,
+    patrocinador: 'CASA ASSIS',
   );
 }
 

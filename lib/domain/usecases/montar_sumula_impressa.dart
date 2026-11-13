@@ -133,8 +133,13 @@ class MontarSumulaImpressa {
         : (wo == timeId ? 0 : d.parametros.golsWo);
 
     return SumulaImpressa(
-      competicao: 'Calcio Firenze',
-      categoria: d.nome,
+      // "CF CASA ASSIS 2027"; sem patrocinador, "CF 2027".
+      competicao: [
+        'CF',
+        if (d.patrocinador case final nome?) nome,
+        '${p.inicio.year}',
+      ].join(' '),
+      categoria: d.nome.replaceAll(' · ', ' '),
       fase: switch (p.fase) {
         Fase.classificatoria => '${p.turno}º Turno',
         Fase.quartas => 'Quartas · ${p.turno}º Turno',
