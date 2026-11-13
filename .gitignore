@@ -20,3 +20,4 @@ ios/Runner/GoogleService-Info.plist
 *.keystore
 key.properties
 .env*
+tool/telas/saida/

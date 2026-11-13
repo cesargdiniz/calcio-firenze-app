@@ -1,0 +1,42 @@
+name: Telas
+
+# Desenha uma imagem de cada tela do app e publica no branch "telas-geradas".
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/telas**']
+
+permissions:
+  contents: write
+
+jobs:
+  telas:
+    name: Gerar imagens das telas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Desenhar as telas
+        run: flutter test tool/telas/telas_test.dart --update-goldens
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: telas
+          path: tool/telas/saida
+      - name: Publicar no branch telas-geradas
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir /tmp/telas
+          cp tool/telas/saida/*.png /tmp/telas/
+          cd /tmp/telas
+          git init -q
+          git checkout -q -b telas-geradas
+          git add .
+          git -c user.name="github-actions" -c user.email="actions@github.com" \
+            commit -q -m "Telas de ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}" telas-geradas
