@@ -27,7 +27,7 @@ clubes/{clubeId}                      nome, sigla, cor, escudoUrl, historico[]  
 
 temporadas/{temporadaId}              nome, categoria, ano, local, turnoAtual,
                                       parametros{...}, ordemSorteio[]
-  times/{clubeId}                     dirigenteId, rebaixadoNoAnoAnterior
+  times/{clubeId}                     nome, sigla, cor, escudo? (PNG reduzido, até 300 KB)
   pessoas/{pessoaId}                  nome, timeId, funcao (atleta|tecnico), numero,
                                       goleiro, dirigente, saiuEm? (data da saída do elenco)
   partidas/{partidaId}                turno, fase, rodada, mandanteId, visitanteId, inicio,
@@ -51,7 +51,7 @@ usuarios/{uid}                        nome, email, perfil (participante|organiza
   situacao/atual                      pendências e cartões da própria pessoa (gerado)
 ```
 
-O app não usa o armazenamento de arquivos do Firebase (Storage). Por isso não há envio de fotos de súmula, laudos ou escudos: o laudo de lesão é só marcado como apresentado na movimentação, e o escudo do time é a cor com a sigla.
+O app não usa o armazenamento de arquivos do Firebase (Storage). O escudo do time é enviado em "Editar time", reduzido para caber em 256 px e guardado no próprio documento do time; sem imagem, vale a cor com a sigla. O laudo de lesão não é enviado: a movimentação só registra que ele foi apresentado.
 
 ## Decisões a confirmar antes de publicar nas lojas
 
