@@ -1,0 +1,23 @@
+name: Baixar arte da abertura (temporário)
+on:
+  push:
+    branches: [claude/splash-animada]
+    paths: [tool/splash_assets.txt]
+permissions:
+  contents: write
+jobs:
+  baixar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p assets/splash
+          while read -r nome arquivo; do
+            curl -sS -L --fail -o "assets/splash/$nome" "https://www.figma.com/api/mcp/asset/$arquivo"
+          done < tool/splash_assets.txt
+          ls -la assets/splash
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/splash
+          git commit -q -m "Arte da abertura baixada do Figma"
+          git push -q
