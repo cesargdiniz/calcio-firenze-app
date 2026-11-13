@@ -102,10 +102,8 @@ class SituacaoTime {
 /// Calcula a situação pessoal e do time a partir das regras.
 class MontarSituacao {
   final DateTime Function() _agora;
-  final Parametros params;
 
-  MontarSituacao({DateTime Function()? agora, this.params = Parametros.master2027})
-    : _agora = agora ?? DateTime.now;
+  MontarSituacao({DateTime Function()? agora}) : _agora = agora ?? DateTime.now;
 
   ({SituacaoPessoa pessoal, SituacaoTime time}) call(
     DadosTemporada d,
@@ -123,7 +121,7 @@ class MontarSituacao {
       pagamentos: d.pagamentos,
       decisoes: d.decisoes,
       agora: agora,
-      params: params,
+      params: d.parametros,
     );
 
     final proximo = partidas.where((p) => !p.encerrada && p.envolve(time.id)).firstOrNull;
@@ -194,7 +192,7 @@ class MontarSituacao {
       return LinhaElenco(x, SituacaoAtleta.liberado, null);
     }
 
-    final elenco = d.pessoas.where((p) => p.timeId == time.id).toList()
+    final elenco = d.pessoas.where((p) => p.timeId == time.id && p.ativo).toList()
       ..sort((a, b) {
         if (a.funcao != b.funcao) return a.funcao == Funcao.tecnico ? 1 : -1;
         return (a.numero ?? 999).compareTo(b.numero ?? 999);

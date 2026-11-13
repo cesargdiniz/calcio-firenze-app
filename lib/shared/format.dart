@@ -10,6 +10,9 @@ String dataHoraJogo(DateTime d) =>
 String dataCurta(DateTime d) =>
     '${_dias[d.weekday - 1]} ${_doisDigitos(d.day)}/${_doisDigitos(d.month)}';
 
+/// "13/11/2026"
+String dataCompleta(DateTime d) => '${_doisDigitos(d.day)}/${_doisDigitos(d.month)}/${d.year}';
+
 /// "R$ 30,00" a partir de centavos.
 String reais(int centavos) {
   final inteiro = centavos ~/ 100;

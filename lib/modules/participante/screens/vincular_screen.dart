@@ -32,7 +32,7 @@ class _VincularScreenState extends State<VincularScreen> {
 
   List<Pessoa> get _candidatos {
     if (_timeId == null) return const [];
-    final doTime = widget.dados.pessoas.where((p) => p.timeId == _timeId);
+    final doTime = widget.dados.pessoas.where((p) => p.timeId == _timeId && p.ativo);
     final Iterable<Pessoa> filtrados = switch (_papel) {
       Papel.atleta => doTime.where((p) => p.funcao == Funcao.atleta),
       Papel.dirigente => doTime.where((p) => p.dirigente),

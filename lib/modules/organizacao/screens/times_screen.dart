@@ -50,7 +50,7 @@ class TimesScreen extends StatelessWidget {
   static String _resumo(OrgPronta o, Time t) {
     if (o.dados.demonstracao) return '${t.sigla} · elenco ainda não importado';
     final atletas = o.dados.pessoas
-        .where((p) => p.timeId == t.id && p.funcao == Funcao.atleta)
+        .where((p) => p.timeId == t.id && p.funcao == Funcao.atleta && p.ativo)
         .length;
     final dirigente = o.dados.pessoas.where((p) => p.timeId == t.id && p.dirigente).firstOrNull;
     return [
@@ -142,8 +142,7 @@ class _EditarTimeState extends State<_EditarTime> {
             const SizedBox(width: AppSpacing.md),
             const Expanded(
               child: Text(
-                'Envio do escudo oficial: chega quando o armazenamento de arquivos do '
-                'Firebase for ativado. Até lá, o app usa a cor e a sigla.',
+                'O escudo do time no app é formado pela cor e pela sigla.',
                 style: AppTextStyles.pequeno,
               ),
             ),

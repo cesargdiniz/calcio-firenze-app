@@ -206,8 +206,10 @@ class _SumulaState extends State<_Sumula> {
         if (_ausente != null)
           Cartao(
             child: Text(
-              'Vale 6 x 0 para ${time(p.adversario(_ausente!)).nome}, e ${time(_ausente!).nome} '
-              'perde 3 pontos (art. 75). Cartões registrados continuam valendo.',
+              'Vale ${widget.dados.parametros.golsWo} x 0 para '
+              '${time(p.adversario(_ausente!)).nome}, e ${time(_ausente!).nome} perde '
+              '${widget.dados.parametros.deducaoWo} pontos (art. 75). Cartões registrados '
+              'continuam valendo.',
               style: AppTextStyles.corpo,
             ),
           )
@@ -402,8 +404,11 @@ class _ListaPessoas extends StatelessWidget {
   }
 }
 
-List<Pessoa> _elenco(DadosTemporada d, String timeId, Funcao funcao) =>
-    d.pessoas.where((x) => x.timeId == timeId && x.funcao == funcao).toList()
+/// Quem fazia parte do elenco na data do jogo.
+List<Pessoa> _elenco(DadosTemporada d, String timeId, Funcao funcao, DateTime dia) =>
+    d.pessoas
+        .where((x) => x.timeId == timeId && x.funcao == funcao && x.noElencoEm(dia))
+        .toList()
       ..sort((a, b) => (a.numero ?? 999).compareTo(b.numero ?? 999));
 
 class _FormGol extends StatefulWidget {
@@ -473,7 +478,7 @@ class _FormGolState extends State<_FormGol> {
         const SizedBox(height: AppSpacing.md),
         Text(_contra ? 'Quem fez contra' : 'Autor do gol', style: AppTextStyles.rotulo),
         _ListaPessoas(
-          pessoas: _elenco(widget.dados, timeDoAutor, Funcao.atleta),
+          pessoas: _elenco(widget.dados, timeDoAutor, Funcao.atleta, widget.partida.inicio),
           selecionada: _autor,
           onSelecionar: (id) => setState(() => _autor = id),
         ),
@@ -503,13 +508,15 @@ class _FormCartaoState extends State<_FormCartao> {
     final temAmarelo = widget.jaLancados.any(
       (c) => c.pessoaId == _pessoa && c.tipo == TipoCartao.amarelo,
     );
+    final amarelo = reais(widget.dados.parametros.valorAmarelo);
+    final vermelho = reais(widget.dados.parametros.valorVermelho);
     return switch (_tipo) {
-      TipoCartao.amarelo => 'Gera pendência de R\$ 30,00.',
+      TipoCartao.amarelo => 'Gera pendência de $amarelo.',
       TipoCartao.segundoAmarelo =>
-        'Vira vermelho: pendência de R\$ 50,00 (o 1º amarelo não é cobrado)'
+        'Vira vermelho: pendência de $vermelho (o 1º amarelo não é cobrado)'
             '${ehTecnico ? '.' : ' e suspensão no próximo jogo.'}',
       TipoCartao.vermelho =>
-        'Pendência de R\$ 50,00${temAmarelo ? ' (mais R\$ 30,00 do amarelo)' : ''}'
+        'Pendência de $vermelho${temAmarelo ? ' (mais $amarelo do amarelo)' : ''}'
             '${ehTecnico ? '. Técnico não é suspenso.' : ' e suspensão no próximo jogo.'}',
     };
   }
@@ -587,7 +594,7 @@ class _FormCartaoState extends State<_FormCartao> {
         const SizedBox(height: AppSpacing.md),
         Text(_funcao == Funcao.tecnico ? 'Técnico' : 'Atleta', style: AppTextStyles.rotulo),
         _ListaPessoas(
-          pessoas: _elenco(widget.dados, _time, _funcao),
+          pessoas: _elenco(widget.dados, _time, _funcao, widget.partida.inicio),
           selecionada: _pessoa,
           onSelecionar: (id) => setState(() => _pessoa = id),
         ),

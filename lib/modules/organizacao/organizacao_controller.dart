@@ -11,6 +11,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/organizacao_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/usecases/gerar_calendario.dart';
+import '../../domain/usecases/movimentacoes.dart';
 
 sealed class OrgStatus {
   const OrgStatus();
@@ -35,8 +36,9 @@ final class OrgPronta extends OrgStatus {
   final DadosTemporada dados;
   final List<Usuario> pedidos;
   final List<Usuario> aprovados;
+  final List<Movimentacao> movimentacoes;
 
-  const OrgPronta(this.sessao, this.dados, this.pedidos, this.aprovados);
+  const OrgPronta(this.sessao, this.dados, this.pedidos, this.aprovados, this.movimentacoes);
 
   Pessoa? pessoa(String id) => dados.pessoas.where((p) => p.id == id).firstOrNull;
   Time? time(String id) => dados.times.where((t) => t.id == id).firstOrNull;
@@ -68,6 +70,7 @@ class OrganizacaoController extends Cubit<OrgStatus> {
   DadosTemporada? _dados;
   List<Usuario>? _pedidos;
   List<Usuario>? _aprovados;
+  List<Movimentacao>? _movimentacoes;
 
   OrganizacaoController(this._auth, this._org, this._gestao, this._temporada)
     : super(const OrgCarregando());
@@ -83,6 +86,7 @@ class OrganizacaoController extends Cubit<OrgStatus> {
       _ehOrg = null;
       _pedidos = null;
       _aprovados = null;
+      _movimentacoes = null;
       for (final x in _porConta) {
         x.cancel();
       }
@@ -114,6 +118,19 @@ class OrganizacaoController extends Cubit<OrgStatus> {
         _recalcular();
       }, onError: _falhar),
     );
+    _porConta.add(
+      _gestao.observarMovimentacoes().listen(
+        (l) {
+          _movimentacoes = l;
+          _recalcular();
+        },
+        // Sem a lista de movimentações, o resto da área continua funcionando.
+        onError: (Object _) {
+          _movimentacoes = const [];
+          _recalcular();
+        },
+      ),
+    );
   }
 
   void _falhar(Object _) {
@@ -128,10 +145,11 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     if (_ehOrg == null) return emit(const OrgCarregando());
     if (_ehOrg == false) return emit(OrgSemAcesso(sessao));
     final dados = _dados;
-    if (dados == null || _pedidos == null || _aprovados == null) {
+    final movimentacoes = _movimentacoes;
+    if (dados == null || _pedidos == null || _aprovados == null || movimentacoes == null) {
       return emit(const OrgCarregando());
     }
-    emit(OrgPronta(sessao, dados, _pedidos!, _aprovados!));
+    emit(OrgPronta(sessao, dados, _pedidos!, _aprovados!, movimentacoes));
   }
 
   Future<void> aprovar(String uid) => _gestao.decidirPedido(uid, StatusVinculo.aprovado);
@@ -179,6 +197,22 @@ class OrganizacaoController extends Cubit<OrgStatus> {
   Future<void> salvarDecisao(DecisaoDisciplinar d) => _gestao.salvarDecisao(_dados!.id, d);
 
   Future<void> excluirDecisao(String id) => _gestao.excluirDecisao(_dados!.id, id);
+
+  Future<void> salvarParametros(Parametros p) => _gestao.salvarParametros(_dados!.id, p);
+
+  Future<void> registrarMovimentacao(Movimentacao m, {Pessoa? substituto}) =>
+      _gestao.registrarMovimentacao(_dados!.id, m, substituto: substituto);
+
+  /// Desfaz a saída. Na troca de goleiro, só enquanto o substituto não
+  /// aparecer em súmula nem em decisão.
+  Future<void> desfazerMovimentacao(Movimentacao m) async {
+    final d = _dados!;
+    final substituto = m.substitutoId;
+    if (substituto != null && citadoNaTemporada(d, substituto)) {
+      throw const MovimentacaoEmUso();
+    }
+    await _gestao.desfazerMovimentacao(d.id, m);
+  }
 
   Future<void> sair() => _auth.sair();
 

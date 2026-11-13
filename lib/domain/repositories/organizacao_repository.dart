@@ -39,4 +39,21 @@ abstract interface class GestaoRepository {
 
   /// Exclui a decisão e a quitação da multa dela, se houver.
   Future<void> excluirDecisao(String temporadaId, String decisaoId);
+
+  /// Valores do regulamento usados em todos os cálculos da temporada.
+  Future<void> salvarParametros(String temporadaId, Parametros parametros);
+
+  /// Saídas de elenco registradas (só a Organização lê).
+  Stream<List<Movimentacao>> observarMovimentacoes();
+
+  /// Registra a saída: marca a pessoa como fora do elenco a partir da data
+  /// e, na troca de goleiro, inscreve o [substituto].
+  Future<void> registrarMovimentacao(
+    String temporadaId,
+    Movimentacao movimentacao, {
+    Pessoa? substituto,
+  });
+
+  /// Apaga o registro, devolve a pessoa ao elenco e remove o substituto.
+  Future<void> desfazerMovimentacao(String temporadaId, Movimentacao movimentacao);
 }

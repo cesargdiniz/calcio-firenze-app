@@ -25,6 +25,7 @@ MotorDisciplinar _motor(DadosTemporada d, {Iterable<DecisaoDisciplinar>? decisoe
       pagamentos: d.pagamentos,
       decisoes: decisoes ?? d.decisoes,
       agora: d.relogio ?? DateTime.now(),
+      params: d.parametros,
     );
 
 /// "MON x SAM"

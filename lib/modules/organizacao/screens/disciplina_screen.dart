@@ -56,6 +56,7 @@ class _DisciplinaState extends State<_Disciplina> {
       pagamentos: d.pagamentos,
       decisoes: d.decisoes,
       agora: agora,
+      params: d.parametros,
     );
     final nomes = {for (final p in d.pessoas) p.id: p.nome};
     final abertas = motor.pendenciasEmAberto()

@@ -123,6 +123,11 @@ class MemoriaGestaoRepository implements GestaoRepository {
   final MemoriaTemporadaRepository temporada;
   MemoriaGestaoRepository(this.usuarios, this.temporada);
 
+  final List<Movimentacao> _movimentacoes = [];
+  final _mudouMovimentacoes = StreamController<void>.broadcast();
+
+  List<Movimentacao> get movimentacoes => List.unmodifiable(_movimentacoes);
+
   Stream<List<Usuario>> _porStatus(StatusVinculo s) async* {
     List<Usuario> filtrar() =>
         usuarios._usuarios.values.where((u) => u.vinculo?.status == s).toList();
@@ -240,8 +245,57 @@ class MemoriaGestaoRepository implements GestaoRepository {
     );
   }
 
+  @override
+  Future<void> salvarParametros(String temporadaId, Parametros parametros) async =>
+      temporada.substituir(_copiar(temporada.dados, parametros: parametros));
+
+  @override
+  Stream<List<Movimentacao>> observarMovimentacoes() async* {
+    yield movimentacoes;
+    yield* _mudouMovimentacoes.stream.map((_) => movimentacoes);
+  }
+
+  @override
+  Future<void> registrarMovimentacao(
+    String temporadaId,
+    Movimentacao movimentacao, {
+    Pessoa? substituto,
+  }) async {
+    final d = temporada.dados;
+    _movimentacoes.add(movimentacao);
+    _mudouMovimentacoes.add(null);
+    temporada.substituir(
+      _copiar(
+        d,
+        pessoas: [
+          for (final p in d.pessoas)
+            p.id == movimentacao.pessoaId ? p.comSaida(movimentacao.data) : p,
+          if (substituto != null) substituto,
+        ],
+      ),
+    );
+  }
+
+  @override
+  Future<void> desfazerMovimentacao(String temporadaId, Movimentacao movimentacao) async {
+    final d = temporada.dados;
+    _movimentacoes.removeWhere((m) => m.id == movimentacao.id);
+    _mudouMovimentacoes.add(null);
+    temporada.substituir(
+      _copiar(
+        d,
+        pessoas: [
+          for (final p in d.pessoas)
+            if (p.id != movimentacao.substitutoId)
+              p.id == movimentacao.pessoaId ? p.comSaida(null) : p,
+        ],
+      ),
+    );
+  }
+
   static DadosTemporada _copiar(
     DadosTemporada d, {
+    Parametros? parametros,
     List<Time>? times,
     List<Pessoa>? pessoas,
     List<Partida>? partidas,
@@ -261,6 +315,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
       partidas: partidas ?? (saindoDaDemo ? const [] : d.partidas),
       pagamentos: pagamentos ?? (saindoDaDemo ? const [] : d.pagamentos),
       decisoes: decisoes ?? (saindoDaDemo ? const [] : d.decisoes),
+      parametros: parametros ?? d.parametros,
       demonstracao: demo,
       relogio: demo ? d.relogio : null,
     );

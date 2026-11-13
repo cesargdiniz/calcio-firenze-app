@@ -67,10 +67,8 @@ class Painel {
 /// Junta os dados da temporada com as regras e devolve o [Painel].
 class MontarPainel {
   final DateTime Function() _agora;
-  final Parametros params;
 
-  MontarPainel({DateTime Function()? agora, this.params = Parametros.master2027})
-    : _agora = agora ?? DateTime.now;
+  MontarPainel({DateTime Function()? agora}) : _agora = agora ?? DateTime.now;
 
   Painel call(DadosTemporada d, {int turno = 1}) {
     final times = {for (final t in d.times) t.id: t};
@@ -83,7 +81,7 @@ class MontarPainel {
       partidas: partidas,
       ajustes: d.ajustes,
       ordemSorteio: d.ordemSorteio,
-      params: params,
+      params: d.parametros,
     );
 
     final motor = MotorDisciplinar(
@@ -91,7 +89,7 @@ class MontarPainel {
       pagamentos: d.pagamentos,
       decisoes: d.decisoes,
       agora: d.relogio ?? _agora(),
-      params: params,
+      params: d.parametros,
     );
 
     final pendentes = partidas.where((p) => !p.encerrada).toList();
