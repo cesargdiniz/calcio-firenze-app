@@ -20,3 +20,6 @@ ios/Runner/GoogleService-Info.plist
 *.keystore
 key.properties
 .env*
+
+# Capturas geradas pela galeria de telas
+test/galeria/telas/
