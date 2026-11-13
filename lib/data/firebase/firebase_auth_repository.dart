@@ -37,6 +37,18 @@ class FirebaseAuthRepository implements AuthRepository {
   });
 
   @override
+  Future<void> entrarComApple() => _tentar(() async {
+    final provedor = AppleAuthProvider()
+      ..addScope('email')
+      ..addScope('name');
+    if (kIsWeb) {
+      await _auth.signInWithPopup(provedor);
+    } else {
+      await _auth.signInWithProvider(provedor);
+    }
+  });
+
+  @override
   Future<void> enviarLinkPorEmail(String email) => _tentar(() async {
     if (!kIsWeb) {
       throw const FalhaLogin('O link por e-mail chega ao celular na próxima versão.');
@@ -90,7 +102,10 @@ class FirebaseAuthRepository implements AuthRepository {
     'user-not-found' || 'wrong-password' || 'invalid-credential' => 'E-mail ou senha incorretos.',
     'email-already-in-use' => 'Já existe uma conta com esse e-mail. Tente entrar.',
     'weak-password' => 'A senha precisa ter pelo menos 6 caracteres.',
-    'popup-closed-by-user' || 'cancelled-popup-request' => 'Login cancelado.',
+    'popup-closed-by-user' ||
+    'cancelled-popup-request' ||
+    'canceled' ||
+    'web-context-canceled' => 'Login cancelado.',
     'popup-blocked' => 'O navegador bloqueou a janela do Google. Permita pop-ups e tente de novo.',
     'invalid-action-code' ||
     'expired-action-code' => 'Esse link já foi usado ou expirou. Peça um novo.',

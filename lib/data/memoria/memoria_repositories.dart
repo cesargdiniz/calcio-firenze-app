@@ -37,6 +37,9 @@ class MemoriaAuthRepository implements AuthRepository {
   Future<void> entrarComGoogle() async => _definir(_sessaoDe('google@exemplo.com'));
 
   @override
+  Future<void> entrarComApple() async => _definir(_sessaoDe('apple@exemplo.com'));
+
+  @override
   Future<void> enviarLinkPorEmail(String email) async => linksEnviados.add(email);
 
   @override

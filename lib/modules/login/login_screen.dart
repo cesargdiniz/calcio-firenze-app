@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -94,11 +95,15 @@ class _LoginState extends State<_Login> {
                   ),
                   label: const Text('Continuar com Google'),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                const OutlinedButton(
-                  onPressed: null,
-                  child: Text('Continuar com Apple · em breve'),
-                ),
+                // A App Store exige o login com Apple onde há login com Google.
+                if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  OutlinedButton.icon(
+                    onPressed: ocupado ? null : controller.entrarComApple,
+                    icon: const Icon(Icons.apple, color: AppColors.tinta),
+                    label: const Text('Continuar com Apple'),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.lg),
                 const Row(
                   children: [

@@ -1,4 +1,5 @@
 import 'package:calcio_firenze/domain/entities/usuario.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,6 +28,24 @@ void main() {
     expect(find.text('Entrar como Participante'), findsOneWidget);
     expect(find.text('Continuar com Google'), findsOneWidget);
     expect(find.text('Receber link por e-mail'), findsOneWidget);
+  });
+
+  testWidgets('fora do iPhone não há login com Apple', (tester) async {
+    await abrirApp(tester, inicio: '/participante');
+    expect(find.text('Continuar com Google'), findsOneWidget);
+    expect(find.text('Continuar com Apple'), findsNothing);
+  });
+
+  testWidgets('no iPhone, o login com Apple leva ao vínculo', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    try {
+      await abrirApp(tester, inicio: '/participante');
+      await tester.tap(find.text('Continuar com Apple'));
+      await tester.pumpAndSettle();
+      expect(find.text('Vincular ao elenco'), findsOneWidget);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   testWidgets('link por e-mail: valida o e-mail e mostra "Confira seu e-mail"', (tester) async {
