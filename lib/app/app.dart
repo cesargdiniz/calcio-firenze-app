@@ -12,6 +12,7 @@ import '../modules/organizacao/organizacao_controller.dart';
 import '../modules/participante/participante_controller.dart';
 import '../modules/torcedor/torcedor_controller.dart';
 import '../shared/pdf/saida_pdf.dart';
+import '../shared/seletor_imagem.dart';
 import '../shared/theme/app_theme.dart';
 import 'router.dart';
 
@@ -26,6 +27,7 @@ class CalcioApp extends StatefulWidget {
   final MontarPainel montarPainel;
   final MontarSituacao montarSituacao;
   final SaidaPdf saidaPdf;
+  final SeletorImagem seletorImagem;
   final String initialLocation;
 
   const CalcioApp({
@@ -38,6 +40,7 @@ class CalcioApp extends StatefulWidget {
     required this.montarPainel,
     required this.montarSituacao,
     this.saidaPdf = const SaidaPdfDoAparelho(),
+    this.seletorImagem = const SeletorImagemDoAparelho(),
     this.initialLocation = '/',
   });
 
@@ -61,6 +64,7 @@ class _CalcioAppState extends State<CalcioApp> {
       RepositoryProvider<AuthRepository>.value(value: widget.auth),
       RepositoryProvider<UsuarioRepository>.value(value: widget.usuarios),
       RepositoryProvider<SaidaPdf>.value(value: widget.saidaPdf),
+      RepositoryProvider<SeletorImagem>.value(value: widget.seletorImagem),
     ],
     child: MultiBlocProvider(
       providers: [

@@ -123,11 +123,13 @@ Future<MemoriaGestaoRepository> _abrir(
 }
 
 Future<void> _capturar(WidgetTester tester, String nome) async {
-  // Imagens (logo) só aparecem na captura depois de decodificadas.
+  // Imagens (logo, arte da abertura) só aparecem na captura depois de
+  // decodificadas, o que precisa de tempo real e não do relógio do teste.
   await tester.runAsync(() async {
     for (final e in find.byType(Image).evaluate().toList()) {
       await precacheImage((e.widget as Image).image, e);
     }
+    await Future<void>.delayed(const Duration(milliseconds: 300));
   });
   await tester.pump();
   await expectLater(find.byType(CalcioApp), matchesGoldenFile('telas/$nome.png'));
@@ -193,9 +195,12 @@ void main() {
   group('Entrada', () {
     _tela('01 splash', (t) async {
       await _abrir(t, '/', assentar: false);
-      await t.pump(const Duration(milliseconds: 100));
+      // No meio da entrada das faixas e depois com tudo no lugar.
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 450));
+      await _capturar(t, '01_splash_entrando');
+      await t.pump(const Duration(milliseconds: 1250));
       await _capturar(t, '01_splash');
-      await t.pump(const Duration(milliseconds: 1300));
       await t.pumpAndSettle();
     });
     _tela('02 como você quer entrar', (t) async {

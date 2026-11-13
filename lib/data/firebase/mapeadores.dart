@@ -6,7 +6,12 @@ import '../../domain/entities/temporada.dart';
 T _porNome<T extends Enum>(List<T> valores, Object? nome, T padrao) =>
     valores.where((e) => e.name == nome).firstOrNull ?? padrao;
 
-Map<String, dynamic> timeParaMapa(Time t) => {'nome': t.nome, 'sigla': t.sigla, 'cor': t.cor};
+Map<String, dynamic> timeParaMapa(Time t) => {
+  'nome': t.nome,
+  'sigla': t.sigla,
+  'cor': t.cor,
+  'escudo': t.escudo == null ? null : Blob(t.escudo!),
+};
 
 Time timeDeMapa(String id, Map<String, dynamic> m) => Time(
   id: id,
@@ -14,6 +19,7 @@ Time timeDeMapa(String id, Map<String, dynamic> m) => Time(
   sigla: m['sigla'] as String? ?? id,
   cor: (m['cor'] as num?)?.toInt() ?? 0xFF6E6E6E,
   escudoUrl: m['escudoUrl'] as String?,
+  escudo: (m['escudo'] as Blob?)?.bytes,
 );
 
 Map<String, dynamic> pessoaParaMapa(Pessoa p) => {
