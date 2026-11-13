@@ -42,7 +42,7 @@ Future<MemoriaGestaoRepository> abrirApp(
       initialLocation: inicio,
     ),
   );
-  if (inicio == '/') await tester.pump(const Duration(milliseconds: 1300)); // Splash
+  // A abertura segue sozinha para a escolha do perfil ao fim da animação.
   await tester.pumpAndSettle();
   return gestao;
 }
