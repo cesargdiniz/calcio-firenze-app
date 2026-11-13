@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:calcio_regras/calcio_regras.dart';
 
 /// Clube da temporada (cadastrado em "Times da temporada").
@@ -11,12 +13,17 @@ class Time {
   final int cor;
   final String? escudoUrl;
 
+  /// Imagem do escudo (PNG já reduzido), enviada em "Editar time". Fica no
+  /// próprio cadastro do time; sem ela, o app mostra a cor com a sigla.
+  final Uint8List? escudo;
+
   const Time({
     required this.id,
     required this.nome,
     required this.sigla,
     required this.cor,
     this.escudoUrl,
+    this.escudo,
   });
 }
 

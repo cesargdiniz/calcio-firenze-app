@@ -11,6 +11,7 @@ import '../domain/usecases/montar_situacao.dart';
 import '../modules/organizacao/organizacao_controller.dart';
 import '../modules/participante/participante_controller.dart';
 import '../modules/torcedor/torcedor_controller.dart';
+import '../shared/seletor_imagem.dart';
 import '../shared/theme/app_theme.dart';
 import 'router.dart';
 
@@ -24,6 +25,7 @@ class CalcioApp extends StatefulWidget {
   final GestaoRepository gestao;
   final MontarPainel montarPainel;
   final MontarSituacao montarSituacao;
+  final SeletorImagem seletorImagem;
   final String initialLocation;
 
   const CalcioApp({
@@ -35,6 +37,7 @@ class CalcioApp extends StatefulWidget {
     required this.gestao,
     required this.montarPainel,
     required this.montarSituacao,
+    this.seletorImagem = const SeletorImagemDoAparelho(),
     this.initialLocation = '/',
   });
 
@@ -57,6 +60,7 @@ class _CalcioAppState extends State<CalcioApp> {
       RepositoryProvider<TemporadaRepository>.value(value: widget.temporada),
       RepositoryProvider<AuthRepository>.value(value: widget.auth),
       RepositoryProvider<UsuarioRepository>.value(value: widget.usuarios),
+      RepositoryProvider<SeletorImagem>.value(value: widget.seletorImagem),
     ],
     child: MultiBlocProvider(
       providers: [
