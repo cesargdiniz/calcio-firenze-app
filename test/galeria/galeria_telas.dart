@@ -14,6 +14,8 @@ import 'package:calcio_firenze/domain/entities/temporada.dart';
 import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
 import 'package:calcio_firenze/domain/usecases/montar_situacao.dart';
+import 'package:calcio_firenze/domain/usecases/montar_sumula_impressa.dart';
+import 'package:calcio_firenze/shared/pdf/sumula_pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -164,6 +166,28 @@ void main() {
   final encerrado = exemplo.partidas.where((p) => p.encerrada).last;
   final agendado = exemplo.partidas.where((p) => !p.encerrada).first;
   final comCartoes = exemplo.partidas.where((p) => (p.sumula?.cartoes.length ?? 0) > 1).first;
+
+  testWidgets('súmula em PDF (em branco e encerrada)', (t) async {
+    await t.runAsync(() async {
+      ByteData fonte(String nome) =>
+          ByteData.sublistView(File('assets/fonts/$nome.ttf').readAsBytesSync());
+      final montar = MontarSumulaImpressa(agora: () => TemporadaExemploRepository.agora);
+      final proximoDoMonza = exemplo.partidas.firstWhere((p) => !p.encerrada && p.envolve('MON'));
+      for (final (nome, partida) in [
+        ('sumula_em_branco', proximoDoMonza),
+        ('sumula_encerrada', comCartoes),
+      ]) {
+        final bytes = await gerarSumulaPdf(
+          montar(_real(), partida.id),
+          fonte: fonte('OpenSans-Regular'),
+          fonteNegrito: fonte('OpenSans-SemiBold'),
+        );
+        File('test/galeria/telas/$nome.pdf')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(bytes);
+      }
+    });
+  });
 
   group('Entrada', () {
     _tela('01 splash', (t) async {

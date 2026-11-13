@@ -9,6 +9,7 @@ import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/card_jogo.dart';
+import '../../../shared/pdf/saida_pdf.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import 'pedidos_screen.dart';
@@ -125,6 +126,12 @@ class JogoOrgScreen extends StatelessWidget {
             ),
           ),
           const TituloSecao('Súmula'),
+          OutlinedButton.icon(
+            onPressed: () => abrirSumulaPdf(context, o.dados, p.id),
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            label: Text(s == null ? 'Súmula para imprimir (PDF)' : 'Súmula em PDF'),
+          ),
+          const SizedBox(height: AppSpacing.md),
           if (s == null) ...[
             const Text(
               'Lance depois do jogo, a partir da súmula de papel ou da transmissão.',
