@@ -183,8 +183,6 @@ void main() {
     _tela('03 início', (t) async {
       await _abrir(t, '/torcedor');
       await _capturar(t, '03_torcedor_inicio');
-      await _rolar(t);
-      await _capturar(t, '04_torcedor_inicio_continuacao');
     });
     _tela('05 jogos', (t) async {
       await _abrir(t, '/torcedor/jogos');
@@ -234,8 +232,6 @@ void main() {
     _tela('14 meu time', (t) async {
       await _abrir(t, '/participante/time', sessao: _rafael, usuarios: aprovado);
       await _capturar(t, '14_participante_meu_time');
-      await _rolar(t);
-      await _capturar(t, '15_participante_meu_time_continuacao');
     });
     _tela('16 perfil', (t) async {
       await _abrir(t, '/participante/perfil', sessao: _rafael, usuarios: aprovado);

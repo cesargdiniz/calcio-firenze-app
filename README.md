@@ -39,6 +39,14 @@ flutter test                                   # telas e casos de uso
 cd packages/calcio_regras && dart test         # regras do regulamento
 ```
 
+## Galeria de telas
+
+Para ver todas as telas sem abrir o app: no GitHub, em Actions → Galeria de telas → Run workflow. As imagens, geradas com os dados de exemplo, saem no branch `galeria-telas-capturas`. No computador:
+
+```bash
+flutter test test/galeria/galeria_telas.dart --update-goldens   # imagens em test/galeria/telas/
+```
+
 ## Organização do código
 
 Veja [docs/arquitetura.md](docs/arquitetura.md): camadas, quem calcula o quê e o modelo de dados do Firestore. As interpretações do regulamento estão em [packages/calcio_regras/README.md](packages/calcio_regras/README.md).

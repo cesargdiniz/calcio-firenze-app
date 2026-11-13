@@ -4,8 +4,6 @@ name: Galeria de telas
 # galeria-telas-capturas. Rode à mão em Actions → Galeria de telas.
 on:
   workflow_dispatch:
-  push:
-    branches: [claude/galeria-telas]
 
 permissions:
   contents: write
