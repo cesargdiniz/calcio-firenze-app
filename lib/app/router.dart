@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../modules/entrada/entrada_screen.dart';
 import '../modules/entrada/splash_screen.dart';
 import '../modules/organizacao/organizacao_shell.dart';
+import '../modules/organizacao/screens/decisoes_screen.dart';
 import '../modules/organizacao/screens/disciplina_screen.dart';
 import '../modules/organizacao/screens/gestao_screen.dart';
 import '../modules/organizacao/screens/jogo_org_screen.dart';
@@ -135,6 +136,16 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
               routes: [
                 GoRoute(path: 'pedidos', builder: (_, _) => const PedidosScreen()),
                 GoRoute(path: 'elencos', builder: (_, _) => const ImportarElencosScreen()),
+                GoRoute(
+                  path: 'decisoes',
+                  builder: (_, _) => const DecisoesScreen(),
+                  routes: [
+                    GoRoute(
+                      path: ':id',
+                      builder: (_, e) => EditarDecisaoScreen(decisaoId: e.pathParameters['id']!),
+                    ),
+                  ],
+                ),
                 GoRoute(
                   path: 'times',
                   builder: (_, _) => const TimesScreen(),

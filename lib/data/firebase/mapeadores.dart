@@ -112,3 +112,26 @@ Partida partidaDeMapa(String id, Map<String, dynamic> m) {
     sumula: s == null ? null : sumulaDeMapa(s),
   );
 }
+
+Map<String, dynamic> decisaoParaMapa(DecisaoDisciplinar d) => {
+  'pessoaId': d.pessoaId,
+  'timeId': d.timeId,
+  'partidaOrigemId': d.partidaOrigemId,
+  'jogosSuspensao': d.jogosSuspensao,
+  'multa': d.multa,
+  'motivo': d.motivo,
+  'fundamento': d.fundamento,
+  'votacao': d.votacao,
+};
+
+DecisaoDisciplinar decisaoDeMapa(String id, Map<String, dynamic> m) => DecisaoDisciplinar(
+  id: id,
+  pessoaId: m['pessoaId'] as String? ?? '',
+  timeId: m['timeId'] as String? ?? '',
+  partidaOrigemId: m['partidaOrigemId'] as String? ?? '',
+  jogosSuspensao: (m['jogosSuspensao'] as num?)?.toInt() ?? 0,
+  multa: (m['multa'] as num?)?.toInt() ?? 0,
+  motivo: m['motivo'] as String? ?? '',
+  fundamento: m['fundamento'] as String?,
+  votacao: m['votacao'] as String?,
+);

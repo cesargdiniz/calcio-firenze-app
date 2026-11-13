@@ -45,7 +45,7 @@ class GestaoScreen extends StatelessWidget {
           grupo('Temporada', [
             item('Times da temporada', rota: '/organizacao/gestao/times'),
             item('Regulamento e parâmetros', detalhe: 'Em breve'),
-            item('Calendário e jogos', detalhe: 'Próxima etapa'),
+            item('Calendário e jogos', rota: '/organizacao/jogos'),
           ]),
           grupo('Elencos', [
             item('Importar elencos do turno', rota: '/organizacao/gestao/elencos'),
@@ -57,7 +57,14 @@ class GestaoScreen extends StatelessWidget {
               rota: '/organizacao/gestao/pedidos',
             ),
           ]),
-          grupo('Governança', [item('Decisões e punições', detalhe: 'Em breve')]),
+          grupo('Governança', [
+            item(
+              o.dados.decisoes.isEmpty || o.dados.demonstracao
+                  ? 'Decisões e punições'
+                  : 'Decisões e punições (${o.dados.decisoes.length})',
+              rota: '/organizacao/gestao/decisoes',
+            ),
+          ]),
         ],
       );
     },

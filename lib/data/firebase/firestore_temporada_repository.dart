@@ -11,8 +11,8 @@ import '../exemplo/temporada_exemplo.dart';
 import 'firestore_usuario_repository.dart';
 import 'mapeadores.dart';
 
-/// Temporada no Firestore: `temporadas/{id}/times`, `/pessoas`, `/partidas`
-/// e `/pagamentos`.
+/// Temporada no Firestore: `temporadas/{id}/times`, `/pessoas`, `/partidas`,
+/// `/decisoes` e `/pagamentos`.
 ///
 /// Enquanto não houver elencos nem jogos cadastrados, mostra a temporada de
 /// exemplo (com os times já salvos no Firestore, se houver).
@@ -33,9 +33,16 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
     List<Pessoa>? pessoas;
     List<Partida>? partidas;
     List<Pagamento>? pagamentos;
+    List<DecisaoDisciplinar>? decisoes;
 
     void emitir() {
-      if (times == null || pessoas == null || partidas == null || pagamentos == null) return;
+      if (times == null ||
+          pessoas == null ||
+          partidas == null ||
+          pagamentos == null ||
+          decisoes == null) {
+        return;
+      }
       final porId = {for (final t in timesMaster2027) t.id: t};
       for (final t in times!) {
         porId[t.id] = t;
@@ -66,6 +73,12 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             pessoas: pessoas!,
             partidas: partidas!,
             pagamentos: pagamentos!,
+            // Decisão cujo jogo de origem saiu do calendário não tem como ser
+            // calculada; fica de fora em vez de derrubar as telas.
+            decisoes: [
+              for (final x in decisoes!)
+                if (partidas!.any((p) => p.id == x.partidaOrigemId)) x,
+            ],
           ),
         );
       }
@@ -85,6 +98,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
           },
           onError: (Object e) {
             // Pagamentos só podem ser lidos com login: o Torcedor segue sem eles.
+            // Decisões: uma falha de leitura não pode derrubar a tabela e os jogos.
             if (opcional) {
               guardar(<T>[]);
               emitir();
@@ -107,6 +121,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
           (l) => pagamentos = l,
           opcional: true,
         );
+        ouvir<DecisaoDisciplinar>('decisoes', decisaoDeMapa, (l) => decisoes = l, opcional: true);
       },
       onCancel: () async {
         for (final s in subs) {
@@ -211,4 +226,21 @@ class FirestoreGestaoRepository implements GestaoRepository {
   @override
   Future<void> desfazerPagamento(String temporadaId, String pendenciaId) =>
       _col(temporadaId, 'pagamentos').doc(pendenciaId).delete();
+
+  @override
+  Future<void> salvarDecisao(String temporadaId, DecisaoDisciplinar decisao) =>
+      _col(temporadaId, 'decisoes').doc(decisao.id).set({
+        ...decisaoParaMapa(decisao),
+        'registradaEm': FieldValue.serverTimestamp(),
+      });
+
+  @override
+  Future<void> excluirDecisao(String temporadaId, String decisaoId) async {
+    final lote = _db.batch();
+    lote.delete(_col(temporadaId, 'decisoes').doc(decisaoId));
+    for (final id in idsPendenciasDaDecisao(decisaoId)) {
+      lote.delete(_col(temporadaId, 'pagamentos').doc(id));
+    }
+    await lote.commit();
+  }
 }

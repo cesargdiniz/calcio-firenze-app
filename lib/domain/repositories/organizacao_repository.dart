@@ -33,4 +33,10 @@ abstract interface class GestaoRepository {
   Future<void> registrarPagamento(String temporadaId, String pendenciaId, DateTime pagoEm);
 
   Future<void> desfazerPagamento(String temporadaId, String pendenciaId);
+
+  /// Cria ou substitui uma decisão da Governança (suspensão e/ou multa).
+  Future<void> salvarDecisao(String temporadaId, DecisaoDisciplinar decisao);
+
+  /// Exclui a decisão e a quitação da multa dela, se houver.
+  Future<void> excluirDecisao(String temporadaId, String decisaoId);
 }

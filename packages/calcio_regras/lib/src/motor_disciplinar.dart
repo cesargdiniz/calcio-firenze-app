@@ -91,6 +91,15 @@ class Pendurado {
   const Pendurado(this.pessoaId, this.timeId, this.amarelos);
 }
 
+/// Id da pendência gerada pela multa de uma decisão da Governança.
+String idPendenciaDaDecisao(String decisaoId) => 'decisao:$decisaoId';
+
+/// Pendências que uma decisão pode gerar: a multa e a multa por atraso dela.
+List<String> idsPendenciasDaDecisao(String decisaoId) => [
+  idPendenciaDaDecisao(decisaoId),
+  '${idPendenciaDaDecisao(decisaoId)}:atraso',
+];
+
 /// Ciclo de contagem de amarelos: zera ao fim da fase classificatória
 /// (art. 70). O mata-mata de cada turno conta como ciclo próprio.
 typedef Ciclo = ({int turno, bool eliminatoria});
@@ -219,7 +228,7 @@ class MotorDisciplinar {
     for (final d in decisoes) {
       final origem = _partida(d.partidaOrigemId);
       if (d.multa > 0) {
-        final id = 'decisao:${d.id}';
+        final id = idPendenciaDaDecisao(d.id);
         pendencias.add(
           Pendencia(
             id: id,

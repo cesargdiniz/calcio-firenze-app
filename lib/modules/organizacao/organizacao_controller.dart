@@ -176,6 +176,10 @@ class OrganizacaoController extends Cubit<OrgStatus> {
   Future<void> desfazerPagamento(String pendenciaId) =>
       _gestao.desfazerPagamento(_dados!.id, pendenciaId);
 
+  Future<void> salvarDecisao(DecisaoDisciplinar d) => _gestao.salvarDecisao(_dados!.id, d);
+
+  Future<void> excluirDecisao(String id) => _gestao.excluirDecisao(_dados!.id, id);
+
   Future<void> sair() => _auth.sair();
 
   @override
