@@ -182,6 +182,12 @@ class DecisaoDisciplinar {
   final int multa;
   final String motivo;
 
+  /// Artigo e grau em que a conduta foi enquadrada (ex.: "Art. 87 · grau médio").
+  final String? fundamento;
+
+  /// Resultado da votação entre os dirigentes, quando houve (art. 87.1).
+  final String? votacao;
+
   const DecisaoDisciplinar({
     required this.id,
     required this.pessoaId,
@@ -190,6 +196,8 @@ class DecisaoDisciplinar {
     required this.motivo,
     this.jogosSuspensao = 0,
     this.multa = 0,
+    this.fundamento,
+    this.votacao,
   });
 }
 

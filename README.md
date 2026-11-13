@@ -2,13 +2,16 @@
 
 App do campeonato Calcio Firenze (Master 2027), em Flutter, para Android, iPhone e web.
 
-## O que já funciona (versão 0.1)
+## O que já funciona
 
-- **Regras do regulamento** (`packages/calcio_regras`): cartões e valores, prazo de 24 h e multa por atraso, suspensões (vermelho, 3 amarelos, decisões), pendurados, impedidos por pendência, pontuação com W.O. e perda de pontos, os 7 desempates + sorteio, chaveamento do mata-mata e rebaixamento. 49 testes.
-- **App do Torcedor** com dados de exemplo: Splash, "Como você quer entrar?", Início, Jogos (por rodada), detalhe do jogo, Classificação e Suspensos/Pendurados. Tudo calculado pelas regras acima.
+- **Regras do regulamento** (`packages/calcio_regras`): cartões e valores, prazo de 24 h e multa por atraso, suspensões (vermelho, 3 amarelos, decisões), pendurados, impedidos por pendência, pontuação com W.O. e perda de pontos, os 7 desempates + sorteio, chaveamento do mata-mata e rebaixamento.
+- **Torcedor** (sem login): Início, Jogos por rodada, detalhe do jogo, Classificação e Suspensos/Pendurados.
+- **Participante**: login (Google, link por e-mail ou senha), pedido de vínculo ao elenco, Meu Time e Perfil.
+- **Organização**: pedidos de vínculo, times, importação de elencos, calendário com sorteio, súmula, disciplina (pendências e quitações) e decisões e punições (suspensão e multa fora da súmula, arts. 87 e 88).
+- **Firebase** (projeto `calcio-firenze`, web): login e dados da temporada no Firestore. Enquanto não houver elencos nem jogos cadastrados, o app mostra uma temporada de exemplo.
 - Identidade do Figma: cores, Montserrat e Open Sans (dentro do app), logo em tamanho fixo.
 
-Próximas etapas: login e perfil Participante, súmula e gestão da Organização, ligação com o Firebase.
+Próximas etapas: movimentações de elenco, regulamento e parâmetros editáveis, login com Apple e as versões de Android e iPhone.
 
 ## Rodar no seu computador
 

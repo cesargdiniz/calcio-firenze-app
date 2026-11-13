@@ -219,12 +219,34 @@ class MemoriaGestaoRepository implements GestaoRepository {
     );
   }
 
+  @override
+  Future<void> salvarDecisao(String temporadaId, DecisaoDisciplinar decisao) async {
+    final d = temporada.dados;
+    temporada.substituir(
+      _copiar(d, decisoes: [...d.decisoes.where((x) => x.id != decisao.id), decisao]),
+    );
+  }
+
+  @override
+  Future<void> excluirDecisao(String temporadaId, String decisaoId) async {
+    final d = temporada.dados;
+    final quitacoes = idsPendenciasDaDecisao(decisaoId);
+    temporada.substituir(
+      _copiar(
+        d,
+        decisoes: d.decisoes.where((x) => x.id != decisaoId).toList(),
+        pagamentos: d.pagamentos.where((p) => !quitacoes.contains(p.pendenciaId)).toList(),
+      ),
+    );
+  }
+
   static DadosTemporada _copiar(
     DadosTemporada d, {
     List<Time>? times,
     List<Pessoa>? pessoas,
     List<Partida>? partidas,
     List<Pagamento>? pagamentos,
+    List<DecisaoDisciplinar>? decisoes,
     bool? demonstracao,
   }) {
     final demo = demonstracao ?? d.demonstracao;
@@ -238,7 +260,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
       pessoas: pessoas ?? d.pessoas,
       partidas: partidas ?? (saindoDaDemo ? const [] : d.partidas),
       pagamentos: pagamentos ?? (saindoDaDemo ? const [] : d.pagamentos),
-      decisoes: saindoDaDemo ? const [] : d.decisoes,
+      decisoes: decisoes ?? (saindoDaDemo ? const [] : d.decisoes),
       demonstracao: demo,
       relogio: demo ? d.relogio : null,
     );
