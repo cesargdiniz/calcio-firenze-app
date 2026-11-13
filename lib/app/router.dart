@@ -8,10 +8,12 @@ import '../modules/organizacao/screens/decisoes_screen.dart';
 import '../modules/organizacao/screens/disciplina_screen.dart';
 import '../modules/organizacao/screens/gestao_screen.dart';
 import '../modules/organizacao/screens/jogo_org_screen.dart';
+import '../modules/organizacao/screens/movimentacoes_screen.dart';
 import '../modules/organizacao/screens/org_jogos_screen.dart';
 import '../modules/organizacao/screens/sumula_screen.dart';
 import '../modules/organizacao/screens/importar_elencos_screen.dart';
 import '../modules/organizacao/screens/org_inicio_screen.dart';
+import '../modules/organizacao/screens/parametros_screen.dart';
 import '../modules/organizacao/screens/pedidos_screen.dart';
 import '../modules/organizacao/screens/times_screen.dart';
 import '../modules/participante/participante_shell.dart';
@@ -136,6 +138,14 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
               routes: [
                 GoRoute(path: 'pedidos', builder: (_, _) => const PedidosScreen()),
                 GoRoute(path: 'elencos', builder: (_, _) => const ImportarElencosScreen()),
+                GoRoute(path: 'parametros', builder: (_, _) => const ParametrosScreen()),
+                GoRoute(
+                  path: 'movimentacoes',
+                  builder: (_, _) => const MovimentacoesScreen(),
+                  routes: [
+                    GoRoute(path: 'nova', builder: (_, _) => const NovaMovimentacaoScreen()),
+                  ],
+                ),
                 GoRoute(
                   path: 'decisoes',
                   builder: (_, _) => const DecisoesScreen(),

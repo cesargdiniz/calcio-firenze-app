@@ -23,6 +23,7 @@ Map<String, dynamic> pessoaParaMapa(Pessoa p) => {
   'numero': p.numero,
   'goleiro': p.goleiro,
   'dirigente': p.dirigente,
+  'saiuEm': p.saiuEm == null ? null : Timestamp.fromDate(p.saiuEm!),
 };
 
 Pessoa pessoaDeMapa(String id, Map<String, dynamic> m) => Pessoa(
@@ -33,6 +34,7 @@ Pessoa pessoaDeMapa(String id, Map<String, dynamic> m) => Pessoa(
   numero: (m['numero'] as num?)?.toInt(),
   goleiro: m['goleiro'] == true,
   dirigente: m['dirigente'] == true,
+  saiuEm: (m['saiuEm'] as Timestamp?)?.toDate(),
 );
 
 Map<String, dynamic> sumulaParaMapa(Sumula s) => {
@@ -134,4 +136,67 @@ DecisaoDisciplinar decisaoDeMapa(String id, Map<String, dynamic> m) => DecisaoDi
   motivo: m['motivo'] as String? ?? '',
   fundamento: m['fundamento'] as String?,
   votacao: m['votacao'] as String?,
+);
+
+Map<String, dynamic> parametrosParaMapa(Parametros p) => {
+  'pontosVitoria': p.pontosVitoria,
+  'pontosEmpate': p.pontosEmpate,
+  'pontosDerrota': p.pontosDerrota,
+  'valorAmarelo': p.valorAmarelo,
+  'valorVermelho': p.valorVermelho,
+  'amarelosParaSuspensao': p.amarelosParaSuspensao,
+  'jogosPorExpulsao': p.jogosPorExpulsao,
+  'prazoQuitacaoHoras': p.prazoQuitacao.inHours,
+  'golsWo': p.golsWo,
+  'deducaoWo': p.deducaoWo,
+  'classificadosMataMata': p.classificadosMataMata,
+  'rebaixados': p.rebaixados,
+};
+
+/// Campos ausentes ficam com o valor do regulamento de 2027.
+Parametros parametrosDeMapa(Map<String, dynamic>? m) {
+  const r = Parametros.master2027;
+  if (m == null) return r;
+  int n(String chave, int padrao) => (m[chave] as num?)?.toInt() ?? padrao;
+  return Parametros(
+    pontosVitoria: n('pontosVitoria', r.pontosVitoria),
+    pontosEmpate: n('pontosEmpate', r.pontosEmpate),
+    pontosDerrota: n('pontosDerrota', r.pontosDerrota),
+    valorAmarelo: n('valorAmarelo', r.valorAmarelo),
+    valorVermelho: n('valorVermelho', r.valorVermelho),
+    amarelosParaSuspensao: n('amarelosParaSuspensao', r.amarelosParaSuspensao),
+    jogosPorExpulsao: n('jogosPorExpulsao', r.jogosPorExpulsao),
+    prazoQuitacao: Duration(hours: n('prazoQuitacaoHoras', r.prazoQuitacao.inHours)),
+    golsWo: n('golsWo', r.golsWo),
+    deducaoWo: n('deducaoWo', r.deducaoWo),
+    classificadosMataMata: n('classificadosMataMata', r.classificadosMataMata),
+    rebaixados: n('rebaixados', r.rebaixados),
+  );
+}
+
+Map<String, dynamic> movimentacaoParaMapa(Movimentacao m) => {
+  'tipo': m.tipo.name,
+  'pessoaId': m.pessoaId,
+  'timeId': m.timeId,
+  'nome': m.nome,
+  'data': Timestamp.fromDate(m.data),
+  'laudo': m.laudo,
+  'motivoTroca': m.motivoTroca?.name,
+  'substitutoId': m.substitutoId,
+  'substitutoNome': m.substitutoNome,
+  'observacoes': m.observacoes,
+};
+
+Movimentacao movimentacaoDeMapa(String id, Map<String, dynamic> m) => Movimentacao(
+  id: id,
+  tipo: _porNome(TipoMovimentacao.values, m['tipo'], TipoMovimentacao.desligamento),
+  pessoaId: m['pessoaId'] as String? ?? '',
+  timeId: m['timeId'] as String? ?? '',
+  nome: m['nome'] as String? ?? '',
+  data: (m['data'] as Timestamp?)?.toDate() ?? DateTime(2027),
+  laudo: m['laudo'] == true,
+  motivoTroca: MotivoTroca.values.where((e) => e.name == m['motivoTroca']).firstOrNull,
+  substitutoId: m['substitutoId'] as String?,
+  substitutoNome: m['substitutoNome'] as String?,
+  observacoes: m['observacoes'] as String?,
 );

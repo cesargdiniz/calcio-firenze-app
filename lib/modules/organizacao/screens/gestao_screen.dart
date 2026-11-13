@@ -25,17 +25,10 @@ class GestaoScreen extends StatelessWidget {
         ],
       );
 
-      Widget item(String texto, {String? rota, String? detalhe}) => ListTile(
-        title: Text(
-          texto,
-          style: AppTextStyles.rotulo.copyWith(color: rota == null ? AppColors.dica : null),
-        ),
-        subtitle: detalhe == null ? null : Text(detalhe, style: AppTextStyles.pequeno),
-        trailing: Icon(
-          Icons.chevron_right_rounded,
-          color: rota == null ? AppColors.linha : AppColors.dica,
-        ),
-        onTap: rota == null ? null : () => context.go(rota),
+      Widget item(String texto, {required String rota}) => ListTile(
+        title: Text(texto, style: AppTextStyles.rotulo),
+        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.dica),
+        onTap: () => context.go(rota),
       );
 
       return ListView(
@@ -44,12 +37,15 @@ class GestaoScreen extends StatelessWidget {
           const CabecalhoTela('Gestão', subtitulo: 'Master · Temporada 2027'),
           grupo('Temporada', [
             item('Times da temporada', rota: '/organizacao/gestao/times'),
-            item('Regulamento e parâmetros', detalhe: 'Em breve'),
+            item('Regulamento e parâmetros', rota: '/organizacao/gestao/parametros'),
             item('Calendário e jogos', rota: '/organizacao/jogos'),
           ]),
           grupo('Elencos', [
             item('Importar elencos do turno', rota: '/organizacao/gestao/elencos'),
-            item('Movimentações', detalhe: 'Em breve'),
+            item(
+              o.movimentacoes.isEmpty ? 'Movimentações' : 'Movimentações (${o.movimentacoes.length})',
+              rota: '/organizacao/gestao/movimentacoes',
+            ),
           ]),
           grupo('Acessos', [
             item(

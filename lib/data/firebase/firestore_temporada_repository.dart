@@ -34,13 +34,15 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
     List<Partida>? partidas;
     List<Pagamento>? pagamentos;
     List<DecisaoDisciplinar>? decisoes;
+    Parametros? parametros;
 
     void emitir() {
       if (times == null ||
           pessoas == null ||
           partidas == null ||
           pagamentos == null ||
-          decisoes == null) {
+          decisoes == null ||
+          parametros == null) {
         return;
       }
       final porId = {for (final t in timesMaster2027) t.id: t};
@@ -59,6 +61,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             pessoas: exemplo.pessoas,
             partidas: exemplo.partidas,
             decisoes: exemplo.decisoes,
+            parametros: parametros!,
             demonstracao: true,
             relogio: exemplo.relogio,
           ),
@@ -73,6 +76,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             pessoas: pessoas!,
             partidas: partidas!,
             pagamentos: pagamentos!,
+            parametros: parametros!,
             // Decisão cujo jogo de origem saiu do calendário não tem como ser
             // calculada; fica de fora em vez de derrubar as telas.
             decisoes: [
@@ -122,6 +126,20 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
           opcional: true,
         );
         ouvir<DecisaoDisciplinar>('decisoes', decisaoDeMapa, (l) => decisoes = l, opcional: true);
+        // Parâmetros ficam no documento da temporada; sem ele (ou se a
+        // leitura falhar), valem os do regulamento.
+        subs.add(
+          _db.collection('temporadas').doc(temporadaId).snapshots().listen(
+            (s) {
+              parametros = parametrosDeMapa(s.data()?['parametros'] as Map<String, dynamic>?);
+              emitir();
+            },
+            onError: (Object _) {
+              parametros = Parametros.master2027;
+              emitir();
+            },
+          ),
+        );
       },
       onCancel: () async {
         for (final s in subs) {
@@ -144,7 +162,11 @@ class FirestoreOrganizacaoRepository implements OrganizacaoRepository {
 
 class FirestoreGestaoRepository implements GestaoRepository {
   final FirebaseFirestore _db;
-  FirestoreGestaoRepository(this._db);
+
+  /// Temporada cujas movimentações a Organização acompanha.
+  final String temporadaId;
+
+  FirestoreGestaoRepository(this._db, {this.temporadaId = 'master-2027'});
 
   Stream<List<Usuario>> _porStatus(StatusVinculo status) => _db
       .collection('usuarios')
@@ -241,6 +263,49 @@ class FirestoreGestaoRepository implements GestaoRepository {
     for (final id in idsPendenciasDaDecisao(decisaoId)) {
       lote.delete(_col(temporadaId, 'pagamentos').doc(id));
     }
+    await lote.commit();
+  }
+
+  @override
+  Future<void> salvarParametros(String temporadaId, Parametros parametros) => _db
+      .collection('temporadas')
+      .doc(temporadaId)
+      .set({'parametros': parametrosParaMapa(parametros)}, SetOptions(merge: true));
+
+  @override
+  Stream<List<Movimentacao>> observarMovimentacoes() => _col(temporadaId, 'movimentacoes')
+      .snapshots()
+      .map((s) => [for (final d in s.docs) movimentacaoDeMapa(d.id, d.data())]);
+
+  @override
+  Future<void> registrarMovimentacao(
+    String temporadaId,
+    Movimentacao movimentacao, {
+    Pessoa? substituto,
+  }) async {
+    final pessoas = _col(temporadaId, 'pessoas');
+    final lote = _db.batch();
+    lote.set(_col(temporadaId, 'movimentacoes').doc(movimentacao.id), {
+      ...movimentacaoParaMapa(movimentacao),
+      'registradaEm': FieldValue.serverTimestamp(),
+    });
+    lote.update(pessoas.doc(movimentacao.pessoaId), {
+      'saiuEm': Timestamp.fromDate(movimentacao.data),
+    });
+    if (substituto != null) lote.set(pessoas.doc(substituto.id), pessoaParaMapa(substituto));
+    await lote.commit();
+  }
+
+  @override
+  Future<void> desfazerMovimentacao(String temporadaId, Movimentacao movimentacao) async {
+    final pessoas = _col(temporadaId, 'pessoas');
+    // A pessoa pode não existir mais se o elenco foi reimportado.
+    final pessoa = await pessoas.doc(movimentacao.pessoaId).get();
+    final lote = _db.batch();
+    lote.delete(_col(temporadaId, 'movimentacoes').doc(movimentacao.id));
+    if (pessoa.exists) lote.update(pessoa.reference, {'saiuEm': null});
+    final substituto = movimentacao.substitutoId;
+    if (substituto != null) lote.delete(pessoas.doc(substituto));
     await lote.commit();
   }
 }

@@ -28,8 +28,8 @@ clubes/{clubeId}                      nome, sigla, cor, escudoUrl, historico[]  
 temporadas/{temporadaId}              nome, categoria, ano, local, turnoAtual,
                                       parametros{...}, ordemSorteio[]
   times/{clubeId}                     dirigenteId, rebaixadoNoAnoAnterior
-  pessoas/{pessoaId}                  nome, timeId, funcao (atleta|tecnico|dirigente),
-                                      numero, goleiro, turno, ativo, uid?
+  pessoas/{pessoaId}                  nome, timeId, funcao (atleta|tecnico), numero,
+                                      goleiro, dirigente, saiuEm? (data da saída do elenco)
   partidas/{partidaId}                turno, fase, rodada, mandanteId, visitanteId, inicio,
                                       arbitros[], etapa (agendada|preparacao|lancamento|encerrada),
                                       sumula{golsMandante, golsVisitante, ausenteWo, penaltis,
@@ -37,10 +37,12 @@ temporadas/{temporadaId}              nome, categoria, ano, local, turnoAtual,
                                       fonte{youtubeUrl?}, pdfUrl?
   pagamentos/{pendenciaId}            pagoEm, registradoPor
   decisoes/{decisaoId}                pessoaId, timeId, partidaOrigemId, jogosSuspensao,
-                                      multa, motivo, fundamento, votacao
+                                      multa, motivo, fundamento?, votacao?
   ajustes/{ajusteId}                  timeId, turno, pontos, motivo
-  movimentacoes/{id}                  tipo (demissao|lesao|trocaGoleiro|desligamento),
-                                      pessoaId, timeId, data, laudoPath?
+  movimentacoes/{id}                  tipo (demissao|desligamento|lesao|trocaGoleiro),
+                                      pessoaId, timeId, nome, data, laudo, motivoTroca?,
+                                      substitutoId?, substitutoNome?, observacoes?
+                                      (só a Organização lê)
   publico/painel                      gerado pelo app da Organização (leitura aberta)
   privado/disciplina                  pendências calculadas (só Organização)
 
