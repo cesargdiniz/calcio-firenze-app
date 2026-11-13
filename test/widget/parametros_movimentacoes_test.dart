@@ -58,7 +58,9 @@ void main() {
         sessao: _org,
         organizacao: {'org1'},
       );
-      await tester.enterText(find.widgetWithText(TextField, 'Cartão amarelo (R\$)'), '40');
+      final campo = find.widgetWithText(TextField, 'Cartão amarelo (R\$)');
+      await tester.scrollUntilVisible(campo, 200, scrollable: find.byType(Scrollable).first);
+      await tester.enterText(campo, '40');
       await tester.pumpAndSettle();
       await acionar(tester, 'Salvar parâmetros');
 
