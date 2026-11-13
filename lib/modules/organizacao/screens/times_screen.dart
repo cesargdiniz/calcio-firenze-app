@@ -142,8 +142,7 @@ class _EditarTimeState extends State<_EditarTime> {
             const SizedBox(width: AppSpacing.md),
             const Expanded(
               child: Text(
-                'Envio do escudo oficial: chega quando o armazenamento de arquivos do '
-                'Firebase for ativado. Até lá, o app usa a cor e a sigla.',
+                'O escudo do time no app é formado pela cor e pela sigla.',
                 style: AppTextStyles.pequeno,
               ),
             ),

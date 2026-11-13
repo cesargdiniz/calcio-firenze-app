@@ -34,7 +34,7 @@ temporadas/{temporadaId}              nome, categoria, ano, local, turnoAtual,
                                       arbitros[], etapa (agendada|preparacao|lancamento|encerrada),
                                       sumula{golsMandante, golsVisitante, ausenteWo, penaltis,
                                              gols[], cartoes[], timesSemPontos[], observacoes},
-                                      fonte{youtubeUrl?}, pdfUrl?
+                                      fonte{youtubeUrl?}
   pagamentos/{pendenciaId}            pagoEm, registradoPor
   decisoes/{decisaoId}                pessoaId, timeId, partidaOrigemId, jogosSuspensao,
                                       multa, motivo, fundamento?, votacao?
@@ -51,7 +51,7 @@ usuarios/{uid}                        nome, email, perfil (participante|organiza
   situacao/atual                      pendências e cartões da própria pessoa (gerado)
 ```
 
-Fotos de súmula e laudos ficam no Storage em `privado/…`, legíveis só pela Organização.
+O app não usa o armazenamento de arquivos do Firebase (Storage). Por isso não há envio de fotos de súmula, laudos ou escudos: o laudo de lesão é só marcado como apresentado na movimentação, e o escudo do time é a cor com a sigla.
 
 ## Decisões a confirmar antes de publicar nas lojas
 
