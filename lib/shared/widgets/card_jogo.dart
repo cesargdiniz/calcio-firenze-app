@@ -92,16 +92,7 @@ class CardJogo extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Expanded(child: Text(partida.local ?? local, style: AppTextStyles.pequeno)),
-              if (s != null) ...[
-                const Icon(Icons.download_rounded, size: 14, color: AppColors.verde),
-                const SizedBox(width: 4),
-                Text('Súmula PDF', style: AppTextStyles.rotulo.copyWith(color: AppColors.verde)),
-              ],
-            ],
-          ),
+          Text(partida.local ?? local, style: AppTextStyles.pequeno),
         ],
       ),
     );

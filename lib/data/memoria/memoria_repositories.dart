@@ -250,6 +250,10 @@ class MemoriaGestaoRepository implements GestaoRepository {
       temporada.substituir(_copiar(temporada.dados, parametros: parametros));
 
   @override
+  Future<void> salvarPatrocinador(String temporadaId, String? patrocinador) async =>
+      temporada.substituir(_copiar(temporada.dados, patrocinador: () => patrocinador));
+
+  @override
   Stream<List<Movimentacao>> observarMovimentacoes() async* {
     yield movimentacoes;
     yield* _mudouMovimentacoes.stream.map((_) => movimentacoes);
@@ -296,6 +300,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
   static DadosTemporada _copiar(
     DadosTemporada d, {
     Parametros? parametros,
+    String? Function()? patrocinador,
     List<Time>? times,
     List<Pessoa>? pessoas,
     List<Partida>? partidas,
@@ -316,6 +321,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
       pagamentos: pagamentos ?? (saindoDaDemo ? const [] : d.pagamentos),
       decisoes: decisoes ?? (saindoDaDemo ? const [] : d.decisoes),
       parametros: parametros ?? d.parametros,
+      patrocinador: patrocinador == null ? d.patrocinador : patrocinador(),
       demonstracao: demo,
       relogio: demo ? d.relogio : null,
     );

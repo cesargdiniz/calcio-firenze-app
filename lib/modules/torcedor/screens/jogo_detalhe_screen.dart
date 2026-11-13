@@ -84,22 +84,9 @@ class JogoDetalheScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           if (s != null)
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _emBreve(context, 'O PDF da súmula'),
-                    child: const Text('Súmula (PDF)'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _emBreve(context, 'O vídeo do jogo'),
-                    child: const Text('Ver no YouTube'),
-                  ),
-                ),
-              ],
+            OutlinedButton(
+              onPressed: () => _emBreve(context, 'O vídeo do jogo'),
+              child: const Text('Ver no YouTube'),
             ),
           if (s != null && s.ausenteWo != null)
             Padding(

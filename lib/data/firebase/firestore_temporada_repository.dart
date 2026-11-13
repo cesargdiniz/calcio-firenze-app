@@ -35,6 +35,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
     List<Pagamento>? pagamentos;
     List<DecisaoDisciplinar>? decisoes;
     Parametros? parametros;
+    String? patrocinador;
 
     void emitir() {
       if (times == null ||
@@ -62,6 +63,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             partidas: exemplo.partidas,
             decisoes: exemplo.decisoes,
             parametros: parametros!,
+            patrocinador: patrocinador,
             demonstracao: true,
             relogio: exemplo.relogio,
           ),
@@ -77,6 +79,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             partidas: partidas!,
             pagamentos: pagamentos!,
             parametros: parametros!,
+            patrocinador: patrocinador,
             // Decisão cujo jogo de origem saiu do calendário não tem como ser
             // calculada; fica de fora em vez de derrubar as telas.
             decisoes: [
@@ -132,6 +135,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
           _db.collection('temporadas').doc(temporadaId).snapshots().listen(
             (s) {
               parametros = parametrosDeMapa(s.data()?['parametros'] as Map<String, dynamic>?);
+              patrocinador = s.data()?['patrocinador'] as String?;
               emitir();
             },
             onError: (Object _) {
@@ -271,6 +275,12 @@ class FirestoreGestaoRepository implements GestaoRepository {
       .collection('temporadas')
       .doc(temporadaId)
       .set({'parametros': parametrosParaMapa(parametros)}, SetOptions(merge: true));
+
+  @override
+  Future<void> salvarPatrocinador(String temporadaId, String? patrocinador) => _db
+      .collection('temporadas')
+      .doc(temporadaId)
+      .set({'patrocinador': patrocinador}, SetOptions(merge: true));
 
   @override
   Stream<List<Movimentacao>> observarMovimentacoes() => _col(temporadaId, 'movimentacoes')

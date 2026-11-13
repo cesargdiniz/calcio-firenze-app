@@ -26,7 +26,7 @@ jobs:
           TOKEN: ${{ github.token }}
         run: |
           mkdir -p /tmp/capturas
-          cp test/galeria/telas/*.png /tmp/capturas/ 2>/dev/null || true
+          cp test/galeria/telas/* /tmp/capturas/ 2>/dev/null || true
           cd /tmp/capturas
           ls | wc -l
           git init -q -b galeria-telas-capturas

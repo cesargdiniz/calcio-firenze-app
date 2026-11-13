@@ -5,6 +5,7 @@ import 'package:calcio_firenze/domain/entities/temporada.dart';
 import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
 import 'package:calcio_firenze/domain/usecases/montar_situacao.dart';
+import 'package:calcio_firenze/shared/pdf/saida_pdf.dart';
 import 'package:calcio_firenze/shared/seletor_imagem.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +19,7 @@ Future<MemoriaGestaoRepository> abrirApp(
   Map<String, Usuario>? usuarios,
   Set<String> organizacao = const {},
   DadosTemporada? dados,
+  SaidaPdf? saidaPdf,
   SeletorImagem? seletorImagem,
 }) async {
   tester.view.physicalSize = const Size(414 * 3, 896 * 3);
@@ -38,6 +40,7 @@ Future<MemoriaGestaoRepository> abrirApp(
       gestao: gestao,
       montarPainel: MontarPainel(agora: agora),
       montarSituacao: MontarSituacao(agora: agora),
+      saidaPdf: saidaPdf ?? const SaidaPdfDoAparelho(),
       seletorImagem: seletorImagem ?? const SeletorImagemDoAparelho(),
       initialLocation: inicio,
     ),

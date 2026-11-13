@@ -43,6 +43,9 @@ abstract interface class GestaoRepository {
   /// Valores do regulamento usados em todos os cálculos da temporada.
   Future<void> salvarParametros(String temporadaId, Parametros parametros);
 
+  /// Patrocinador que dá nome à competição na súmula; nulo para tirar.
+  Future<void> salvarPatrocinador(String temporadaId, String? patrocinador);
+
   /// Saídas de elenco registradas (só a Organização lê).
   Stream<List<Movimentacao>> observarMovimentacoes();
 
