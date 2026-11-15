@@ -229,15 +229,27 @@ DadosTemporada montarTemporadaExemplo() {
     if (p.rodada! > 3) continue;
     final doMandante = gols();
     final doVisitante = gols();
+    final listaGols = [
+      ...autores(p, p.mandanteId, doMandante, i),
+      ...autores(p, p.visitanteId, doVisitante, i + 1),
+    ];
+    // Melhor da partida: o primeiro a marcar pelo vencedor; no empate, o
+    // primeiro a marcar no jogo; no 0 x 0, o goleiro do mandante.
+    final vencedor = doMandante == doVisitante
+        ? null
+        : (doMandante > doVisitante ? p.mandanteId : p.visitanteId);
+    final destaque =
+        listaGols.where((g) => g.timeId == vencedor).firstOrNull ?? listaGols.firstOrNull;
+    final goleiro = _elencos().firstWhere((x) => x.timeId == p.mandanteId && x.goleiro);
     partidas[i] = p.comSumula(
       Sumula(
         golsMandante: doMandante,
         golsVisitante: doVisitante,
-        gols: [
-          ...autores(p, p.mandanteId, doMandante, i),
-          ...autores(p, p.visitanteId, doVisitante, i + 1),
-        ],
+        gols: listaGols,
         cartoes: cartoes[p.id] ?? const [],
+        melhorDaPartida: destaque == null
+            ? MelhorDaPartida(pessoaId: goleiro.id, timeId: goleiro.timeId)
+            : MelhorDaPartida(pessoaId: destaque.autorId!, timeId: destaque.timeId),
       ),
     );
   }

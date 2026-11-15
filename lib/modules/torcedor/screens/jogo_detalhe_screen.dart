@@ -110,6 +110,16 @@ class JogoDetalheScreen extends StatelessWidget {
                         '${g.tempo}º tempo',
                       ),
                   ]),
+            if (s.melhorDaPartida case final m?) ...[
+              const TituloSecao('Melhor da partida'),
+              _Lista([
+                (
+                  const Icon(Icons.star_rounded, size: 16, color: AppColors.amarelo),
+                  '${(nomes[m.pessoaId] ?? m.pessoaId).toUpperCase()} · ${painel.time(m.timeId).sigla}',
+                  '',
+                ),
+              ]),
+            ],
             const TituloSecao('Cartões'),
             s.cartoes.isEmpty
                 ? const Text('Nenhum cartão.', style: AppTextStyles.pequeno)

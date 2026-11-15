@@ -166,6 +166,12 @@ class JogoOrgScreen extends StatelessWidget {
                       '${o.time(g.timeId)?.sigla} · ${g.tempo}º tempo',
                       style: AppTextStyles.corpo,
                     ),
+                  if (s.melhorDaPartida case final m?)
+                    Text(
+                      '⭐ Melhor da partida: ${nomes[m.pessoaId] ?? m.pessoaId} · '
+                      '${o.time(m.timeId)?.sigla}',
+                      style: AppTextStyles.corpo,
+                    ),
                   for (final c in s.cartoes)
                     Text(
                       '${c.tipo == TipoCartao.amarelo ? '🟨' : '🟥'} ${nomes[c.pessoaId] ?? c.pessoaId} · '

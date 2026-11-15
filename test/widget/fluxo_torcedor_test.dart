@@ -1,3 +1,4 @@
+import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
 import 'package:calcio_regras/calcio_regras.dart';
 import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,7 +54,7 @@ void main() {
     await abrirComoTorcedor(tester);
     await tester.tap(find.text('Tabela'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Artilharia'));
+    await tester.tap(find.text('Estatísticas'));
     await tester.pumpAndSettle();
 
     final dados = montarTemporadaExemplo();
@@ -62,5 +63,35 @@ void main() {
     expect(find.text('Artilharia'), findsWidgets);
     expect(find.text('1º'), findsWidgets);
     expect(find.text(nome), findsOneWidget);
+  });
+
+  testWidgets('Estatísticas: cada categoria mostra o seu ranking', (tester) async {
+    await abrirComoTorcedor(tester);
+    await tester.tap(find.text('Tabela'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Estatísticas'));
+    await tester.pumpAndSettle();
+
+    final dados = montarTemporadaExemplo();
+    final painel = MontarPainel(agora: () => TemporadaExemploRepository.agora)(dados);
+    String nome(String id) => dados.pessoas.firstWhere((p) => p.id == id).nome.toUpperCase();
+    String time(String id) => dados.times.firstWhere((t) => t.id == id).nome;
+
+    final esperado = {
+      'Melhor da partida': nome(painel.melhoresDaPartida.first.pessoaId),
+      'Melhor ataque': time(painel.melhorAtaque.first.timeId),
+      'Melhor defesa': time(painel.melhorDefesa.first.timeId),
+      'Cartão amarelo': nome(painel.amarelos.first.pessoaId),
+      'Cartão vermelho': nome(painel.vermelhos.first.pessoaId),
+      'Todos os cartões': nome(painel.cartoes.first.pessoaId),
+    };
+    for (final MapEntry(key: categoria, value: primeiro) in esperado.entries) {
+      final chip = find.text(categoria);
+      await tester.ensureVisible(chip);
+      await tester.pumpAndSettle();
+      await tester.tap(chip);
+      await tester.pumpAndSettle();
+      expect(find.text(primeiro), findsWidgets, reason: categoria);
+    }
   });
 }

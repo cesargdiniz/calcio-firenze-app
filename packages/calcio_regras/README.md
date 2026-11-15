@@ -7,6 +7,7 @@ As regras do Calcio Firenze (Master 2027) em Dart puro, sem Flutter nem Firebase
 | `classificacao.dart` | Tabela do turno e geral, W.O., perda de pontos, 7 desempates + sorteio, rebaixados | arts. 4, 42, 43.1, 68, 75, 89 |
 | `motor_disciplinar.dart` | Pendências (R$), prazo de 24 h, multa por atraso, suspensões, pendurados, impedidos | arts. 66–73.7, 86–88 |
 | `artilharia.dart` | Goleadores do turno ou da temporada, sem os gols de W.O. | art. 75 |
+| `estatisticas.dart` | Cartões por pessoa, melhor da partida, melhor ataque e melhor defesa | arts. 67, 73.1, 75 |
 | `mata_mata.dart` | Quartas, semifinais, quem avança, grande final | art. 16 |
 | `parametros.dart` | Valores ajustáveis (pontos, R$, prazos) | — |
 
@@ -32,3 +33,6 @@ Pontos em que o regulamento deixa margem. Cada um tem teste próprio; se a Organ
 8. **Confronto direto (critério 5):** mini-tabela de pontos só entre os empatados naquele ponto do desempate. Se um critério seguinte separa parte do grupo, o confronto direto não é reaplicado ao que sobrou.
 9. **Classificação geral (art. 89):** soma só as fases classificatórias dos dois turnos.
 10. **Artilharia:** só contam gols com autor lançado na súmula. Os gols do W.O. (art. 75) valem para a classificação, mas não são de nenhum jogador; gols contra e a disputa de pênaltis também ficam de fora. Empatados dividem a posição.
+11. **Cartões nas estatísticas:** contam atletas e técnicos. O 2º amarelo na mesma partida conta como dois amarelos e um vermelho; amarelo seguido de vermelho direto conta um de cada. No ranking de todos os cartões, quem tem mais vermelhos fica à frente no empate.
+12. **Melhor ataque e melhor defesa:** usam os gols da tabela da fase classificatória do turno, então os gols de W.O. contam. Times sem jogo ficam de fora.
+13. **Melhor da partida:** escolha opcional da Organização na súmula, só de atletas. Jogo de W.O. não tem melhor da partida.

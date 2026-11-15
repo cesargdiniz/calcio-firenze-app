@@ -238,8 +238,19 @@ void main() {
     _tela('08 classificação', (t) async {
       await _abrir(t, '/torcedor/tabela');
       await _capturar(t, '08_torcedor_classificacao');
-      await _tocar(t, 'Artilharia');
+      await _tocar(t, 'Estatísticas');
       await _capturar(t, '08a_torcedor_artilharia');
+      for (final (categoria, arquivo) in const [
+        ('Melhor da partida', '08b_torcedor_melhor_da_partida'),
+        ('Melhor ataque', '08c_torcedor_melhor_ataque'),
+        ('Melhor defesa', '08d_torcedor_melhor_defesa'),
+        ('Cartão amarelo', '08e_torcedor_cartao_amarelo'),
+        ('Cartão vermelho', '08f_torcedor_cartao_vermelho'),
+        ('Todos os cartões', '08g_torcedor_todos_os_cartoes'),
+      ]) {
+        await _tocar(t, categoria);
+        await _capturar(t, arquivo);
+      }
     });
     _tela('09 suspensos', (t) async {
       await _abrir(t, '/torcedor/suspensos');
