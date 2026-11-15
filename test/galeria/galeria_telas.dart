@@ -21,6 +21,15 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Tamanho da tela capturada. O padrão é um celular comum, a 2x. Para as
+/// capturas da App Store (iPhone de 6,9", 1320 × 2868):
+///
+///   flutter test test/galeria/galeria_telas.dart --update-goldens \
+///     --dart-define=TELA_LARGURA=440 --dart-define=TELA_ALTURA=956 --dart-define=TELA_DENSIDADE=3
+const double _largura = int.fromEnvironment('TELA_LARGURA', defaultValue: 414) + 0.0;
+const double _altura = int.fromEnvironment('TELA_ALTURA', defaultValue: 896) + 0.0;
+const double _densidade = int.fromEnvironment('TELA_DENSIDADE', defaultValue: 2) + 0.0;
+
 const _org = Sessao(uid: 'org1', email: 'cesar@exemplo.com');
 const _rafael = Sessao(uid: 'u1', email: 'rafael@exemplo.com');
 
@@ -98,8 +107,8 @@ Future<MemoriaGestaoRepository> _abrir(
   DadosTemporada? dados,
   bool assentar = true,
 }) async {
-  tester.view.physicalSize = const Size(414 * 2, 896 * 2);
-  tester.view.devicePixelRatio = 2;
+  tester.view.physicalSize = Size(_largura * _densidade, _altura * _densidade);
+  tester.view.devicePixelRatio = _densidade;
   addTearDown(tester.view.reset);
 
   final repoUsuarios = MemoriaUsuarioRepository(usuarios);
