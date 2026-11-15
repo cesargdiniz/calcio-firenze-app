@@ -93,15 +93,26 @@ class ParametrosScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       ComOrg(
-        builder: (context, o) =>
-            _Formulario(atuais: o.dados.parametros, patrocinador: o.dados.patrocinador),
+        builder: (context, o) => _Formulario(
+          // Trocar de categoria recomeça o formulário com os valores dela.
+          key: ValueKey(o.dados.id),
+          titulo: o.dados.nome,
+          atuais: o.dados.parametros,
+          patrocinador: o.dados.patrocinador,
+        ),
       );
 }
 
 class _Formulario extends StatefulWidget {
+  final String titulo;
   final Parametros atuais;
   final String? patrocinador;
-  const _Formulario({required this.atuais, required this.patrocinador});
+  const _Formulario({
+    super.key,
+    required this.titulo,
+    required this.atuais,
+    required this.patrocinador,
+  });
 
   @override
   State<_Formulario> createState() => _FormularioState();
@@ -187,7 +198,7 @@ class _FormularioState extends State<_Formulario> {
     padding: AppSpacing.tela,
     children: [
       const VoltarGestao(),
-      const CabecalhoTela('Regulamento e parâmetros', subtitulo: 'Master · Temporada 2027'),
+      CabecalhoTela('Regulamento e parâmetros', subtitulo: widget.titulo),
       const SizedBox(height: AppSpacing.md),
       Container(
         padding: const EdgeInsets.all(AppSpacing.md),

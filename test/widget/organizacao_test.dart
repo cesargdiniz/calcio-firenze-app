@@ -10,12 +10,12 @@ const _pedido = Usuario(
   uid: 'u1',
   email: 'rafael@exemplo.com',
   nome: 'Rafael Souza',
-  vinculo: Vinculo(
+  vinculos: [Vinculo(
     temporadaId: 'master-2027',
     pessoaId: 'rafael-souza',
     timeId: 'SAM',
     papel: Papel.atleta,
-  ),
+  )],
 );
 
 void main() {
@@ -49,7 +49,7 @@ void main() {
     await tester.tap(find.text('Aprovar'));
     await tester.pumpAndSettle();
     expect(find.text('Nenhum pedido'), findsOneWidget);
-    final aprovados = await gestao.observarAprovados().first;
+    final aprovados = await gestao.observarAprovados('master-2027').first;
     expect(aprovados.single.uid, 'u1');
   });
 

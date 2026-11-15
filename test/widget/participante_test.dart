@@ -11,13 +11,13 @@ Usuario _rafael(StatusVinculo status, {Papel papel = Papel.atleta}) => Usuario(
   uid: 'u1',
   email: 'rafael@exemplo.com',
   nome: 'Rafael Souza',
-  vinculo: Vinculo(
+  vinculos: [Vinculo(
     temporadaId: 'master-2027',
     pessoaId: papel == Papel.tecnico ? 'helio-ramos' : 'rafael-souza',
     timeId: 'SAM',
     papel: papel,
     status: status,
-  ),
+  )],
 );
 
 void main() {

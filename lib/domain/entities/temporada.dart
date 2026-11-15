@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:calcio_regras/calcio_regras.dart';
 
+import 'categoria.dart';
+
 /// Clube da temporada (cadastrado em "Times da temporada").
 class Time {
   final String id;
@@ -179,4 +181,7 @@ class DadosTemporada {
     this.demonstracao = false,
     this.relogio,
   });
+
+  /// Categoria desta temporada (Master se o id não for conhecido).
+  Categoria get categoria => Categoria.deTemporada(id) ?? Categoria.master;
 }

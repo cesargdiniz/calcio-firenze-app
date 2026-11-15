@@ -5,6 +5,7 @@ import 'package:calcio_regras/calcio_regras.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -12,6 +13,7 @@ import '../../domain/repositories/organizacao_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/usecases/gerar_calendario.dart';
 import '../../domain/usecases/movimentacoes.dart';
+import '../categoria/categoria_controller.dart';
 
 sealed class OrgStatus {
   const OrgStatus();
@@ -25,7 +27,7 @@ final class OrgSemLogin extends OrgStatus {
   const OrgSemLogin();
 }
 
-/// Logado, mas a conta não está em `organizacao/{uid}`.
+/// Logado, mas a conta não organiza nenhuma categoria.
 final class OrgSemAcesso extends OrgStatus {
   final Sessao sessao;
   const OrgSemAcesso(this.sessao);
@@ -38,14 +40,29 @@ final class OrgPronta extends OrgStatus {
   final List<Usuario> aprovados;
   final List<Movimentacao> movimentacoes;
 
-  const OrgPronta(this.sessao, this.dados, this.pedidos, this.aprovados, this.movimentacoes);
+  /// Categorias que esta conta organiza (a de [dados] é uma delas).
+  final List<Categoria> categorias;
+
+  const OrgPronta(
+    this.sessao,
+    this.dados,
+    this.pedidos,
+    this.aprovados,
+    this.movimentacoes, {
+    this.categorias = Categoria.values,
+  });
+
+  Categoria get categoria => dados.categoria;
 
   Pessoa? pessoa(String id) => dados.pessoas.where((p) => p.id == id).firstOrNull;
   Time? time(String id) => dados.times.where((t) => t.id == id).firstOrNull;
 
+  /// Vínculo do pedido nesta categoria.
+  Vinculo? vinculo(Usuario u) => u.vinculoEm(dados.id);
+
   /// Outra conta já aprovada para a mesma pessoa do elenco.
   Usuario? conflito(Usuario pedido) => aprovados
-      .where((u) => u.uid != pedido.uid && u.vinculo?.pessoaId == pedido.vinculo?.pessoaId)
+      .where((u) => u.uid != pedido.uid && vinculo(u)?.pessoaId == vinculo(pedido)?.pessoaId)
       .firstOrNull;
 }
 
@@ -54,50 +71,50 @@ final class OrgFalha extends OrgStatus {
   const OrgFalha(this.mensagem);
 }
 
+/// Área da Organização. Cada conta organiza uma ou mais categorias; a área
+/// mostra a categoria escolhida no seletor, se a conta a organiza, ou a
+/// primeira que ela organiza.
 class OrganizacaoController extends Cubit<OrgStatus> {
   final AuthRepository _auth;
   final OrganizacaoRepository _org;
   final GestaoRepository _gestao;
   final TemporadaRepository _temporada;
+  final CategoriaController _escolha;
 
   final List<StreamSubscription<void>> _porConta = [];
+  final List<StreamSubscription<void>> _porCategoria = [];
   StreamSubscription<void>? _subSessao;
-  StreamSubscription<void>? _subTemporada;
+  StreamSubscription<void>? _subEscolha;
 
   Sessao? _sessao;
   bool _sessaoCarregada = false;
-  bool? _ehOrg;
+  List<Categoria>? _categorias;
+  Categoria? _categoria;
   DadosTemporada? _dados;
   List<Usuario>? _pedidos;
   List<Usuario>? _aprovados;
   List<Movimentacao>? _movimentacoes;
 
-  OrganizacaoController(this._auth, this._org, this._gestao, this._temporada)
+  OrganizacaoController(this._auth, this._org, this._gestao, this._temporada, this._escolha)
     : super(const OrgCarregando());
 
   void iniciar() {
-    _subTemporada = _temporada.observar().listen((d) {
-      _dados = d;
-      _recalcular();
-    }, onError: _falhar);
+    _subEscolha = _escolha.stream.listen((_) => _definirCategoria());
     _subSessao = _auth.observarSessao().listen((s) {
       _sessao = s;
       _sessaoCarregada = true;
-      _ehOrg = null;
-      _pedidos = null;
-      _aprovados = null;
-      _movimentacoes = null;
+      _categorias = null;
       for (final x in _porConta) {
         x.cancel();
       }
       _porConta.clear();
+      _pararCategoria();
+      _categoria = null;
       if (s != null) {
         _porConta.add(
-          _org.ehOrganizacao(s.uid).listen((v) {
-            final antes = _ehOrg;
-            _ehOrg = v;
-            if (v && antes != true) _ouvirGestao();
-            _recalcular();
+          _org.categoriasQueOrganiza(s.uid).listen((l) {
+            _categorias = l;
+            _definirCategoria();
           }, onError: _falhar),
         );
       }
@@ -105,21 +122,54 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     }, onError: _falhar);
   }
 
-  void _ouvirGestao() {
-    _porConta.add(
-      _gestao.observarPedidos().listen((l) {
+  /// Categoria a mostrar: a do seletor, se esta conta organiza; se não, a
+  /// primeira que organiza.
+  void _definirCategoria() {
+    final permitidas = _categorias;
+    if (permitidas == null || permitidas.isEmpty) return _recalcular();
+    final escolhida = _escolha.atual;
+    final c = permitidas.contains(escolhida) ? escolhida! : permitidas.first;
+    if (c != _categoria) {
+      _categoria = c;
+      _ouvirCategoria(c);
+    }
+    _recalcular();
+  }
+
+  void _pararCategoria() {
+    for (final x in _porCategoria) {
+      x.cancel();
+    }
+    _porCategoria.clear();
+    _dados = null;
+    _pedidos = null;
+    _aprovados = null;
+    _movimentacoes = null;
+  }
+
+  void _ouvirCategoria(Categoria c) {
+    _pararCategoria();
+    final id = c.temporadaId;
+    _porCategoria.add(
+      _temporada.observar(id).listen((d) {
+        _dados = d;
+        _recalcular();
+      }, onError: _falhar),
+    );
+    _porCategoria.add(
+      _gestao.observarPedidos(id).listen((l) {
         _pedidos = l;
         _recalcular();
       }, onError: _falhar),
     );
-    _porConta.add(
-      _gestao.observarAprovados().listen((l) {
+    _porCategoria.add(
+      _gestao.observarAprovados(id).listen((l) {
         _aprovados = l;
         _recalcular();
       }, onError: _falhar),
     );
-    _porConta.add(
-      _gestao.observarMovimentacoes().listen(
+    _porCategoria.add(
+      _gestao.observarMovimentacoes(id).listen(
         (l) {
           _movimentacoes = l;
           _recalcular();
@@ -133,6 +183,9 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     );
   }
 
+  /// Troca a categoria da área (e do seletor do app inteiro).
+  Future<void> escolherCategoria(Categoria c) => _escolha.escolher(c);
+
   void _falhar(Object _) {
     if (!isClosed) emit(const OrgFalha('Não foi possível carregar os dados da Organização.'));
   }
@@ -142,26 +195,31 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     final sessao = _sessao;
     if (!_sessaoCarregada) return emit(const OrgCarregando());
     if (sessao == null) return emit(const OrgSemLogin());
-    if (_ehOrg == null) return emit(const OrgCarregando());
-    if (_ehOrg == false) return emit(OrgSemAcesso(sessao));
+    final categorias = _categorias;
+    if (categorias == null) return emit(const OrgCarregando());
+    if (categorias.isEmpty) return emit(OrgSemAcesso(sessao));
     final dados = _dados;
     final movimentacoes = _movimentacoes;
     if (dados == null || _pedidos == null || _aprovados == null || movimentacoes == null) {
       return emit(const OrgCarregando());
     }
-    emit(OrgPronta(sessao, dados, _pedidos!, _aprovados!, movimentacoes));
+    emit(
+      OrgPronta(sessao, dados, _pedidos!, _aprovados!, movimentacoes, categorias: categorias),
+    );
   }
 
-  Future<void> aprovar(String uid) => _gestao.decidirPedido(uid, StatusVinculo.aprovado);
-  Future<void> recusar(String uid) => _gestao.decidirPedido(uid, StatusVinculo.recusado);
+  Future<void> aprovar(String uid) =>
+      _gestao.decidirPedido(_dados!.id, uid, StatusVinculo.aprovado);
+  Future<void> recusar(String uid) =>
+      _gestao.decidirPedido(_dados!.id, uid, StatusVinculo.recusado);
 
   Future<void> salvarTime(Time t) => _gestao.salvarTimes(_dados!.id, [t]);
 
   Future<void> importarElencos(Map<String, List<Pessoa>> porTime) =>
       _gestao.importarElencos(_dados!.id, porTime);
 
-  /// Sorteia os confrontos e grava as 9 rodadas do turno nas datas do
-  /// regulamento. Substitui jogos do turno que ainda não tenham súmula.
+  /// Sorteia os confrontos e grava as rodadas do turno nas datas do
+  /// calendário da categoria. Substitui jogos do turno que ainda não tenham súmula.
   Future<void> gerarTurno(int turno) async {
     final d = _dados!;
     // Na demonstração, os jogos de exemplo não contam (saem ao gerar).
@@ -171,10 +229,17 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     if (antigos.any((p) => p.encerrada)) {
       throw StateError('O turno já tem súmulas encerradas.');
     }
+    final esperados = d.categoria.times;
+    if (d.times.length != esperados) {
+      throw StateError(
+        'A categoria ${d.categoria.nome} tem $esperados times e há ${d.times.length} '
+        'cadastrados. Ajuste em Gestão › Times da temporada.',
+      );
+    }
     final novos = const GerarCalendario()(
       turno: turno,
       times: [for (final t in d.times) t.id],
-      horarios: horariosMaster2027[turno]!,
+      horarios: horariosDe(d.categoria)[turno]!,
       sorteio: Random(),
     );
     final ids = {for (final p in novos) p.id};
@@ -227,8 +292,8 @@ class OrganizacaoController extends Cubit<OrgStatus> {
   @override
   Future<void> close() async {
     await _subSessao?.cancel();
-    await _subTemporada?.cancel();
-    for (final x in _porConta) {
+    await _subEscolha?.cancel();
+    for (final x in [..._porConta, ..._porCategoria]) {
       await x.cancel();
     }
     return super.close();

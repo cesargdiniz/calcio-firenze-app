@@ -28,9 +28,27 @@ class TimesScreen extends StatelessWidget {
         padding: AppSpacing.tela,
         children: [
           const VoltarGestao(),
-          CabecalhoTela('Times da temporada', subtitulo: '${times.length} clubes · Master 2027'),
+          CabecalhoTela(
+            'Times da temporada',
+            subtitulo: '${times.length} de ${o.categoria.times} clubes · ${o.dados.nome}',
+          ),
           const SizedBox(height: AppSpacing.lg),
-          Cartao(
+          if (times.length < o.categoria.times) ...[
+            Text(
+              'A categoria ${o.categoria.nome} tem ${o.categoria.times} times. Cadastre os que '
+              'faltam antes de importar os elencos e sortear o calendário.',
+              style: AppTextStyles.corpo,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            FilledButton.icon(
+              onPressed: () => context.go('/organizacao/gestao/times/novo'),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Adicionar time'),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+          if (times.isNotEmpty)
+            Cartao(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
             child: Column(
               children: [
@@ -78,6 +96,13 @@ class EditarTimeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ComOrg(
     builder: (context, o) {
+      if (timeId == 'novo') {
+        return _EditarTime(
+          key: ValueKey('novo-${o.dados.id}'),
+          time: Time(id: '', nome: '', sigla: '', cor: _paleta.first),
+          siglasEmUso: {for (final t in o.dados.times) t.id},
+        );
+      }
       final t = o.time(timeId);
       if (t == null) return const Center(child: Text('Time não encontrado.'));
       return _EditarTime(time: t, key: ValueKey(t.id));
@@ -87,7 +112,12 @@ class EditarTimeScreen extends StatelessWidget {
 
 class _EditarTime extends StatefulWidget {
   final Time time;
-  const _EditarTime({super.key, required this.time});
+
+  /// Preenchido só ao cadastrar um time novo: siglas que já existem.
+  final Set<String>? siglasEmUso;
+  const _EditarTime({super.key, required this.time, this.siglasEmUso});
+
+  bool get novo => siglasEmUso != null;
 
   @override
   State<_EditarTime> createState() => _EditarTimeState();
@@ -95,6 +125,7 @@ class _EditarTime extends StatefulWidget {
 
 class _EditarTimeState extends State<_EditarTime> {
   late final _nome = TextEditingController(text: widget.time.nome);
+  late final _sigla = TextEditingController(text: widget.time.sigla);
   late int _cor = widget.time.cor;
   late Uint8List? _escudo = widget.time.escudo;
   bool _salvando = false;
@@ -103,19 +134,34 @@ class _EditarTimeState extends State<_EditarTime> {
   @override
   void dispose() {
     _nome.dispose();
+    _sigla.dispose();
     super.dispose();
+  }
+
+  String get _siglaDigitada => _sigla.text.trim().toUpperCase();
+
+  /// Problema na sigla de um time novo, ou nulo.
+  String? get _erroSigla {
+    if (!widget.novo) return null;
+    final s = _siglaDigitada;
+    if (s.length < 2 || s.length > 4 || !RegExp(r'^[A-Z0-9]+$').hasMatch(s)) {
+      return 'De 2 a 4 letras ou números, sem espaço.';
+    }
+    if (widget.siglasEmUso!.contains(s)) return 'Já existe um time com esta sigla.';
+    return null;
   }
 
   Future<void> _salvar() async {
     final nome = _nome.text.trim();
-    if (nome.isEmpty) return;
+    if (nome.isEmpty || _erroSigla != null) return;
+    final sigla = widget.novo ? _siglaDigitada : widget.time.sigla;
     setState(() => _salvando = true);
     try {
       await context.read<OrganizacaoController>().salvarTime(
         Time(
-          id: widget.time.id,
+          id: widget.novo ? sigla : widget.time.id,
           nome: nome,
-          sigla: widget.time.sigla,
+          sigla: sigla,
           cor: _cor,
           escudoUrl: widget.time.escudoUrl,
           escudo: _escudo,
@@ -166,7 +212,7 @@ class _EditarTimeState extends State<_EditarTime> {
     final previa = Time(
       id: widget.time.id,
       nome: _nome.text,
-      sigla: widget.time.sigla,
+      sigla: widget.novo ? _siglaDigitada : widget.time.sigla,
       cor: _cor,
       escudo: _escudo,
     );
@@ -220,13 +266,26 @@ class _EditarTimeState extends State<_EditarTime> {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        InputDecorator(
-          decoration: const InputDecoration(
-            labelText: 'Sigla',
-            border: OutlineInputBorder(borderRadius: AppRadius.botao),
+        if (widget.novo)
+          TextField(
+            controller: _sigla,
+            onChanged: (_) => setState(() {}),
+            textCapitalization: TextCapitalization.characters,
+            maxLength: 4,
+            decoration: InputDecoration(
+              labelText: 'Sigla (não muda depois)',
+              errorText: _sigla.text.isEmpty ? null : _erroSigla,
+              border: const OutlineInputBorder(borderRadius: AppRadius.botao),
+            ),
+          )
+        else
+          InputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'Sigla',
+              border: OutlineInputBorder(borderRadius: AppRadius.botao),
+            ),
+            child: Text(widget.time.sigla, style: AppTextStyles.nome),
           ),
-          child: Text(widget.time.sigla, style: AppTextStyles.nome),
-        ),
         const TituloSecao('Cor do time'),
         Wrap(
           spacing: AppSpacing.sm,
@@ -257,8 +316,8 @@ class _EditarTimeState extends State<_EditarTime> {
         ),
         const SizedBox(height: AppSpacing.xl),
         FilledButton(
-          onPressed: _salvando ? null : _salvar,
-          child: Text(_salvando ? 'Salvando…' : 'Salvar'),
+          onPressed: _salvando || _nome.text.trim().isEmpty || _erroSigla != null ? null : _salvar,
+          child: Text(_salvando ? 'Salvando…' : (widget.novo ? 'Adicionar time' : 'Salvar')),
         ),
       ],
     );

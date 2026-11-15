@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
+import 'package:calcio_firenze/domain/entities/categoria.dart';
 import 'package:calcio_firenze/domain/entities/etapa.dart';
 import 'package:calcio_firenze/domain/entities/temporada.dart';
 import 'package:calcio_firenze/domain/usecases/gerar_calendario.dart';
@@ -210,5 +211,40 @@ void main() {
       expect(s.campeao, t.pos(2));
       expect(etapasDe(t.partidas).last, const Etapa(0, Fase.grandeFinal));
     });
+  });
+
+  test('Super Master: sem quartas, semifinal direta 1º x 4º e 2º x 3º', () {
+    final base = montarTemporadaExemplo();
+    final ids = [for (final t in base.times.take(6)) t.id];
+    final partidas = [
+      for (final p in const GerarCalendario()(
+        turno: 1,
+        times: ids,
+        horarios: horariosSuperMaster2027[1]!,
+        sorteio: Random(5),
+      ))
+        p.comSumula(
+          ids.indexOf(p.mandanteId) < ids.indexOf(p.visitanteId)
+              ? const Sumula(golsMandante: 1)
+              : const Sumula(golsVisitante: 1),
+        ),
+    ];
+    final d = DadosTemporada(
+      id: Categoria.superMaster.temporadaId,
+      nome: Categoria.superMaster.titulo,
+      local: 'Arena Gugu',
+      times: base.times.take(6).toList(),
+      pessoas: const [],
+      partidas: partidas,
+    );
+    final s = mm.turno(d, 1);
+    expect(s.proxima, Fase.semifinal);
+    expect(s.propostos.map((p) => '${p.mandanteId} x ${p.visitanteId}'), [
+      '${ids[0]} x ${ids[3]}',
+      '${ids[1]} x ${ids[2]}',
+    ]);
+    expect(s.propostos.map((p) => p.id), ['t1-semi-1', 't1-semi-2']);
+    expect(s.propostos.first.inicio, DateTime(2027, 5, 20, 20, 30));
+    expect(s.vantagem, isEmpty);
   });
 }

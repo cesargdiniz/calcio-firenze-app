@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/organizacao_repository.dart';
+import '../domain/repositories/preferencias_repository.dart';
 import '../domain/repositories/temporada_repository.dart';
 import '../domain/repositories/usuario_repository.dart';
 import '../domain/usecases/montar_painel.dart';
 import '../domain/usecases/montar_situacao.dart';
+import '../modules/categoria/categoria_controller.dart';
 import '../modules/organizacao/organizacao_controller.dart';
 import '../modules/participante/participante_controller.dart';
 import '../modules/torcedor/torcedor_controller.dart';
@@ -26,6 +28,7 @@ class CalcioApp extends StatefulWidget {
   final GestaoRepository gestao;
   final MontarPainel montarPainel;
   final MontarSituacao montarSituacao;
+  final PreferenciasRepository preferencias;
   final SaidaPdf saidaPdf;
   final SeletorImagem seletorImagem;
   final String initialLocation;
@@ -39,6 +42,7 @@ class CalcioApp extends StatefulWidget {
     required this.gestao,
     required this.montarPainel,
     required this.montarSituacao,
+    required this.preferencias,
     this.saidaPdf = const SaidaPdfDoAparelho(),
     this.seletorImagem = const SeletorImagemDoAparelho(),
     this.initialLocation = '/',
@@ -50,10 +54,12 @@ class CalcioApp extends StatefulWidget {
 
 class _CalcioAppState extends State<CalcioApp> {
   late final GoRouter _router = criarRouter(initialLocation: widget.initialLocation);
+  late final CategoriaController _categoria = CategoriaController(widget.preferencias)..iniciar();
 
   @override
   void dispose() {
     _router.dispose();
+    _categoria.close();
     super.dispose();
   }
 
@@ -68,8 +74,10 @@ class _CalcioAppState extends State<CalcioApp> {
     ],
     child: MultiBlocProvider(
       providers: [
+        BlocProvider.value(value: _categoria),
         BlocProvider(
-          create: (_) => TorcedorController(widget.temporada, widget.montarPainel)..iniciar(),
+          create: (_) =>
+              TorcedorController(widget.temporada, widget.montarPainel, _categoria)..iniciar(),
         ),
         BlocProvider(
           create: (_) => ParticipanteController(
@@ -77,6 +85,7 @@ class _CalcioAppState extends State<CalcioApp> {
             widget.usuarios,
             widget.temporada,
             widget.montarSituacao,
+            _categoria,
           )..iniciar(),
         ),
         BlocProvider(
@@ -85,6 +94,7 @@ class _CalcioAppState extends State<CalcioApp> {
             widget.organizacao,
             widget.gestao,
             widget.temporada,
+            _categoria,
           )..iniciar(),
         ),
       ],

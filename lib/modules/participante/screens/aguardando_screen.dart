@@ -15,12 +15,14 @@ import '../participante_controller.dart';
 /// Pedido de vínculo enviado, aguardando a Organização.
 class AguardandoScreen extends StatelessWidget {
   final Usuario usuario;
+  final Vinculo vinculo;
   final Pessoa pessoa;
   final Time time;
 
   const AguardandoScreen({
     super.key,
     required this.usuario,
+    required this.vinculo,
     required this.pessoa,
     required this.time,
   });
@@ -55,7 +57,7 @@ class AguardandoScreen extends StatelessWidget {
                     children: [
                       Text(pessoa.nome.toUpperCase(), style: AppTextStyles.nome),
                       Text(
-                        '${usuario.vinculo?.papel.rotulo ?? ''} · ${time.nome}',
+                        '${vinculo.papel.rotulo} · ${time.nome}',
                         style: AppTextStyles.pequeno,
                       ),
                     ],

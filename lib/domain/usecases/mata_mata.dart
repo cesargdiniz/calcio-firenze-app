@@ -1,5 +1,6 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../entities/categoria.dart';
 import '../entities/temporada.dart';
 import 'gerar_calendario.dart';
 
@@ -44,7 +45,9 @@ class SituacaoMataMata {
 
 /// Monta as etapas eliminatórias (art. 16) a partir da classificação e dos
 /// resultados: quartas (3º x 6º e 4º x 5º), semifinais, final do turno e a
-/// grande final entre os campeões dos turnos, se forem diferentes.
+/// grande final entre os campeões dos turnos, se forem diferentes. Nas
+/// categorias com 4 classificados não há quartas: semifinal 1º x 4º e
+/// 2º x 3º.
 class MataMata {
   final String local;
   const MataMata({this.local = 'Arena Gugu'});
@@ -68,6 +71,7 @@ class MataMata {
       );
     }
 
+    final categoria = d.categoria;
     final tabela = classificacaoDoTurno(
       turno: turno,
       times: [for (final t in d.times) t.id],
@@ -76,10 +80,12 @@ class MataMata {
       ordemSorteio: d.ordemSorteio,
       params: d.parametros,
     );
-    // Um empate decidido só por sorteio entre o 1º e o 7º muda o chaveamento.
-    if (tabela.take(7).any((l) => l.aguardaSorteio)) {
+    // Um empate decidido só por sorteio entre os classificados e o primeiro
+    // de fora muda o chaveamento.
+    final corte = categoria.classificados + 1;
+    if (tabela.take(corte).any((l) => l.aguardaSorteio)) {
       return SituacaoMataMata(
-        aguardando: 'Há times empatados em todos os critérios entre os 7 primeiros. O '
+        aguardando: 'Há times empatados em todos os critérios entre os $corte primeiros. O '
             'sorteio do art. 42 precisa ser feito antes de montar o mata-mata.',
         desfazivel: desfazer?.$1,
         idsDesfaziveis: desfazer?.$2 ?? const [],
@@ -126,14 +132,17 @@ class MataMata {
       idsDesfaziveis: desfazer?.$2 ?? const [],
     );
 
-    final quartas = da(Fase.quartas);
-    if (quartas.isEmpty) return propor(Fase.quartas, chaveamentoQuartas(tabela));
-    final vQuartas = vencedores(quartas);
-    if (vQuartas == null) return esperando('Aguardando o resultado das quartas de final.');
-
     final semis = da(Fase.semifinal);
-    if (semis.isEmpty) {
-      return propor(Fase.semifinal, chaveamentoSemifinais(tabela, vQuartas));
+    if (categoria.temQuartas) {
+      final quartas = da(Fase.quartas);
+      if (quartas.isEmpty) return propor(Fase.quartas, chaveamentoQuartas(tabela));
+      final vQuartas = vencedores(quartas);
+      if (vQuartas == null) return esperando('Aguardando o resultado das quartas de final.');
+      if (semis.isEmpty) {
+        return propor(Fase.semifinal, chaveamentoSemifinais(tabela, vQuartas));
+      }
+    } else if (semis.isEmpty) {
+      return propor(Fase.semifinal, chaveamentoSemifinaisDiretas(tabela));
     }
     final vSemis = vencedores(semis);
     if (vSemis == null) return esperando('Aguardando o resultado das semifinais.');
@@ -225,7 +234,7 @@ class MataMata {
       null,
       (a, b) => a == null || b.isAfter(a) ? b : a,
     );
-    final oficiais = [...?horariosMaster2027[turno]]..sort();
+    final oficiais = [...?horariosDe(d.categoria)[turno]]..sort();
     final livres = [
       for (final h in oficiais)
         if ((ultimo == null || h.isAfter(ultimo)) && !ocupados.contains(h)) h,

@@ -37,13 +37,13 @@ Usuario _usuario(StatusVinculo status, {String uid = 'u1'}) => Usuario(
   uid: uid,
   email: 'rafael@exemplo.com',
   nome: 'Rafael Souza',
-  vinculo: Vinculo(
+  vinculos: [Vinculo(
     temporadaId: 'master-2027',
     pessoaId: 'rafael-souza',
     timeId: 'SAM',
     papel: Papel.atleta,
     status: status,
-  ),
+  )],
 );
 
 /// A temporada de exemplo como se fosse a real (elencos importados, três
@@ -124,6 +124,7 @@ Future<MemoriaGestaoRepository> _abrir(
       gestao: gestao,
       montarPainel: MontarPainel(agora: agora),
       montarSituacao: MontarSituacao(agora: agora),
+      preferencias: MemoriaPreferencias('master-2027'),
       initialLocation: rota,
     ),
   );
@@ -299,13 +300,13 @@ void main() {
             uid: 'u1',
             email: 'helio@exemplo.com',
             nome: 'Hélio Ramos',
-            vinculo: Vinculo(
+            vinculos: [Vinculo(
               temporadaId: 'master-2027',
               pessoaId: 'helio-ramos',
               timeId: 'SAM',
               papel: Papel.tecnico,
               status: StatusVinculo.aprovado,
-            ),
+            )],
           ),
         },
       );

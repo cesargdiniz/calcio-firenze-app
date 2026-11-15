@@ -37,6 +37,12 @@ class InicioScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
+          if (painel.partidas.isEmpty)
+            const ListaVazia(
+              titulo: 'Calendário ainda não publicado',
+              texto: 'Os jogos, a tabela e os suspensos desta categoria aparecem aqui assim que '
+                  'a Organização sortear o calendário.',
+            ),
           if (painel.proximaEtapa != null && suspensos > 0)
             _AvisoSuspensos(
               texto: suspensos == 1

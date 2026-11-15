@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/organizacao_repository.dart';
+import '../../domain/repositories/preferencias_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/repositories/usuario_repository.dart';
 
@@ -80,8 +82,15 @@ class MemoriaUsuarioRepository implements UsuarioRepository {
   }
 
   @override
-  Future<void> pedirVinculo(Usuario usuario) async {
-    _usuarios[usuario.uid] = usuario;
+  Future<void> pedirVinculo(Usuario usuario, Vinculo vinculo) async {
+    final atual = _usuarios[usuario.uid] ?? usuario;
+    _usuarios[usuario.uid] = Usuario(
+      uid: usuario.uid,
+      email: usuario.email,
+      nome: usuario.nome,
+      perfil: atual.perfil,
+      vinculos: atual.vinculos,
+    ).comVinculo(vinculo.comStatus(StatusVinculo.pendente));
     _mudancas.add(usuario.uid);
   }
 
@@ -92,33 +101,60 @@ class MemoriaUsuarioRepository implements UsuarioRepository {
   }
 }
 
-/// Temporada em memória que aceita as gravações da Organização (testes).
+/// Temporadas em memória que aceitam as gravações da Organização (testes).
+/// Categorias sem dados informados começam vazias.
 class MemoriaTemporadaRepository implements TemporadaRepository {
-  DadosTemporada _dados;
+  final Map<String, DadosTemporada> _temporadas;
   final _mudancas = StreamController<DadosTemporada>.broadcast();
 
-  MemoriaTemporadaRepository(this._dados);
+  MemoriaTemporadaRepository(DadosTemporada principal, [List<DadosTemporada> outras = const []])
+    : _temporadas = {principal.id: principal, for (final d in outras) d.id: d},
+      _principal = principal.id;
 
-  DadosTemporada get dados => _dados;
+  final String _principal;
+
+  /// A temporada informada primeiro (a dos testes de uma categoria só).
+  DadosTemporada get dados => _temporadas[_principal]!;
+
+  DadosTemporada daTemporada(String id) => _temporadas[id] ?? _vazia(id);
 
   void substituir(DadosTemporada d) {
-    _dados = d;
+    _temporadas[d.id] = d;
     _mudancas.add(d);
   }
 
+  static DadosTemporada _vazia(String id) {
+    final c = Categoria.deTemporada(id) ?? Categoria.master;
+    return DadosTemporada(
+      id: id,
+      nome: c.titulo,
+      local: 'Arena Gugu',
+      times: const [],
+      pessoas: const [],
+      partidas: const [],
+    );
+  }
+
   @override
-  Stream<DadosTemporada> observar() async* {
-    yield _dados;
-    yield* _mudancas.stream;
+  Stream<DadosTemporada> observar(String temporadaId) async* {
+    yield daTemporada(temporadaId);
+    yield* _mudancas.stream.where((d) => d.id == temporadaId);
   }
 }
 
 class MemoriaOrganizacaoRepository implements OrganizacaoRepository {
-  final Set<String> uids;
-  MemoriaOrganizacaoRepository([this.uids = const {}]);
+  /// uid → categorias que organiza (lista vazia: todas).
+  final Map<String, List<Categoria>> contas;
+
+  MemoriaOrganizacaoRepository([Set<String> uids = const {}, Map<String, List<Categoria>>? porCategoria])
+    : contas = {for (final u in uids) u: const [], ...?porCategoria};
 
   @override
-  Stream<bool> ehOrganizacao(String uid) => Stream.value(uids.contains(uid));
+  Stream<List<Categoria>> categoriasQueOrganiza(String uid) {
+    final c = contas[uid];
+    if (c == null) return Stream.value(const []);
+    return Stream.value(c.isEmpty ? Categoria.values : c);
+  }
 }
 
 class MemoriaGestaoRepository implements GestaoRepository {
@@ -131,49 +167,41 @@ class MemoriaGestaoRepository implements GestaoRepository {
 
   List<Movimentacao> get movimentacoes => List.unmodifiable(_movimentacoes);
 
-  Stream<List<Usuario>> _porStatus(StatusVinculo s) async* {
-    List<Usuario> filtrar() =>
-        usuarios._usuarios.values.where((u) => u.vinculo?.status == s).toList();
+  Stream<List<Usuario>> _porStatus(String temporadaId, StatusVinculo s) async* {
+    List<Usuario> filtrar() => [
+      for (final u in usuarios._usuarios.values)
+        if (u.vinculoEm(temporadaId) case final v? when v.status == s)
+          Usuario(uid: u.uid, email: u.email, nome: u.nome, perfil: u.perfil, vinculos: [v]),
+    ];
     yield filtrar();
     yield* usuarios._mudancas.stream.map((_) => filtrar());
   }
 
   @override
-  Stream<List<Usuario>> observarPedidos() => _porStatus(StatusVinculo.pendente);
+  Stream<List<Usuario>> observarPedidos(String temporadaId) =>
+      _porStatus(temporadaId, StatusVinculo.pendente);
 
   @override
-  Stream<List<Usuario>> observarAprovados() => _porStatus(StatusVinculo.aprovado);
+  Stream<List<Usuario>> observarAprovados(String temporadaId) =>
+      _porStatus(temporadaId, StatusVinculo.aprovado);
 
   @override
-  Future<void> decidirPedido(String uid, StatusVinculo status) async {
+  Future<void> decidirPedido(String temporadaId, String uid, StatusVinculo status) async {
     final u = usuarios._usuarios[uid]!;
-    final v = u.vinculo!;
-    usuarios._usuarios[uid] = Usuario(
-      uid: u.uid,
-      email: u.email,
-      nome: u.nome,
-      perfil: u.perfil,
-      vinculo: Vinculo(
-        temporadaId: v.temporadaId,
-        pessoaId: v.pessoaId,
-        timeId: v.timeId,
-        papel: v.papel,
-        status: status,
-      ),
-    );
+    usuarios._usuarios[uid] = u.comVinculo(u.vinculoEm(temporadaId)!.comStatus(status));
     usuarios._mudancas.add(uid);
   }
 
   @override
   Future<void> salvarTimes(String temporadaId, List<Time> times) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     final porId = {for (final t in d.times) t.id: t, for (final t in times) t.id: t};
     temporada.substituir(_copiar(d, times: porId.values.toList()));
   }
 
   @override
   Future<void> importarElencos(String temporadaId, Map<String, List<Pessoa>> porTime) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     final mantidos = d.demonstracao
         ? <Pessoa>[]
         : d.pessoas.where((p) => !porTime.containsKey(p.timeId)).toList();
@@ -184,7 +212,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
 
   @override
   Future<void> salvarPartidas(String temporadaId, List<Partida> partidas) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     final base = d.demonstracao ? <Partida>[] : d.partidas;
     final porId = {for (final p in base) p.id: p, for (final p in partidas) p.id: p};
     temporada.substituir(
@@ -199,7 +227,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
 
   @override
   Future<void> excluirPartidas(String temporadaId, List<String> ids) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     temporada.substituir(
       _copiar(d, partidas: d.partidas.where((p) => !ids.contains(p.id)).toList()),
     );
@@ -207,7 +235,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
 
   @override
   Future<void> registrarPagamento(String temporadaId, String pendenciaId, DateTime pagoEm) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     temporada.substituir(
       _copiar(
         d,
@@ -221,7 +249,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
 
   @override
   Future<void> desfazerPagamento(String temporadaId, String pendenciaId) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     temporada.substituir(
       _copiar(d, pagamentos: d.pagamentos.where((p) => p.pendenciaId != pendenciaId).toList()),
     );
@@ -229,7 +257,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
 
   @override
   Future<void> salvarDecisao(String temporadaId, DecisaoDisciplinar decisao) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     temporada.substituir(
       _copiar(d, decisoes: [...d.decisoes.where((x) => x.id != decisao.id), decisao]),
     );
@@ -237,7 +265,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
 
   @override
   Future<void> excluirDecisao(String temporadaId, String decisaoId) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     final quitacoes = idsPendenciasDaDecisao(decisaoId);
     temporada.substituir(
       _copiar(
@@ -250,14 +278,16 @@ class MemoriaGestaoRepository implements GestaoRepository {
 
   @override
   Future<void> salvarParametros(String temporadaId, Parametros parametros) async =>
-      temporada.substituir(_copiar(temporada.dados, parametros: parametros));
+      temporada.substituir(_copiar(temporada.daTemporada(temporadaId), parametros: parametros));
 
   @override
   Future<void> salvarPatrocinador(String temporadaId, String? patrocinador) async =>
-      temporada.substituir(_copiar(temporada.dados, patrocinador: () => patrocinador));
+      temporada.substituir(
+        _copiar(temporada.daTemporada(temporadaId), patrocinador: () => patrocinador),
+      );
 
   @override
-  Stream<List<Movimentacao>> observarMovimentacoes() async* {
+  Stream<List<Movimentacao>> observarMovimentacoes(String temporadaId) async* {
     yield movimentacoes;
     yield* _mudouMovimentacoes.stream.map((_) => movimentacoes);
   }
@@ -268,7 +298,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
     Movimentacao movimentacao, {
     Pessoa? substituto,
   }) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     _movimentacoes.add(movimentacao);
     _mudouMovimentacoes.add(null);
     temporada.substituir(
@@ -285,7 +315,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
 
   @override
   Future<void> desfazerMovimentacao(String temporadaId, Movimentacao movimentacao) async {
-    final d = temporada.dados;
+    final d = temporada.daTemporada(temporadaId);
     _movimentacoes.removeWhere((m) => m.id == movimentacao.id);
     _mudouMovimentacoes.add(null);
     temporada.substituir(
@@ -329,4 +359,17 @@ class MemoriaGestaoRepository implements GestaoRepository {
       relogio: demo ? d.relogio : null,
     );
   }
+}
+
+/// Preferências em memória (testes). [categoriaInicial] simula uma escolha
+/// já feita em outra abertura do app.
+class MemoriaPreferencias implements PreferenciasRepository {
+  String? _categoria;
+  MemoriaPreferencias([String? categoriaInicial]) : _categoria = categoriaInicial;
+
+  @override
+  Future<String?> categoria() async => _categoria;
+
+  @override
+  Future<void> salvarCategoria(String temporadaId) async => _categoria = temporadaId;
 }

@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/temporada.dart';
 import '../../../domain/entities/usuario.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -10,6 +11,7 @@ import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
+import '../../categoria/categoria_controller.dart';
 import '../participante_controller.dart';
 
 /// 04 · Vincular ao elenco. O pedido vai para a Organização aprovar.
@@ -17,7 +19,15 @@ class VincularScreen extends StatefulWidget {
   final DadosTemporada dados;
   final bool recusado;
 
-  const VincularScreen({super.key, required this.dados, this.recusado = false});
+  /// Outras categorias em que a conta já tem vínculo (atalho para trocar).
+  final List<Categoria> comVinculo;
+
+  const VincularScreen({
+    super.key,
+    required this.dados,
+    this.recusado = false,
+    this.comVinculo = const [],
+  });
 
   @override
   State<VincularScreen> createState() => _VincularScreenState();
@@ -77,12 +87,36 @@ class _VincularScreenState extends State<VincularScreen> {
                 label: Text('Sair', style: AppTextStyles.subtitulo.copyWith(fontSize: 14)),
               ),
             ),
-            const CabecalhoTela('Vincular ao elenco', subtitulo: 'Master · Temporada 2027'),
+            CabecalhoTela('Vincular ao elenco', subtitulo: widget.dados.nome),
             const SizedBox(height: AppSpacing.sm),
-            const Text(
-              'Diga quem você é no campeonato. A Organização confere e aprova o pedido.',
+            Text(
+              'Diga quem você é na categoria ${widget.dados.categoria.nome}. A Organização '
+              'confere e aprova o pedido. Se você joga em mais de uma categoria, peça o '
+              'vínculo em cada uma.',
               style: AppTextStyles.corpo,
             ),
+            for (final c in widget.comVinculo)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => context.read<CategoriaController>().escolher(c),
+                  icon: const Icon(Icons.swap_horiz_rounded, color: AppColors.verde),
+                  label: Text('Ver ${c.nome}, onde você já tem vínculo'),
+                ),
+              ),
+            if (widget.dados.times.isEmpty || widget.dados.pessoas.isEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: AppSpacing.md),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: const BoxDecoration(
+                  color: AppColors.amareloSuave,
+                  borderRadius: AppRadius.botao,
+                ),
+                child: const Text(
+                  'Os elencos desta categoria ainda não foram cadastrados pela Organização.',
+                  style: AppTextStyles.corpo,
+                ),
+              ),
             if (widget.recusado)
               Container(
                 margin: const EdgeInsets.only(top: AppSpacing.md),

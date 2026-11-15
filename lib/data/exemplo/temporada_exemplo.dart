@@ -1,5 +1,6 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/repositories/temporada_repository.dart';
 
@@ -11,11 +12,25 @@ class TemporadaExemploRepository implements TemporadaRepository {
   /// "Agora" coerente com os dados: dia seguinte ao último jogo da Rodada 3.
   static final agora = DateTime(2027, 2, 26, 10);
 
+  /// Só o Master tem exemplo; as outras categorias aparecem vazias.
   @override
-  Stream<DadosTemporada> observar() => Stream.value(montarTemporadaExemplo());
+  Stream<DadosTemporada> observar(String temporadaId) {
+    final exemplo = montarTemporadaExemplo();
+    if (temporadaId == exemplo.id) return Stream.value(exemplo);
+    final c = Categoria.deTemporada(temporadaId) ?? Categoria.master;
+    return Stream.value(
+      DadosTemporada(
+        id: temporadaId,
+        nome: c.titulo,
+        local: exemplo.local,
+        times: const [],
+        pessoas: const [],
+        partidas: const [],
+      ),
+    );
+  }
 }
 
-/// Os 10 clubes do Master 2027, com as cores do Figma.
 /// Os 10 clubes do Master 2027, com as cores do Figma.
 const timesMaster2027 = [
   Time(id: 'INT', nome: 'Inter', sigla: 'INT', cor: 0xFF0A3D91),

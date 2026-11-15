@@ -48,7 +48,7 @@ class PerfilScreen extends StatelessWidget {
   Widget build(BuildContext context) => ComParticipante(
     builder: (context, p) {
       final s = p.pessoal;
-      final avisos = montarAvisos(s, p.time, veTime: p.papel.veTime).length;
+      final avisos = avisosDoParticipante(p).length;
       final iniciais = s.pessoa.nome
           .split(' ')
           .where((x) => x.isNotEmpty)

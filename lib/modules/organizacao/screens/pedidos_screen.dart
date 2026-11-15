@@ -86,7 +86,7 @@ class _PedidoState extends State<_Pedido> {
   @override
   Widget build(BuildContext context) {
     final u = widget.usuario;
-    final v = u.vinculo!;
+    final v = widget.o.vinculo(u)!;
     final pessoa = widget.o.pessoa(v.pessoaId);
     final time = widget.o.time(v.timeId);
     final conflito = widget.o.conflito(u);

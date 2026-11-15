@@ -1,0 +1,138 @@
+import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
+import 'package:calcio_firenze/domain/entities/categoria.dart';
+import 'package:calcio_firenze/domain/entities/temporada.dart';
+import 'package:calcio_firenze/domain/entities/usuario.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+
+import 'apoio.dart';
+
+const _org = Sessao(uid: 'org1', email: 'livre@exemplo.com');
+const _marcos = Sessao(uid: 'u1', email: 'marcos@exemplo.com');
+
+/// A temporada de exemplo copiada para outra categoria (mesmos elencos).
+DadosTemporada _exemploEm(Categoria c) {
+  final e = montarTemporadaExemplo();
+  return DadosTemporada(
+    id: c.temporadaId,
+    nome: c.titulo,
+    local: e.local,
+    times: e.times,
+    pessoas: e.pessoas,
+    partidas: e.partidas,
+    decisoes: e.decisoes,
+    relogio: e.relogio,
+  );
+}
+
+Vinculo _vinculo(Categoria c) => Vinculo(
+  temporadaId: c.temporadaId,
+  pessoaId: 'marcos-lima',
+  timeId: 'UDI',
+  papel: Papel.atleta,
+  status: StatusVinculo.aprovado,
+);
+
+Future<void> _trocarPara(WidgetTester tester, String nome) async {
+  await tester.tap(find.byKey(const Key('seletor-categoria')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(nome).last);
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  testWidgets('primeira abertura: escolhe a categoria antes de ver os jogos', (tester) async {
+    await abrirApp(tester, inicio: '/torcedor', categoria: null);
+    expect(find.text('Qual categoria você quer acompanhar?'), findsOneWidget);
+    expect(find.text('8 times · temporada 2027'), findsOneWidget);
+
+    await tester.tap(find.text('Livre'));
+    await tester.pumpAndSettle();
+    expect(find.text('LIVRE'), findsOneWidget);
+    expect(find.text('Calendário ainda não publicado'), findsOneWidget);
+  });
+
+  testWidgets('a barra do topo troca a categoria do Torcedor', (tester) async {
+    await abrirApp(tester, inicio: '/torcedor');
+    expect(find.text('MASTER'), findsOneWidget);
+    expect(find.text('Próximos jogos · Rodada 4'), findsOneWidget);
+
+    await _trocarPara(tester, 'Super Master');
+    expect(find.text('SUPER MASTER'), findsOneWidget);
+    expect(find.text('Calendário ainda não publicado'), findsOneWidget);
+
+    await _trocarPara(tester, 'Master');
+    expect(find.text('Próximos jogos · Rodada 4'), findsOneWidget);
+  });
+
+  testWidgets('Organização da Livre só vê a Livre e cadastra os times dela', (tester) async {
+    final gestao = await abrirApp(
+      tester,
+      inicio: '/organizacao/gestao/times',
+      sessao: _org,
+      organizacaoPorCategoria: {
+        'org1': [Categoria.livre],
+      },
+    );
+    // A conta organiza uma categoria só: a barra não abre lista.
+    expect(find.text('LIVRE'), findsOneWidget);
+    expect(find.byIcon(Icons.expand_more_rounded), findsNothing);
+    expect(find.text('0 de 8 clubes · Livre · Temporada 2027'), findsOneWidget);
+
+    await acionar(tester, 'Adicionar time');
+    await tester.enterText(find.widgetWithText(TextField, 'Nome do clube'), 'Real Firenze');
+    await tester.enterText(find.widgetWithText(TextField, 'Sigla (não muda depois)'), 'rfi');
+    await tester.pumpAndSettle();
+    await acionar(tester, 'Adicionar time');
+
+    final livre = gestao.temporada.daTemporada('livre-2027');
+    expect(livre.times.single.id, 'RFI');
+    expect(livre.times.single.nome, 'Real Firenze');
+    expect(gestao.temporada.dados.times, hasLength(10), reason: 'o Master não muda');
+  });
+
+  testWidgets('sem vínculo na categoria, o Participante pode pedir ou voltar à dele', (
+    tester,
+  ) async {
+    await abrirApp(
+      tester,
+      inicio: '/participante',
+      sessao: _marcos,
+      categoria: 'livre-2027',
+      usuarios: {
+        'u1': Usuario(
+          uid: 'u1',
+          email: 'marcos@exemplo.com',
+          nome: 'Marcos Lima',
+          vinculos: [_vinculo(Categoria.master)],
+        ),
+      },
+    );
+    expect(find.text('Vincular ao elenco'), findsOneWidget);
+    expect(find.text('Ver Master, onde você já tem vínculo'), findsOneWidget);
+
+    await tester.tap(find.text('Ver Master, onde você já tem vínculo'));
+    await tester.pumpAndSettle();
+    expect(find.text('MASTER'), findsOneWidget);
+    expect(find.text('Vincular ao elenco'), findsNothing);
+  });
+
+  testWidgets('avisos juntam as categorias em que o atleta joga', (tester) async {
+    await abrirApp(
+      tester,
+      inicio: '/participante/avisos',
+      sessao: _marcos,
+      outrasTemporadas: [_exemploEm(Categoria.livre)],
+      usuarios: {
+        'u1': Usuario(
+          uid: 'u1',
+          email: 'marcos@exemplo.com',
+          nome: 'Marcos Lima',
+          vinculos: [_vinculo(Categoria.master), _vinculo(Categoria.livre)],
+        ),
+      },
+    );
+    expect(find.textContaining('Você está suspenso'), findsNWidgets(2));
+    expect(find.textContaining('Livre · Você está suspenso'), findsOneWidget);
+  });
+}

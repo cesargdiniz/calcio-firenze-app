@@ -1,6 +1,7 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
 import '../../domain/usecases/montar_situacao.dart';
+import 'participante_controller.dart';
 import '../../shared/format.dart';
 
 /// Quanto o aviso pede atenção. A ordem é a da lista: o mais grave primeiro.
@@ -130,3 +131,12 @@ Aviso _pendencia(ItemPendencia p, String quem, {required bool deOutro}) {
     ),
   };
 }
+
+/// Avisos da categoria em exibição e, com o nome da categoria na frente, os
+/// das outras categorias em que a pessoa também joga.
+List<Aviso> avisosDoParticipante(ParticipantePronto p) => [
+  ...montarAvisos(p.pessoal, p.time, veTime: p.papel.veTime),
+  for (final o in p.outras)
+    for (final a in montarAvisos(o.pessoal, o.time, veTime: o.papel.veTime))
+      Aviso('${o.categoria.nome} · ${a.titulo}', a.texto, a.gravidade, doTime: a.doTime),
+];

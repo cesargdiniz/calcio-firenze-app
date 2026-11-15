@@ -41,7 +41,7 @@ class ParticipanteInicioScreen extends StatelessWidget {
         _ => null,
       };
       final rodada = s.proximoJogo?.rodada;
-      final avisos = montarAvisos(s, p.time, veTime: p.papel.veTime).length;
+      final avisos = avisosDoParticipante(p).length;
 
       return ListView(
         padding: AppSpacing.tela,

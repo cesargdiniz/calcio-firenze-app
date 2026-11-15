@@ -1,22 +1,26 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../entities/categoria.dart';
 import '../entities/temporada.dart';
 import '../entities/usuario.dart';
 
-/// Quem é da Organização (documento `organizacao/{uid}`).
+/// Quem é da Organização e de quais categorias (documento
+/// `organizacao/{uid}`). Lista vazia: não é da Organização.
 abstract interface class OrganizacaoRepository {
-  Stream<bool> ehOrganizacao(String uid);
+  Stream<List<Categoria>> categoriasQueOrganiza(String uid);
 }
 
 /// Gravações da Organização na temporada.
 abstract interface class GestaoRepository {
-  /// Pedidos de vínculo aguardando decisão.
-  Stream<List<Usuario>> observarPedidos();
+  /// Pedidos de vínculo da categoria aguardando decisão. Cada usuário vem só
+  /// com o vínculo desta categoria.
+  Stream<List<Usuario>> observarPedidos(String temporadaId);
 
-  /// Contas já aprovadas (para avisar de nome vinculado a duas contas).
-  Stream<List<Usuario>> observarAprovados();
+  /// Contas já aprovadas na categoria (para avisar de nome vinculado a duas
+  /// contas).
+  Stream<List<Usuario>> observarAprovados(String temporadaId);
 
-  Future<void> decidirPedido(String uid, StatusVinculo status);
+  Future<void> decidirPedido(String temporadaId, String uid, StatusVinculo status);
 
   /// Cria ou atualiza os times da temporada.
   Future<void> salvarTimes(String temporadaId, List<Time> times);
@@ -47,7 +51,7 @@ abstract interface class GestaoRepository {
   Future<void> salvarPatrocinador(String temporadaId, String? patrocinador);
 
   /// Saídas de elenco registradas (só a Organização lê).
-  Stream<List<Movimentacao>> observarMovimentacoes();
+  Stream<List<Movimentacao>> observarMovimentacoes(String temporadaId);
 
   /// Registra a saída: marca a pessoa como fora do elenco a partir da data
   /// e, na troca de goleiro, inscreve o [substituto].

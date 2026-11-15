@@ -25,8 +25,9 @@ O Firebase gratuito (plano Spark) não roda Cloud Functions, e as regras estão 
 ```
 clubes/{clubeId}                      nome, sigla, cor, escudoUrl, historico[]   (cadastrado uma vez)
 
-temporadas/{temporadaId}              parametros{...}, patrocinador? (nome da competição
-                                      na súmula: "CF <patrocinador> <ano>")
+temporadas/{temporadaId}              uma por categoria: master-2027, super-master-2027,
+                                      livre-2027. parametros{...}, patrocinador? (nome da
+                                      competição na súmula: "CF <patrocinador> <ano>")
   times/{clubeId}                     nome, sigla, cor, escudo? (PNG reduzido, até 300 KB)
   pessoas/{pessoaId}                  nome, timeId, funcao (atleta|tecnico), numero,
                                       goleiro, dirigente, saiuEm? (data da saída do elenco)
@@ -46,11 +47,26 @@ temporadas/{temporadaId}              parametros{...}, patrocinador? (nome da co
                                       (só a Organização lê)
   publico/painel                      gerado pelo app da Organização (leitura aberta)
   privado/disciplina                  pendências calculadas (só Organização)
+  vinculos/{uid}                      nome, email, pessoaId, timeId, papel, status
+                                      (pendente|aprovado|recusado). Um por categoria: o
+                                      mesmo atleta pode jogar Master e Livre.
 
-usuarios/{uid}                        nome, email, perfil (participante|organizacao),
-                                      vinculo{temporadaId, pessoaId, status}
+usuarios/{uid}                        nome, email, perfil (participante)
   situacao/atual                      pendências e cartões da própria pessoa (gerado)
+
+organizacao/{uid}                     quem organiza; temporadas[]? limita às categorias
+                                      (sem o campo, organiza todas). Criado à mão no console.
 ```
+
+## Categorias
+
+Master (10 times), Super Master (6) e Livre (8) são competições separadas, cada uma em
+sua temporada, com times, elencos, calendário, tabela, regras e Organização próprios
+(`lib/domain/entities/categoria.dart`). O Torcedor e o Participante escolhem a categoria
+na primeira abertura e trocam pela barra do topo; a escolha fica guardada no aparelho. A
+Organização vê só as categorias que organiza. Os avisos do Participante juntam todas as
+categorias em que ele tem vínculo aprovado. A Copa Master entra quando o formato estiver
+definido.
 
 O app não usa o armazenamento de arquivos do Firebase (Storage). O escudo do time é enviado em "Editar time", reduzido para caber em 256 px e guardado no próprio documento do time; sem imagem, vale a cor com a sigla. O laudo de lesão não é enviado: a movimentação só registra que ele foi apresentado.
 

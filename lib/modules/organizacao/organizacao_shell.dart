@@ -8,6 +8,7 @@ import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
 import '../../shared/widgets/logo_calcio.dart';
+import '../categoria/seletor_categoria.dart';
 import '../login/login_screen.dart';
 import 'organizacao_controller.dart';
 
@@ -46,8 +47,20 @@ class OrganizacaoShell extends StatelessWidget {
           ),
         ),
       ),
-      OrgPronta() => Scaffold(
-        body: SafeArea(bottom: false, child: navegacao),
+      OrgPronta(:final categoria, :final categorias) => Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              BarraCategoria(
+                atual: categoria,
+                opcoes: categorias,
+                onEscolher: context.read<OrganizacaoController>().escolherCategoria,
+              ),
+              Expanded(child: navegacao),
+            ],
+          ),
+        ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: navegacao.currentIndex,
           onDestinationSelected: (i) =>

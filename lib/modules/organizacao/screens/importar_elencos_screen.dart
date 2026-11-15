@@ -81,7 +81,7 @@ class _ImportarState extends State<_Importar> {
       padding: AppSpacing.tela,
       children: [
         const VoltarGestao(),
-        const CabecalhoTela('Importar elencos', subtitulo: 'Master · Temporada 2027'),
+        CabecalhoTela('Importar elencos', subtitulo: widget.o.dados.nome),
         const TituloSecao('1. Copie da planilha'),
         const Text(
           'Uma linha por pessoa, com as colunas nesta ordem:\n'

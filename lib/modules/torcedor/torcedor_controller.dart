@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/categoria.dart';
 import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/usecases/montar_painel.dart';
+import '../categoria/categoria_controller.dart';
 
 sealed class TorcedorStatus {
   const TorcedorStatus();
@@ -23,18 +25,27 @@ final class TorcedorFalha extends TorcedorStatus {
   const TorcedorFalha(this.mensagem);
 }
 
-/// Escuta a temporada e recalcula o painel público a cada mudança.
+/// Escuta a temporada da categoria escolhida e recalcula o painel público a
+/// cada mudança (ou troca de categoria).
 class TorcedorController extends Cubit<TorcedorStatus> {
   final TemporadaRepository _repository;
   final MontarPainel _montarPainel;
+  final CategoriaController _categorias;
   StreamSubscription<void>? _assinatura;
+  StreamSubscription<void>? _subCategoria;
 
-  TorcedorController(this._repository, this._montarPainel) : super(const TorcedorCarregando());
+  TorcedorController(this._repository, this._montarPainel, this._categorias)
+    : super(const TorcedorCarregando());
 
   void iniciar() {
+    _subCategoria?.cancel();
+    _subCategoria = _categorias.observar().listen(_ouvir);
+  }
+
+  void _ouvir(Categoria c) {
     _assinatura?.cancel();
     emit(const TorcedorCarregando());
-    _assinatura = _repository.observar().listen(
+    _assinatura = _repository.observar(c.temporadaId).listen(
       (dados) => emit(TorcedorPronto(_montarPainel(dados))),
       onError: (Object e) => emit(const TorcedorFalha('Não foi possível carregar a temporada.')),
     );
@@ -42,6 +53,7 @@ class TorcedorController extends Cubit<TorcedorStatus> {
 
   @override
   Future<void> close() async {
+    await _subCategoria?.cancel();
     await _assinatura?.cancel();
     return super.close();
   }
