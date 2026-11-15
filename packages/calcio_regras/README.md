@@ -6,6 +6,7 @@ As regras do Calcio Firenze (Master 2027) em Dart puro, sem Flutter nem Firebase
 |---|---|---|
 | `classificacao.dart` | Tabela do turno e geral, W.O., perda de pontos, 7 desempates + sorteio, rebaixados | arts. 4, 42, 43.1, 68, 75, 89 |
 | `motor_disciplinar.dart` | Pendências (R$), prazo de 24 h, multa por atraso, suspensões, pendurados, impedidos | arts. 66–73.7, 86–88 |
+| `artilharia.dart` | Goleadores do turno ou da temporada, sem os gols de W.O. | art. 75 |
 | `mata_mata.dart` | Quartas, semifinais, quem avança, grande final | art. 16 |
 | `parametros.dart` | Valores ajustáveis (pontos, R$, prazos) | — |
 
@@ -30,3 +31,4 @@ Pontos em que o regulamento deixa margem. Cada um tem teste próprio; se a Organ
 7. **Cartões no desempate (critérios 6 e 7):** conta todos os cartões do time, inclusive do técnico; o 2º amarelo conta como vermelho.
 8. **Confronto direto (critério 5):** mini-tabela de pontos só entre os empatados naquele ponto do desempate. Se um critério seguinte separa parte do grupo, o confronto direto não é reaplicado ao que sobrou.
 9. **Classificação geral (art. 89):** soma só as fases classificatórias dos dois turnos.
+10. **Artilharia:** só contam gols com autor lançado na súmula. Os gols do W.O. (art. 75) valem para a classificação, mas não são de nenhum jogador; gols contra e a disputa de pênaltis também ficam de fora. Empatados dividem a posição.
