@@ -1,0 +1,32 @@
+name: Migrar para material_ui (temporário)
+on:
+  push:
+    branches: [claude/material-ui]
+    paths: [.github/workflows/migrar-material.yml]
+permissions:
+  contents: write
+jobs:
+  migrar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter --version
+      - run: flutter pub add material_ui
+      - run: dart fix --apply --code=migrate_design_widgets
+      - name: O que sobrou da biblioteca antiga
+        run: grep -rn "package:flutter/material.dart\|package:flutter/cupertino.dart" lib test || echo "nada"
+      - run: grep -n "material_ui" pubspec.yaml pubspec.lock
+      - run: cat ~/.pub-cache/hosted/pub.dev/material_ui-*/pubspec.yaml | head -30
+      - run: flutter analyze --no-fatal-infos || true
+      - name: Gravar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A lib test pubspec.yaml pubspec.lock
+          git status --short | wc -l
+          git commit -q -m "Componentes: material_ui no lugar de package:flutter/material.dart (dart fix)"
+          git push -q
