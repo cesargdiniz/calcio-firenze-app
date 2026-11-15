@@ -238,6 +238,8 @@ void main() {
     _tela('08 classificação', (t) async {
       await _abrir(t, '/torcedor/tabela');
       await _capturar(t, '08_torcedor_classificacao');
+      await _tocar(t, 'Artilharia');
+      await _capturar(t, '08a_torcedor_artilharia');
     });
     _tela('09 suspensos', (t) async {
       await _abrir(t, '/torcedor/suspensos');

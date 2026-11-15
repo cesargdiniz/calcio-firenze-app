@@ -31,6 +31,9 @@ class Painel {
   /// Nome de cada pessoa, para súmula e listas.
   final Map<String, String> nomes;
   final List<LinhaClassificacao> tabela;
+
+  /// Goleadores do turno, do que mais marcou para o que menos marcou.
+  final List<Artilheiro> artilharia;
   final List<Partida> partidas;
 
   /// Rodada com os próximos jogos (a primeira com partida sem súmula).
@@ -45,6 +48,7 @@ class Painel {
     required this.times,
     required this.nomes,
     required this.tabela,
+    required this.artilharia,
     required this.partidas,
     required this.proximaRodada,
     required this.proximosJogos,
@@ -148,6 +152,7 @@ class MontarPainel {
       times: times,
       nomes: {for (final p in d.pessoas) p.id: p.nome},
       tabela: tabela,
+      artilharia: artilharia(partidas, turno: turno),
       partidas: partidas,
       proximaRodada: proximaRodada,
       proximosJogos: proximos,

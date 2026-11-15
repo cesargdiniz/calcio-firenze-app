@@ -1,6 +1,7 @@
 /// Regras do Calcio Firenze — Master 2027.
 library;
 
+export 'src/artilharia.dart';
 export 'src/classificacao.dart';
 export 'src/entidades.dart';
 export 'src/mata_mata.dart';

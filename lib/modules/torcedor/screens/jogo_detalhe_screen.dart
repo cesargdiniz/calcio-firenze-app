@@ -92,7 +92,8 @@ class JogoDetalheScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.md),
               child: Text(
-                'W.O.: ${painel.time(s.ausenteWo!).nome} não compareceu (art. 75).',
+                'W.O.: ${painel.time(s.ausenteWo!).nome} não compareceu (art. 75). Os gols do '
+                'W.O. contam na classificação, mas não têm autor e ficam fora da artilharia.',
                 style: AppTextStyles.corpo,
               ),
             ),

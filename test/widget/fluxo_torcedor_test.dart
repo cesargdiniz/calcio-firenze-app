@@ -1,3 +1,5 @@
+import 'package:calcio_regras/calcio_regras.dart';
+import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'apoio.dart';
@@ -41,9 +43,24 @@ void main() {
     await abrirComoTorcedor(tester);
     await tester.tap(find.text('Tabela'));
     await tester.pumpAndSettle();
-    expect(find.text('Classificação'), findsOneWidget);
+    expect(find.text('Classificação'), findsWidgets);
     for (final nome in ['Inter', 'Sassuolo', 'Casale']) {
       expect(find.textContaining(nome), findsWidgets);
     }
+  });
+
+  testWidgets('aba Tabela tem a artilharia do turno', (tester) async {
+    await abrirComoTorcedor(tester);
+    await tester.tap(find.text('Tabela'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Artilharia'));
+    await tester.pumpAndSettle();
+
+    final dados = montarTemporadaExemplo();
+    final lider = artilharia(dados.partidas, turno: 1).first;
+    final nome = dados.pessoas.firstWhere((p) => p.id == lider.pessoaId).nome.toUpperCase();
+    expect(find.text('Artilharia'), findsWidgets);
+    expect(find.text('1º'), findsWidgets);
+    expect(find.text(nome), findsOneWidget);
   });
 }

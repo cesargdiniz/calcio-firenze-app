@@ -208,11 +208,37 @@ DadosTemporada montarTemporadaExemplo() {
   cartao(3, 'leandro-paiva', 'INT', TipoCartao.amarelo);
   cartao(2, 'helio-ramos', 'SAM', TipoCartao.amarelo, funcao: Funcao.tecnico);
 
+  // Autores dos gols: sempre entre os jogadores de linha, com alguns
+  // marcando mais que os outros, para a artilharia ter um líder.
+  final linha = <String, List<String>>{};
+  for (final x in _elencos()) {
+    if (x.funcao == Funcao.atleta && !x.goleiro) linha.putIfAbsent(x.timeId, () => []).add(x.id);
+  }
+  const preferencia = [0, 0, 1, 2, 0, 3, 1, 4];
+  List<Gol> autores(Partida p, String timeId, int quantos, int indice) => [
+    for (var k = 0; k < quantos; k++)
+      Gol(
+        timeId: timeId,
+        autorId: linha[timeId]![preferencia[(p.rodada! * 5 + indice * 3 + k) % preferencia.length]],
+        tempo: 1 + k % 2,
+      ),
+  ];
+
   for (var i = 0; i < partidas.length; i++) {
     final p = partidas[i];
     if (p.rodada! > 3) continue;
+    final doMandante = gols();
+    final doVisitante = gols();
     partidas[i] = p.comSumula(
-      Sumula(golsMandante: gols(), golsVisitante: gols(), cartoes: cartoes[p.id] ?? const []),
+      Sumula(
+        golsMandante: doMandante,
+        golsVisitante: doVisitante,
+        gols: [
+          ...autores(p, p.mandanteId, doMandante, i),
+          ...autores(p, p.visitanteId, doVisitante, i + 1),
+        ],
+        cartoes: cartoes[p.id] ?? const [],
+      ),
     );
   }
 
