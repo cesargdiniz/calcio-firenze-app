@@ -201,7 +201,7 @@ class ParticipanteController extends Cubit<ParticipanteStatus> {
       final comVinculo = [
         for (final x in usuario?.vinculos ?? const <Vinculo>[])
           if (x.temporadaId != dados.id && x.status != StatusVinculo.recusado)
-            if (Categoria.deTemporada(x.temporadaId) case final c?) c,
+            ?Categoria.deTemporada(x.temporadaId),
       ];
       return emit(ParticipanteSemVinculo(sessao, dados, comVinculo: comVinculo));
     }

@@ -1,6 +1,5 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
-import '../entities/categoria.dart';
 import '../entities/temporada.dart';
 import 'gerar_calendario.dart';
 
