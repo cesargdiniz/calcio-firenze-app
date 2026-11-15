@@ -35,10 +35,7 @@ class _Temporada {
   ];
 
   void segundoTurno() {
-    final horarios = [
-      for (final h in horariosMaster2027[1]!.take(45)) h.add(const Duration(days: 140)),
-    ];
-    partidas.addAll(_turno(2, horarios));
+    partidas.addAll(_turno(2, horariosMaster2027[2]!));
   }
 
   DadosTemporada get dados => DadosTemporada(
@@ -62,6 +59,19 @@ class _Temporada {
 
 void main() {
   const mm = MataMata();
+
+  test('sem horário oficial livre, propõe uma semana depois e marca como provisória', () {
+    final t = _Temporada();
+    // Ocupa os horários oficiais das quartas com outro jogo qualquer.
+    for (final h in horariosMaster2027[1]!.skip(45)) {
+      t.partidas.add(
+        Partida(id: 'x$h', turno: 9, fase: Fase.classificatoria, mandanteId: 'a', visitanteId: 'b', inicio: h),
+      );
+    }
+    final s = mm.turno(t.dados, 1);
+    expect(s.dataProvisoria, isTrue);
+    expect(s.propostos.first.inicio, DateTime(2027, 5, 21, 20, 30));
+  });
 
   test('sem calendário, pede para gerar', () {
     final t = _Temporada()..partidas.clear();
@@ -121,14 +131,14 @@ void main() {
       const Sumula(golsMandante: 1, golsVisitante: 1, penaltis: Penaltis(3, 4)),
     );
 
-    // Final: 1º x 3º, sem horário oficial: data provisória uma semana depois.
+    // Final: 1º x 3º, no horário oficial de 19/06.
     s = mm.turno(t.dados, 1);
     expect(s.proxima, Fase.finalTurno);
     expect(s.propostos.single.id, 't1-final');
     expect('${s.propostos.single.mandanteId} x ${s.propostos.single.visitanteId}',
         '${t.pos(1)} x ${t.pos(3)}');
-    expect(s.dataProvisoria, isTrue);
-    expect(s.propostos.single.inicio, DateTime(2027, 6, 17, 20, 30));
+    expect(s.dataProvisoria, isFalse);
+    expect(s.propostos.single.inicio, DateTime(2027, 6, 19, 19));
 
     t.criar(s);
     t.resultado('t1-final', const Sumula(golsVisitante: 1));
@@ -190,6 +200,8 @@ void main() {
       expect(jogo.id, 'grande-final');
       expect(jogo.turno, 0);
       expect('${jogo.mandanteId} x ${jogo.visitanteId}', '${t.pos(1)} x ${t.pos(2)}');
+      expect(jogo.inicio, DateTime(2027, 12, 11, 19));
+      expect(s.dataProvisoria, isFalse);
 
       t.criar(s);
       expect(mm.grandeFinal(t.dados).idsDesfaziveis, ['grande-final']);

@@ -8,9 +8,12 @@ void main() {
   const gerar = GerarCalendario();
   final turno1 = horariosMaster2027[1]!;
 
-  test('1º turno: 45 horários da classificatória e 4 do mata-mata', () {
-    expect(turno1, hasLength(49));
-    expect(turno1.toSet(), hasLength(49));
+  test('cada turno: 45 horários da classificatória e 5 do mata-mata', () {
+    for (final t in [1, 2]) {
+      expect(horariosMaster2027[t], hasLength(50));
+      expect(horariosMaster2027[t]!.toSet(), hasLength(50));
+    }
+    expect(horariosMaster2027[0], [DateTime(2027, 12, 11, 19)]);
   });
 
   test('todos contra todos: 45 jogos, cada par uma vez, 5 por rodada', () {
@@ -68,9 +71,18 @@ void main() {
     expect(assinatura(1) == assinatura(2), isFalse);
   });
 
-  test('2º turno ainda não fecha: avisa quantos horários faltam', () {
+  test('2º turno: abertura em 06 e 07/08, última rodada até 12/11', () {
+    final p = gerar(turno: 2, times: times, horarios: horariosMaster2027[2]!, sorteio: Random(3));
+    expect(p, hasLength(45));
+    final inicios = p.map((x) => x.inicio).toList()..sort();
+    expect(inicios.first, DateTime(2027, 8, 6, 20, 30));
+    expect(inicios[2], DateTime(2027, 8, 7, 17));
+    expect(inicios.last, DateTime(2027, 11, 12, 20, 30));
+  });
+
+  test('horários que faltam: avisa quantos', () {
     expect(
-      () => gerar(turno: 2, times: times, horarios: horariosMaster2027[2]!),
+      () => gerar(turno: 2, times: times, horarios: horariosMaster2027[2]!.take(40).toList()),
       throwsA(predicate((e) => e is StateError && e.message.contains('faltam 5'))),
     );
   });
