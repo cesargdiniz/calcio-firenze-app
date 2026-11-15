@@ -33,7 +33,8 @@ temporadas/{temporadaId}              parametros{...}, patrocinador? (nome da co
   partidas/{partidaId}                turno, fase, rodada, mandanteId, visitanteId, inicio,
                                       arbitros[], etapa (agendada|preparacao|lancamento|encerrada),
                                       sumula{golsMandante, golsVisitante, ausenteWo, penaltis,
-                                             gols[], cartoes[], timesSemPontos[], observacoes},
+                                             gols[], cartoes[], timesSemPontos[], observacoes,
+                                             melhorDaPartida{pessoaId, timeId}?},
                                       fonte{youtubeUrl?}
   pagamentos/{pendenciaId}            pagoEm, registradoPor
   decisoes/{decisaoId}                pessoaId, timeId, partidaOrigemId, jogosSuspensao,

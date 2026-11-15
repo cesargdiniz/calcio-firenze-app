@@ -51,6 +51,7 @@ class _SumulaState extends State<_Sumula> {
   late final List<Gol> _gols = [...?widget.inicial?.gols];
   late final List<CartaoAplicado> _cartoes = [...?widget.inicial?.cartoes];
   late final Set<String> _semPontos = {...?widget.inicial?.timesSemPontos};
+  late MelhorDaPartida? _melhor = widget.inicial?.melhorDaPartida;
   late int _penM = widget.inicial?.penaltis?.mandante ?? 0;
   late int _penV = widget.inicial?.penaltis?.visitante ?? 0;
   late final _youtube = TextEditingController(text: widget.inicial?.youtubeUrl ?? '');
@@ -97,6 +98,7 @@ class _SumulaState extends State<_Sumula> {
             timesSemPontos: _semPontos,
             observacoes: _obs.text.trim().isEmpty ? null : _obs.text.trim(),
             youtubeUrl: _youtube.text.trim().isEmpty ? null : _youtube.text.trim(),
+            melhorDaPartida: _ausente == null ? _melhor : null,
           ),
         ),
       );
@@ -133,6 +135,16 @@ class _SumulaState extends State<_Sumula> {
       builder: (_) => _FormCartao(partida: p, dados: widget.dados, jaLancados: _cartoes),
     );
     if (c != null) setState(() => _cartoes.add(c));
+  }
+
+  Future<void> _escolherMelhor() async {
+    final m = await showModalBottomSheet<MelhorDaPartida>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _FormMelhor(partida: p, dados: widget.dados, atual: _melhor),
+    );
+    if (m != null) setState(() => _melhor = m);
   }
 
   Widget _placar(Time t, int valor, ValueChanged<int> mudar) => Expanded(
@@ -273,6 +285,22 @@ class _SumulaState extends State<_Sumula> {
             },
             onRemover: () => setState(() => _cartoes.removeAt(i)),
           ),
+        if (_ausente == null) ...[
+          TituloSecao(
+            'Melhor da partida',
+            acao: _melhor == null ? 'Escolher' : 'Trocar',
+            onAcao: _escolherMelhor,
+          ),
+          if (_melhor case final m?)
+            _Linha(
+              icone: const Icon(Icons.star_rounded, size: 18, color: AppColors.amarelo),
+              texto: '${nome(m.pessoaId)} · ${time(m.timeId).sigla}',
+              lateral: '',
+              onRemover: () => setState(() => _melhor = null),
+            )
+          else
+            const Text('Opcional. Entra nas estatísticas.', style: AppTextStyles.pequeno),
+        ],
         const TituloSecao('Irregularidade'),
         for (final t in [m, v])
           CheckboxListTile(
@@ -410,6 +438,60 @@ List<Pessoa> _elenco(DadosTemporada d, String timeId, Funcao funcao, DateTime di
         .where((x) => x.timeId == timeId && x.funcao == funcao && x.noElencoEm(dia))
         .toList()
       ..sort((a, b) => (a.numero ?? 999).compareTo(b.numero ?? 999));
+
+/// Escolha do melhor da partida entre os atletas dos dois times.
+class _FormMelhor extends StatefulWidget {
+  final Partida partida;
+  final DadosTemporada dados;
+  final MelhorDaPartida? atual;
+  const _FormMelhor({required this.partida, required this.dados, this.atual});
+
+  @override
+  State<_FormMelhor> createState() => _FormMelhorState();
+}
+
+class _FormMelhorState extends State<_FormMelhor> {
+  late String _time = widget.atual?.timeId ?? widget.partida.mandanteId;
+  late String? _pessoa = widget.atual?.pessoaId;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.partida;
+    String nome(String id) => widget.dados.times.firstWhere((t) => t.id == id).nome;
+    return _Folha(
+      titulo: 'Melhor da partida',
+      botao: 'Confirmar',
+      pronto: _pessoa != null,
+      onConfirmar: () =>
+          Navigator.pop(context, MelhorDaPartida(pessoaId: _pessoa!, timeId: _time)),
+      children: [
+        const Text('Time', style: AppTextStyles.rotulo),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.sm,
+          children: [
+            for (final t in [p.mandanteId, p.visitanteId])
+              ChipFiltro(
+                nome(t),
+                ativo: t == _time,
+                onTap: () => setState(() {
+                  _time = t;
+                  _pessoa = null;
+                }),
+              ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        const Text('Atleta', style: AppTextStyles.rotulo),
+        _ListaPessoas(
+          pessoas: _elenco(widget.dados, _time, Funcao.atleta, p.inicio),
+          selecionada: _pessoa,
+          onSelecionar: (id) => setState(() => _pessoa = id),
+        ),
+      ],
+    );
+  }
+}
 
 class _FormGol extends StatefulWidget {
   final Partida partida;

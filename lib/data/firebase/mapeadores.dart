@@ -61,6 +61,9 @@ Map<String, dynamic> sumulaParaMapa(Sumula s) => {
   'timesSemPontos': s.timesSemPontos.toList(),
   'observacoes': s.observacoes,
   'youtubeUrl': s.youtubeUrl,
+  'melhorDaPartida': s.melhorDaPartida == null
+      ? null
+      : {'pessoaId': s.melhorDaPartida!.pessoaId, 'timeId': s.melhorDaPartida!.timeId},
 };
 
 Sumula sumulaDeMapa(Map<String, dynamic> m) {
@@ -92,6 +95,13 @@ Sumula sumulaDeMapa(Map<String, dynamic> m) {
     timesSemPontos: {...(m['timesSemPontos'] as List? ?? const []).cast<String>()},
     observacoes: m['observacoes'] as String?,
     youtubeUrl: m['youtubeUrl'] as String?,
+    melhorDaPartida: switch (m['melhorDaPartida']) {
+      {'pessoaId': final String pessoa, 'timeId': final String time} => MelhorDaPartida(
+        pessoaId: pessoa,
+        timeId: time,
+      ),
+      _ => null,
+    },
   );
 }
 

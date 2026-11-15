@@ -54,6 +54,13 @@ class Gol {
   const Gol({required this.timeId, this.autorId, this.contra = false, this.tempo = 1});
 }
 
+/// Atleta escolhido o melhor da partida pela Organização.
+class MelhorDaPartida {
+  final String pessoaId;
+  final String timeId;
+  const MelhorDaPartida({required this.pessoaId, required this.timeId});
+}
+
 /// Resultado da disputa de pênaltis (só no mata-mata).
 class Penaltis {
   final int mandante;
@@ -84,6 +91,9 @@ class Sumula {
   /// Link da transmissão, quando o lançamento foi feito pelo vídeo.
   final String? youtubeUrl;
 
+  /// Escolha opcional da Organização. Não existe em jogo de W.O.
+  final MelhorDaPartida? melhorDaPartida;
+
   const Sumula({
     this.golsMandante = 0,
     this.golsVisitante = 0,
@@ -94,6 +104,7 @@ class Sumula {
     this.timesSemPontos = const {},
     this.observacoes,
     this.youtubeUrl,
+    this.melhorDaPartida,
   });
 }
 

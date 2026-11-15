@@ -5,6 +5,7 @@ import 'package:calcio_firenze/domain/entities/temporada.dart';
 import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:calcio_firenze/domain/usecases/gerar_calendario.dart';
 import 'package:calcio_regras/calcio_regras.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'apoio.dart';
@@ -74,6 +75,54 @@ void main() {
     expect(salvo.sumula?.golsMandante, 2);
     expect(salvo.sumula?.golsVisitante, 1);
     expect(find.text('Encerrada'), findsOneWidget);
+  });
+
+  testWidgets('súmula registra o melhor da partida', (tester) async {
+    final dados = _real();
+    final jogo = dados.partidas.first;
+    final atleta = dados.pessoas.firstWhere(
+      (p) => p.timeId == jogo.mandanteId && p.funcao == Funcao.atleta,
+    );
+    final gestao = await abrirApp(
+      tester,
+      inicio: '/organizacao/jogos/${jogo.id}/sumula',
+      sessao: _org,
+      organizacao: {'org1'},
+      dados: dados,
+    );
+    final escolher = find.text('Escolher');
+    await tester.scrollUntilVisible(escolher, 200, scrollable: find.byType(Scrollable).first);
+    await tester.tap(escolher);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(atleta.nome.toUpperCase()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Trocar'), findsOneWidget);
+
+    await acionar(tester, 'Encerrar súmula');
+    final salvo = gestao.temporada.dados.partidas.firstWhere((p) => p.id == jogo.id);
+    expect(salvo.sumula?.melhorDaPartida?.pessoaId, atleta.id);
+    expect(salvo.sumula?.melhorDaPartida?.timeId, jogo.mandanteId);
+  });
+
+  testWidgets('W.O. não guarda melhor da partida', (tester) async {
+    final dados = _real();
+    final jogo = dados.partidas.first;
+    final gestao = await abrirApp(
+      tester,
+      inicio: '/organizacao/jogos/${jogo.id}/sumula',
+      sessao: _org,
+      organizacao: {'org1'},
+      dados: dados,
+    );
+    final sigla = dados.times.firstWhere((t) => t.id == jogo.visitanteId).sigla;
+    await tester.tap(find.text('W.O.: $sigla faltou'));
+    await tester.pumpAndSettle();
+    expect(find.text('Melhor da partida'), findsNothing);
+    await acionar(tester, 'Encerrar súmula');
+    final salvo = gestao.temporada.dados.partidas.firstWhere((p) => p.id == jogo.id);
+    expect(salvo.sumula?.melhorDaPartida, isNull);
   });
 
   testWidgets('W.O. registra 6 x 0 para o time presente', (tester) async {

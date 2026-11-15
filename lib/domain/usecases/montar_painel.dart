@@ -34,6 +34,14 @@ class Painel {
 
   /// Goleadores do turno, do que mais marcou para o que menos marcou.
   final List<Artilheiro> artilharia;
+
+  /// Estatísticas do turno.
+  final List<EscolhidoMelhor> melhoresDaPartida;
+  final List<GolsDoTime> melhorAtaque;
+  final List<GolsDoTime> melhorDefesa;
+  final List<CartoesDaPessoa> amarelos;
+  final List<CartoesDaPessoa> vermelhos;
+  final List<CartoesDaPessoa> cartoes;
   final List<Partida> partidas;
 
   /// Rodada com os próximos jogos (a primeira com partida sem súmula).
@@ -49,6 +57,12 @@ class Painel {
     required this.nomes,
     required this.tabela,
     required this.artilharia,
+    required this.melhoresDaPartida,
+    required this.melhorAtaque,
+    required this.melhorDefesa,
+    required this.amarelos,
+    required this.vermelhos,
+    required this.cartoes,
     required this.partidas,
     required this.proximaRodada,
     required this.proximosJogos,
@@ -153,6 +167,12 @@ class MontarPainel {
       nomes: {for (final p in d.pessoas) p.id: p.nome},
       tabela: tabela,
       artilharia: artilharia(partidas, turno: turno),
+      melhoresDaPartida: melhoresDaPartida(partidas, turno: turno),
+      melhorAtaque: melhorAtaque(tabela),
+      melhorDefesa: melhorDefesa(tabela),
+      amarelos: cartoesPorPessoa(partidas, turno: turno, criterio: CriterioCartoes.amarelos),
+      vermelhos: cartoesPorPessoa(partidas, turno: turno, criterio: CriterioCartoes.vermelhos),
+      cartoes: cartoesPorPessoa(partidas, turno: turno),
       partidas: partidas,
       proximaRodada: proximaRodada,
       proximosJogos: proximos,
