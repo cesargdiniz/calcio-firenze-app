@@ -140,7 +140,13 @@ class ChipFiltro extends StatelessWidget {
 class ListaVazia extends StatelessWidget {
   final String titulo;
   final String texto;
-  const ListaVazia({super.key, required this.titulo, required this.texto});
+  final IconData icone;
+  const ListaVazia({
+    super.key,
+    required this.titulo,
+    required this.texto,
+    this.icone = Icons.check_rounded,
+  });
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -151,7 +157,7 @@ class ListaVazia extends StatelessWidget {
           width: 80,
           height: 80,
           decoration: const BoxDecoration(color: AppColors.verdeSuave, shape: BoxShape.circle),
-          child: const Icon(Icons.check_rounded, color: AppColors.verde, size: 36),
+          child: Icon(icone, color: AppColors.verde, size: 36),
         ),
         const SizedBox(height: AppSpacing.md),
         Text(titulo, style: AppTextStyles.tituloSecao.copyWith(fontSize: 18)),

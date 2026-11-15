@@ -41,6 +41,7 @@ class InicioScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           if (painel.partidas.isEmpty)
             const ListaVazia(
+              icone: Icons.event_outlined,
               titulo: 'Calendário ainda não publicado',
               texto: 'Os jogos, a tabela e os suspensos desta categoria aparecem aqui assim que '
                   'a Organização sortear o calendário.',
@@ -69,16 +70,18 @@ class InicioScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
             ],
           ],
-          TituloSecao(
-            'Classificação · 1º Turno',
-            acao: 'Ver tabela',
-            onAcao: () => context.go('/torcedor/tabela'),
-          ),
-          TabelaClassificacao(
-            painel: painel,
-            linhas: painel.tabela.take(4).toList(),
-            compacta: true,
-          ),
+          if (painel.partidas.isNotEmpty) ...[
+            TituloSecao(
+              'Classificação · 1º Turno',
+              acao: 'Ver tabela',
+              onAcao: () => context.go('/torcedor/tabela'),
+            ),
+            TabelaClassificacao(
+              painel: painel,
+              linhas: painel.tabela.take(4).toList(),
+              compacta: true,
+            ),
+          ],
         ],
       );
     },
