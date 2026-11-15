@@ -135,4 +135,16 @@ void main() {
     expect(find.textContaining('Você está suspenso'), findsNWidgets(2));
     expect(find.textContaining('Livre · Você está suspenso'), findsOneWidget);
   });
+
+  testWidgets('Master mostra as datas reservadas da Copa em Jogos', (tester) async {
+    await abrirApp(tester, inicio: '/torcedor/jogos');
+    await tester.tap(find.text('Copa'));
+    await tester.pumpAndSettle();
+    expect(find.text('Copa Master · datas reservadas'), findsOneWidget);
+    expect(find.text('Preliminar'), findsOneWidget);
+    expect(find.text('Ter 06/04 · 20:30 e 21:30 · 2 jogos'), findsOneWidget);
+
+    await _trocarPara(tester, 'Livre');
+    expect(find.text('Copa'), findsNothing);
+  });
 }

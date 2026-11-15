@@ -113,6 +113,24 @@ final horariosSuperMaster2027 = <int, List<DateTime>>{
   0: _dias(const [(11, 6, 1)]), // grande final
 };
 
+/// Um dia reservado no calendário, com os horários dos jogos. Os confrontos
+/// ainda não estão definidos.
+class DiaReservado {
+  final String etapa;
+  final List<DateTime> horarios;
+  const DiaReservado(this.etapa, this.horarios);
+}
+
+/// Copa Master 2027: mata-mata exclusivo dos times do Master. Por enquanto
+/// só as datas ficam reservadas; quem joga é definido depois.
+final datasCopaMaster2027 = [
+  DiaReservado('Preliminar', _dia(4, 6, 2)),
+  DiaReservado('Quartas de final', _dia(4, 20, 2)),
+  DiaReservado('Quartas de final', _dia(4, 22, 2)),
+  DiaReservado('Semifinais', _dia(5, 18, 2)),
+  DiaReservado('Final', _dia(6, 11, 1)),
+];
+
 /// Horários oficiais da categoria, por turno (0 = grande final).
 Map<int, List<DateTime>> horariosDe(Categoria c) => switch (c) {
   Categoria.master => horariosMaster2027,

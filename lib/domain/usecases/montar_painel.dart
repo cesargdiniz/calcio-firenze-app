@@ -1,5 +1,6 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../entities/categoria.dart';
 import '../entities/etapa.dart';
 import '../entities/temporada.dart';
 
@@ -54,7 +55,11 @@ class Painel {
   final List<ItemSuspenso> suspensos;
   final List<ItemPendurado> pendurados;
 
+  /// Categoria da temporada (o Master também mostra as datas da Copa).
+  final Categoria categoria;
+
   const Painel({
+    this.categoria = Categoria.master,
     required this.nomeTemporada,
     required this.local,
     required this.times,
@@ -168,6 +173,7 @@ class MontarPainel {
     }
 
     return Painel(
+      categoria: d.categoria,
       nomeTemporada: d.nome,
       local: d.local,
       times: times,

@@ -127,4 +127,23 @@ void main() {
       expect(horariosDe(Categoria.superMaster), same(horariosSuperMaster2027));
     });
   });
+
+  test('Copa Master: 9 jogos em 5 datas reservadas, de 06/04 a 11/06', () {
+    expect(datasCopaMaster2027.map((d) => d.etapa), [
+      'Preliminar',
+      'Quartas de final',
+      'Quartas de final',
+      'Semifinais',
+      'Final',
+    ]);
+    expect(datasCopaMaster2027.expand((d) => d.horarios), hasLength(9));
+    expect(datasCopaMaster2027.first.horarios, [
+      DateTime(2027, 4, 6, 20, 30),
+      DateTime(2027, 4, 6, 21, 30),
+    ]);
+    expect(datasCopaMaster2027.last.horarios, [DateTime(2027, 6, 11, 20, 30)]);
+    // Nenhuma data da Copa cai em horário do Master.
+    final master = {...horariosMaster2027[1]!, ...horariosMaster2027[2]!};
+    expect(datasCopaMaster2027.expand((d) => d.horarios).where(master.contains), isEmpty);
+  });
 }

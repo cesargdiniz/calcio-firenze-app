@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/mata_mata.dart';
 import '../../../shared/format.dart';
@@ -11,6 +12,7 @@ import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/card_jogo.dart';
+import '../../../shared/widgets/datas_copa.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 
@@ -174,6 +176,10 @@ class _JogosState extends State<_Jogos> {
               'O sorteio fica travado depois da primeira súmula encerrada.',
               style: AppTextStyles.pequeno,
             ),
+        ],
+        if (o.categoria == Categoria.master && _turno == 1) ...[
+          const SizedBox(height: AppSpacing.md),
+          const DatasCopa(),
         ],
         if (o.dados.demonstracao)
           const Padding(
