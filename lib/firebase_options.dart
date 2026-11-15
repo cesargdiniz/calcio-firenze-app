@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -57,5 +54,16 @@ class DefaultFirebaseOptions {
     authDomain: 'calcio-firenze.firebaseapp.com',
     storageBucket: 'calcio-firenze.firebasestorage.app',
     measurementId: 'G-NZ6GLPGCYV',
+  );
+
+  /// Do GoogleService-Info.plist do app iOS `br.com.calciofirenze.app`.
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDFtCSEajVDsn3Pi936xCVI83Ixn1knBNI',
+    appId: '1:1010799319095:ios:3260da75be09ef10ba47b2',
+    messagingSenderId: '1010799319095',
+    projectId: 'calcio-firenze',
+    storageBucket: 'calcio-firenze.firebasestorage.app',
+    iosClientId: '1010799319095-h9gcc9v892etg57fuofktjhima68nffd.apps.googleusercontent.com',
+    iosBundleId: 'br.com.calciofirenze.app',
   );
 }

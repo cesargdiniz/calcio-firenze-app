@@ -9,14 +9,17 @@ class FalhaLogin implements Exception {
   String toString() => mensagem;
 }
 
-/// Login do Participante e da Organização. Três formas (especificação):
-/// Google, link por e-mail e, como alternativa, e-mail e senha.
-/// O login com Apple entra junto com o app de iPhone.
+/// Login do Participante e da Organização: Google, link por e-mail e, como
+/// alternativa, e-mail e senha. No iPhone há também o login com Apple, que a
+/// App Store exige de apps que oferecem login com Google.
 abstract interface class AuthRepository {
   /// Emite a sessão atual e cada mudança (login, saída).
   Stream<Sessao?> observarSessao();
 
   Future<void> entrarComGoogle();
+
+  /// Só é oferecido no iPhone.
+  Future<void> entrarComApple();
 
   /// Envia o link de acesso para o e-mail.
   Future<void> enviarLinkPorEmail(String email);

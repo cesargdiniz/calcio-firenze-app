@@ -55,6 +55,11 @@ class LoginController extends Cubit<LoginStatus> {
     return null;
   });
 
+  Future<void> entrarComApple() => _executar(() async {
+    await _auth.entrarComApple();
+    return null;
+  });
+
   Future<void> enviarLink(String email) => _executar(() async {
     final e = email.trim();
     if (!emailValido(e)) return const LoginErro('Digite um e-mail válido.');
