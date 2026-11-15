@@ -2,6 +2,7 @@ import 'package:calcio_regras/calcio_regras.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../domain/entities/etapa.dart';
 import '../../../shared/format.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
@@ -87,6 +88,11 @@ class JogoDetalheScreen extends StatelessWidget {
             OutlinedButton(
               onPressed: () => _emBreve(context, 'O vídeo do jogo'),
               child: const Text('Ver no YouTube'),
+            ),
+          if (resultadoMataMata(p, (id) => painel.time(id).nome) case final texto?)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.md),
+              child: Text(texto, style: AppTextStyles.nome),
             ),
           if (s != null && s.ausenteWo != null)
             Padding(

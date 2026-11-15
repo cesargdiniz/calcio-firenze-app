@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../domain/entities/etapa.dart';
 import '../../../shared/format.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
@@ -154,6 +155,8 @@ class JogoOrgScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.sm),
+                  if (resultadoMataMata(p, (id) => o.time(id)?.nome ?? id) case final texto?)
+                    Text(texto, style: AppTextStyles.nome),
                   if (s.ausenteWo != null)
                     Text(
                       'W.O.: ${o.time(s.ausenteWo!)?.nome} não compareceu. Os gols contam na '

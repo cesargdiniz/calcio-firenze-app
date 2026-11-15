@@ -3,6 +3,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../domain/entities/etapa.dart';
+import '../../../domain/usecases/mata_mata.dart';
+import '../../../shared/format.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
@@ -29,13 +32,16 @@ class _Jogos extends StatefulWidget {
 
 class _JogosState extends State<_Jogos> {
   int _turno = 1;
-  int? _rodada;
+  Etapa? _etapa;
   bool _gerando = false;
 
+  /// Jogos do turno; no 2º, também a grande final.
   List<Partida> get _doTurno => widget.o.dados.demonstracao
       ? const []
-      : (widget.o.dados.partidas.where((p) => p.turno == _turno).toList()
-          ..sort((a, b) => a.inicio.compareTo(b.inicio)));
+      : (widget.o.dados.partidas
+                .where((p) => p.turno == _turno || (_turno == 2 && p.fase == Fase.grandeFinal))
+                .toList()
+            ..sort((a, b) => a.inicio.compareTo(b.inicio)));
 
   Future<void> _gerar({required bool refazer}) async {
     final demo = widget.o.dados.demonstracao;
@@ -63,7 +69,7 @@ class _JogosState extends State<_Jogos> {
     try {
       await context.read<OrganizacaoController>().gerarTurno(_turno);
       if (mounted) {
-        setState(() => _rodada = 1);
+        setState(() => _etapa = Etapa(_turno, Fase.classificatoria, 1));
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Calendário do $_turnoº turno gerado.')));
       }
@@ -84,16 +90,13 @@ class _JogosState extends State<_Jogos> {
   Widget build(BuildContext context) {
     final o = widget.o;
     final jogos = _doTurno;
-    final rodadas = {
-      for (final p in jogos)
-        if (p.rodada != null) p.rodada!,
-    }.toList()..sort();
-    final pendente = jogos.where((p) => !p.encerrada).firstOrNull?.rodada;
-    final rodada = _rodada != null && rodadas.contains(_rodada)
-        ? _rodada!
-        : (pendente ?? (rodadas.isEmpty ? 1 : rodadas.last));
-    final daRodada = jogos.where((p) => p.rodada == rodada).toList();
-    final algumaSumula = jogos.any((p) => p.encerrada);
+    final etapas = etapasDe(jogos);
+    final pendente = jogos.where((p) => !p.encerrada).firstOrNull;
+    final etapa = etapas.contains(_etapa)
+        ? _etapa
+        : (pendente != null ? Etapa.de(pendente) : etapas.lastOrNull);
+    final daEtapa = etapa == null ? const <Partida>[] : jogos.where(etapa.contem).toList();
+    final algumaSumula = jogos.any((p) => p.encerrada && p.fase == Fase.classificatoria);
 
     return ListView(
       padding: AppSpacing.tela,
@@ -108,7 +111,7 @@ class _JogosState extends State<_Jogos> {
                 ativo: t == _turno,
                 onTap: () => setState(() {
                   _turno = t;
-                  _rodada = null;
+                  _etapa = null;
                 }),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -133,15 +136,15 @@ class _JogosState extends State<_Jogos> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                for (final r in rodadas) ...[
-                  ChipFiltro('R$r', ativo: r == rodada, onTap: () => setState(() => _rodada = r)),
+                for (final e in etapas) ...[
+                  ChipFiltro(e.curto, ativo: e == etapa, onTap: () => setState(() => _etapa = e)),
                   const SizedBox(width: AppSpacing.sm),
                 ],
               ],
             ),
           ),
-          TituloSecao('Rodada $rodada'),
-          for (final p in daRodada) ...[
+          if (etapa != null) TituloSecao(etapa.rotulo),
+          for (final p in daEtapa) ...[
             CardJogo(
               partida: p,
               mandante: o.time(p.mandanteId)!,
@@ -151,6 +154,12 @@ class _JogosState extends State<_Jogos> {
             ),
             const SizedBox(height: AppSpacing.md),
           ],
+          _PainelMataMata(
+            o: o,
+            turno: _turno,
+            onCriado: (e) => setState(() => _etapa = e),
+          ),
+          if (_turno == 2) _PainelMataMata(o: o, turno: 0, onCriado: (e) => setState(() => _etapa = e)),
           if (!algumaSumula)
             TextButton(
               onPressed: _gerando ? null : () => _gerar(refazer: true),
@@ -170,6 +179,168 @@ class _JogosState extends State<_Jogos> {
               style: TextStyle(fontFamily: 'OpenSans', fontSize: 11, color: AppColors.dica),
             ),
           ),
+      ],
+    );
+  }
+}
+
+/// Situação do mata-mata do turno (ou da grande final, com [turno] 0): cria a
+/// próxima etapa, mostra o campeão ou desfaz a última etapa sem súmula.
+class _PainelMataMata extends StatefulWidget {
+  final OrgPronta o;
+  final int turno;
+  final ValueChanged<Etapa> onCriado;
+  const _PainelMataMata({required this.o, required this.turno, required this.onCriado});
+
+  @override
+  State<_PainelMataMata> createState() => _PainelMataMataState();
+}
+
+class _PainelMataMataState extends State<_PainelMataMata> {
+  bool _gravando = false;
+
+  bool get _grandeFinal => widget.turno == 0;
+
+  SituacaoMataMata get _situacao => _grandeFinal
+      ? const MataMata().grandeFinal(widget.o.dados)
+      : const MataMata().turno(widget.o.dados, widget.turno);
+
+  String _nome(String id) => widget.o.time(id)?.nome ?? id;
+
+  static String _etapa(Fase f) => switch (f) {
+    Fase.quartas => 'quartas de final',
+    Fase.semifinal => 'semifinais',
+    Fase.finalTurno => 'final do turno',
+    Fase.grandeFinal => 'grande final',
+    Fase.classificatoria => 'fase classificatória',
+  };
+
+  Future<void> _executar(Future<void> Function() acao, String feito) async {
+    final avisos = ScaffoldMessenger.of(context);
+    setState(() => _gravando = true);
+    try {
+      await acao();
+      avisos.showSnackBar(SnackBar(content: Text(feito)));
+    } catch (_) {
+      avisos.showSnackBar(const SnackBar(content: Text('Não foi possível gravar. Tente de novo.')));
+    } finally {
+      if (mounted) setState(() => _gravando = false);
+    }
+  }
+
+  Future<void> _criar(SituacaoMataMata s) async {
+    final controller = context.read<OrganizacaoController>();
+    final etapa = Etapa.de(s.propostos.first);
+    await _executar(
+      () => controller.criarEtapa(s.propostos),
+      'Jogos criados: ${_etapa(s.proxima!)}.',
+    );
+    if (mounted) widget.onCriado(etapa);
+  }
+
+  Future<void> _desfazer(SituacaoMataMata s) async {
+    final controller = context.read<OrganizacaoController>();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text('Desfazer ${_etapa(s.desfazivel!)}?'),
+        content: const Text(
+          'Os jogos desta etapa saem do calendário. Dá para criar de novo depois.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Desfazer')),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await _executar(() => controller.desfazerEtapa(s.idsDesfaziveis), 'Etapa desfeita.');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = _situacao;
+    final filhos = <Widget>[];
+
+    if (s.campeao case final c? when s.proxima == null) {
+      filhos.add(
+        Row(
+          children: [
+            const Icon(Icons.emoji_events_rounded, color: AppColors.amarelo),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                _grandeFinal ? 'Campeão do Calcio Firenze: ${_nome(c)}' : 'Campeão do ${widget.turno}º turno: ${_nome(c)}',
+                style: AppTextStyles.nome,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    if (s.aguardando case final texto?) {
+      filhos.add(Text(texto, style: AppTextStyles.corpo));
+    }
+    if (s.proxima case final fase?) {
+      filhos.add(Text('Próxima etapa: ${_etapa(fase)}', style: AppTextStyles.nome));
+      for (final p in s.propostos) {
+        final vantagem = s.vantagem[p.mandanteId];
+        filhos.add(
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: Text(
+              [
+                '${_nome(p.mandanteId)} x ${_nome(p.visitanteId)}',
+                dataHoraJogo(p.inicio),
+                if (vantagem != null) 'empate classifica ${_nome(vantagem)}',
+              ].join(' · '),
+              style: AppTextStyles.corpo,
+            ),
+          ),
+        );
+      }
+      if (s.dataProvisoria) {
+        filhos.add(
+          const Padding(
+            padding: EdgeInsets.only(top: AppSpacing.sm),
+            child: Text(
+              'Data provisória: o calendário oficial ainda não tem horário para esta etapa. '
+              'Ajuste data e hora em cada jogo depois de criar.',
+              style: AppTextStyles.pequeno,
+            ),
+          ),
+        );
+      }
+      filhos
+        ..add(const SizedBox(height: AppSpacing.md))
+        ..add(
+          FilledButton(
+            onPressed: _gravando ? null : () => _criar(s),
+            child: Text('Criar ${_etapa(fase)}'),
+          ),
+        );
+    }
+    if (s.desfazivel case final f?) {
+      filhos.add(
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: _gravando ? null : () => _desfazer(s),
+            child: Text('Desfazer ${_etapa(f)}'),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TituloSecao(_grandeFinal ? 'Grande final' : 'Mata-mata do ${widget.turno}º turno'),
+        Cartao(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: filhos),
+        ),
+        const SizedBox(height: AppSpacing.md),
       ],
     );
   }

@@ -188,6 +188,12 @@ class OrganizacaoController extends Cubit<OrgStatus> {
 
   Future<void> salvarPartida(Partida p) => _gestao.salvarPartidas(_dados!.id, [p]);
 
+  /// Grava os jogos de uma etapa do mata-mata (quartas, semifinais, final).
+  Future<void> criarEtapa(List<Partida> jogos) => _gestao.salvarPartidas(_dados!.id, jogos);
+
+  /// Apaga os jogos de uma etapa do mata-mata que ainda não tem súmula.
+  Future<void> desfazerEtapa(List<String> ids) => _gestao.excluirPartidas(_dados!.id, ids);
+
   Future<void> registrarPagamento(String pendenciaId) =>
       _gestao.registrarPagamento(_dados!.id, pendenciaId, DateTime.now());
 

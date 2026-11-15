@@ -1,6 +1,8 @@
+import 'package:calcio_regras/calcio_regras.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../domain/entities/etapa.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
@@ -35,16 +37,16 @@ class InicioScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          if (painel.proximaRodada != null && suspensos > 0)
+          if (painel.proximaEtapa != null && suspensos > 0)
             _AvisoSuspensos(
               texto: suspensos == 1
-                  ? '1 suspenso para a Rodada ${painel.proximaRodada}'
-                  : '$suspensos suspensos para a Rodada ${painel.proximaRodada}',
+                  ? '1 suspenso para ${_para(painel.proximaEtapa!)}'
+                  : '$suspensos suspensos para ${_para(painel.proximaEtapa!)}',
               onTap: () => context.go('/torcedor/suspensos'),
             ),
-          if (painel.proximaRodada != null) ...[
+          if (painel.proximaEtapa != null) ...[
             TituloSecao(
-              'Próximos jogos · Rodada ${painel.proximaRodada}',
+              'Próximos jogos · ${painel.proximaEtapa!.rotulo}',
               acao: 'Ver todos',
               onAcao: () => context.go('/torcedor/jogos'),
             ),
@@ -112,3 +114,9 @@ class _AvisoSuspensos extends StatelessWidget {
     ),
   );
 }
+
+/// "a Rodada 4", "as Quartas de final", "a Final do 1º turno".
+String _para(Etapa e) => switch (e.fase) {
+  Fase.quartas || Fase.semifinal => 'as ${e.rotulo}',
+  _ => 'a ${e.rotulo}',
+};
