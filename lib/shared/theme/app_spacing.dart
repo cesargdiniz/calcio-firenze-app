@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Espaçamentos e raios do Figma.
 abstract final class AppSpacing {
