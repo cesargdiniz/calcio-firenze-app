@@ -4,6 +4,11 @@ name: Galeria de telas
 # galeria-telas-capturas. Rode à mão em Actions → Galeria de telas.
 on:
   workflow_dispatch:
+    inputs:
+      loja:
+        description: 'Capturas no tamanho da App Store (iPhone de 6,9", 1320 x 2868)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -19,7 +24,15 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - run: flutter test test/galeria/galeria_telas.dart --update-goldens
+      - name: Capturar no tamanho padrão
+        if: ${{ inputs.loja != true }}
+        run: flutter test test/galeria/galeria_telas.dart --update-goldens
+      - name: Capturar no tamanho da App Store
+        if: ${{ inputs.loja == true }}
+        run: >
+          flutter test test/galeria/galeria_telas.dart --update-goldens
+          --dart-define=TELA_LARGURA=440 --dart-define=TELA_ALTURA=956
+          --dart-define=TELA_DENSIDADE=3
       - name: Publicar as capturas no branch galeria-telas-capturas
         if: always()
         env:
