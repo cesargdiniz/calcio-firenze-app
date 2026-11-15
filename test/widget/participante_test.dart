@@ -119,6 +119,21 @@ void main() {
     expect(find.text('Pendências do time'), findsOneWidget);
   });
 
+  testWidgets('sino mostra quantos avisos há e abre a lista', (tester) async {
+    await abrirApp(
+      tester,
+      inicio: '/participante',
+      sessao: _sessao,
+      usuarios: {'u1': _rafael(StatusVinculo.aprovado)},
+    );
+    expect(find.descendant(of: find.byType(Badge), matching: find.text('1')), findsOneWidget);
+    await tester.tap(find.byTooltip('Avisos (1)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 aviso'), findsOneWidget);
+    expect(find.textContaining('Pague R\$ 30,00 até '), findsOneWidget);
+  });
+
   testWidgets('recusado: volta ao vínculo com aviso', (tester) async {
     await abrirApp(
       tester,

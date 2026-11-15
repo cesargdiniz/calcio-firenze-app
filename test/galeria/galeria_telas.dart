@@ -263,6 +263,32 @@ void main() {
       await _abrir(t, '/participante/time', sessao: _rafael, usuarios: aprovado);
       await _capturar(t, '14_participante_meu_time');
     });
+    _tela('16a avisos do atleta', (t) async {
+      await _abrir(t, '/participante/avisos', sessao: _rafael, usuarios: aprovado);
+      await _capturar(t, '16a_participante_avisos');
+    });
+    _tela('16b avisos do técnico', (t) async {
+      await _abrir(
+        t,
+        '/participante/avisos',
+        sessao: _rafael,
+        usuarios: {
+          'u1': const Usuario(
+            uid: 'u1',
+            email: 'helio@exemplo.com',
+            nome: 'Hélio Ramos',
+            vinculo: Vinculo(
+              temporadaId: 'master-2027',
+              pessoaId: 'helio-ramos',
+              timeId: 'SAM',
+              papel: Papel.tecnico,
+              status: StatusVinculo.aprovado,
+            ),
+          ),
+        },
+      );
+      await _capturar(t, '16b_participante_avisos_tecnico');
+    });
     _tela('16 perfil', (t) async {
       await _abrir(t, '/participante/perfil', sessao: _rafael, usuarios: aprovado);
       await _capturar(t, '16_participante_perfil');
