@@ -156,7 +156,8 @@ class JogoOrgScreen extends StatelessWidget {
                   const SizedBox(height: AppSpacing.sm),
                   if (s.ausenteWo != null)
                     Text(
-                      'W.O.: ${o.time(s.ausenteWo!)?.nome} não compareceu.',
+                      'W.O.: ${o.time(s.ausenteWo!)?.nome} não compareceu. Os gols contam na '
+                      'classificação, mas não têm autor e ficam fora da artilharia.',
                       style: AppTextStyles.corpo,
                     ),
                   for (final g in s.gols)
