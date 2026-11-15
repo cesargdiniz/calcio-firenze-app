@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Cores da identidade visual, tiradas do Figma (página "Fluxo de telas").
 abstract final class AppColors {

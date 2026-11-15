@@ -4,7 +4,7 @@ import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
 import 'package:calcio_firenze/domain/entities/temporada.dart';
 import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:calcio_firenze/shared/pdf/saida_pdf.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'apoio.dart';

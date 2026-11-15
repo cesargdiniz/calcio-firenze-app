@@ -15,7 +15,7 @@ Próximas etapas: ambiente de teste separado da produção, login com Apple e as
 
 ## Rodar no seu computador
 
-Requisitos: [Flutter](https://docs.flutter.dev/get-started/install) estável (3.32 ou mais novo).
+Requisitos: [Flutter](https://docs.flutter.dev/get-started/install) estável (3.47 ou mais novo). Os componentes visuais vêm do pacote `material_ui`, e não mais de `package:flutter/material.dart`.
 
 Na primeira vez, gere as pastas de Android, iPhone e web (o código do app não é alterado):
 

@@ -7,7 +7,7 @@ import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
 import 'package:calcio_firenze/domain/usecases/montar_situacao.dart';
 import 'package:calcio_firenze/shared/pdf/saida_pdf.dart';
 import 'package:calcio_firenze/shared/seletor_imagem.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Monta o app com dados de exemplo e repositórios em memória, em tela de

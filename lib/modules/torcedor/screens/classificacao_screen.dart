@@ -1,5 +1,5 @@
 import 'package:calcio_regras/calcio_regras.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/theme/app_colors.dart';
