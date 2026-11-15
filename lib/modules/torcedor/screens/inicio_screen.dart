@@ -27,12 +27,14 @@ class InicioScreen extends StatelessWidget {
             children: [
               const LogoCalcio(),
               const SizedBox(width: AppSpacing.md),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Calcio Firenze', style: AppTextStyles.tituloSecao.copyWith(fontSize: 20)),
-                  Text(painel.nomeTemporada, style: AppTextStyles.subtitulo),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Calcio Firenze', style: AppTextStyles.tituloSecao.copyWith(fontSize: 20)),
+                    Text(painel.nomeTemporada, style: AppTextStyles.subtitulo),
+                  ],
+                ),
               ),
             ],
           ),

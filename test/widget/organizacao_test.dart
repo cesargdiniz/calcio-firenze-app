@@ -77,11 +77,20 @@ void main() {
     tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'Conferir')).onPressed!();
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.text('Pronto'), 200, scrollable: lista);
+    // Rola a lista direto até o fim: arrastar pelo meio da tela cairia no
+    // campo de texto, que tem rolagem própria.
+    Future<void> irAoFim() async {
+      for (var i = 0; i < 3; i++) {
+        final p = tester.state<ScrollableState>(lista).position;
+        p.jumpTo(p.maxScrollExtent);
+        await tester.pumpAndSettle();
+      }
+    }
+
+    await irAoFim();
     expect(find.text('Pronto'), findsOneWidget);
     expect(find.text('12 atletas · 13 pessoas'), findsOneWidget);
 
-    await tester.scrollUntilVisible(find.text('Importar 1 time'), 200, scrollable: lista);
     tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Importar 1 time')).onPressed!();
     await tester.pumpAndSettle();
 
