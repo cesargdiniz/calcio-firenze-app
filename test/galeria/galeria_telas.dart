@@ -223,6 +223,15 @@ void main() {
     });
   });
 
+  group('Compartilhar', () {
+    _tela('08h compartilhar classificação', (t) async {
+      await _abrir(t, '/torcedor/tabela');
+      await t.tap(find.byKey(const Key('compartilhar')));
+      await t.pumpAndSettle();
+      await _capturar(t, '08h_compartilhar_classificacao');
+    });
+  });
+
   group('Categorias', () {
     _tela('02b escolher categoria', (t) async {
       await _abrir(t, '/torcedor', categoria: null);
