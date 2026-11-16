@@ -9,6 +9,7 @@ import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
 import '../../shared/widgets/logo_calcio.dart';
 import '../../domain/entities/categoria.dart';
+import '../categoria/categoria_controller.dart';
 import '../categoria/seletor_categoria.dart';
 import '../login/login_screen.dart';
 import 'organizacao_controller.dart';
@@ -49,7 +50,9 @@ class OrganizacaoShell extends StatelessWidget {
           ),
         ),
       ),
-      OrgPronta(:final categoria, :final categorias) => Scaffold(
+      OrgPronta(:final categoria, :final categorias) => _AlinharCategoria(
+        categoria: categoria,
+        child: Scaffold(
         body: SafeArea(
           bottom: false,
           child: Column(
@@ -76,12 +79,30 @@ class OrganizacaoShell extends StatelessWidget {
           ],
         ),
       ),
+      ),
     },
   );
 }
 
 /// Primeiro acesso da conta da Organização: informar a categoria que organiza.
 /// A escolha limita tudo o que a conta altera; trocar depois só pelo console.
+/// Na área da Organização, o resto do app (Tabela, que vem do Torcedor)
+/// segue a categoria que a conta organiza.
+class _AlinharCategoria extends StatelessWidget {
+  final Categoria categoria;
+  final Widget child;
+  const _AlinharCategoria({required this.categoria, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final escolha = context.read<CategoriaController>();
+    if (escolha.atual != categoria) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => escolha.escolher(categoria));
+    }
+    return child;
+  }
+}
+
 class _InformarCategoria extends StatefulWidget {
   final String email;
   const _InformarCategoria({required this.email});

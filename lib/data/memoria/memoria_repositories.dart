@@ -321,7 +321,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
         pessoas: [
           for (final p in d.pessoas)
             p.id == movimentacao.pessoaId ? p.comSaida(movimentacao.data) : p,
-          if (substituto != null) substituto,
+          ?substituto,
         ],
       ),
     );
@@ -379,7 +379,16 @@ class MemoriaGestaoRepository implements GestaoRepository {
 /// já feita em outra abertura do app.
 class MemoriaPreferencias implements PreferenciasRepository {
   String? _categoria;
-  MemoriaPreferencias([String? categoriaInicial]) : _categoria = categoriaInicial;
+  String? _perfil;
+  MemoriaPreferencias([String? categoriaInicial, String? perfilInicial])
+    : _categoria = categoriaInicial,
+      _perfil = perfilInicial;
+
+  @override
+  Future<String?> perfil() async => _perfil;
+
+  @override
+  Future<void> salvarPerfil(String rota) async => _perfil = rota;
 
   @override
   Future<String?> categoria() async => _categoria;

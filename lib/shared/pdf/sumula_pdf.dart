@@ -57,7 +57,7 @@ Future<Uint8List> gerarSumulaPdf(
   return doc.save();
 }
 
-final _negrito = pw.TextStyle(fontWeight: pw.FontWeight.bold);
+const _negrito = pw.TextStyle(fontWeight: pw.FontWeight.bold);
 
 pw.BoxDecoration _borda([double largura = _linha]) =>
     pw.BoxDecoration(border: pw.Border.all(width: largura));
@@ -249,7 +249,7 @@ pw.Widget _jogadores(TimeSumulaImpresso t) {
   final altura = linhas.length <= _linhasMinimas
       ? _alturaJogador
       : _alturaJogador * _linhasMinimas / linhas.length;
-  final cinza = pw.TextStyle(color: PdfColors.grey500, fontSize: 7);
+  const cinza = pw.TextStyle(color: PdfColors.grey500, fontSize: 7);
 
   pw.Widget centro(pw.Widget child) =>
       _celula(child, altura: altura, alinhamento: pw.Alignment.center);
@@ -347,7 +347,7 @@ pw.Widget _quadros(TimeSumulaImpresso t) {
   );
   pw.TableRow assinatura(String texto, String valor) => pw.TableRow(
     children: [
-      _celula(pw.Text(texto, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 7)), altura: 13),
+      _celula(pw.Text(texto, style: const pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 7)), altura: 13),
       _celula(pw.Text(valor, maxLines: 1, style: const pw.TextStyle(fontSize: 7)), altura: 13),
     ],
   );
@@ -362,7 +362,7 @@ pw.Widget _quadros(TimeSumulaImpresso t) {
             top: 0.5,
             child: pw.Text(
               '$numero',
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 5.5),
+              style: const pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 5.5),
             ),
           ),
           pw.Center(child: pw.Text(':')),

@@ -18,7 +18,6 @@ import 'package:calcio_firenze/domain/usecases/montar_situacao.dart';
 import 'package:calcio_firenze/domain/usecases/montar_sumula_impressa.dart';
 import 'package:calcio_firenze/shared/pdf/sumula_pdf.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -110,12 +109,14 @@ Future<MemoriaGestaoRepository> _abrir(
   String? categoria = 'master-2027',
   Map<String, List<Categoria>>? organizacaoPorCategoria,
 }) async {
-  tester.view.physicalSize = Size(_largura * _densidade, _altura * _densidade);
+  tester.view.physicalSize = const Size(_largura * _densidade, _altura * _densidade);
   tester.view.devicePixelRatio = _densidade;
   addTearDown(tester.view.reset);
 
   final repoUsuarios = MemoriaUsuarioRepository(usuarios);
-  final temporada = MemoriaTemporadaRepository(dados ?? montarTemporadaExemplo());
+  final temporada = MemoriaTemporadaRepository(
+    dados ?? montarTemporadaExemplo(demonstracao: false),
+  );
   final gestao = MemoriaGestaoRepository(repoUsuarios, temporada);
   DateTime agora() => TemporadaExemploRepository.agora;
   await tester.pumpWidget(

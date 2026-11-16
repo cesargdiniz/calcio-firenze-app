@@ -24,6 +24,7 @@ Future<MemoriaGestaoRepository> abrirApp(
   SaidaPdf? saidaPdf,
   SeletorImagem? seletorImagem,
   String? categoria = 'master-2027',
+  String? perfilSalvo,
   Map<String, List<Categoria>>? organizacaoPorCategoria,
   List<DadosTemporada> outrasTemporadas = const [],
 }) async {
@@ -48,7 +49,7 @@ Future<MemoriaGestaoRepository> abrirApp(
       gestao: gestao,
       montarPainel: MontarPainel(agora: agora),
       montarSituacao: MontarSituacao(agora: agora),
-      preferencias: MemoriaPreferencias(categoria),
+      preferencias: MemoriaPreferencias(categoria, perfilSalvo),
       saidaPdf: saidaPdf ?? const SaidaPdfDoAparelho(),
       seletorImagem: seletorImagem ?? const SeletorImagemDoAparelho(),
       initialLocation: inicio,

@@ -69,6 +69,7 @@ class _CalcioAppState extends State<CalcioApp> {
       RepositoryProvider<TemporadaRepository>.value(value: widget.temporada),
       RepositoryProvider<AuthRepository>.value(value: widget.auth),
       RepositoryProvider<UsuarioRepository>.value(value: widget.usuarios),
+      RepositoryProvider<PreferenciasRepository>.value(value: widget.preferencias),
       RepositoryProvider<SaidaPdf>.value(value: widget.saidaPdf),
       RepositoryProvider<SeletorImagem>.value(value: widget.seletorImagem),
     ],

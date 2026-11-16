@@ -36,6 +36,12 @@ class InicioScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              // Atleta ou Organização que entrou como Torcedor volta à escolha.
+              IconButton(
+                tooltip: 'Trocar de perfil',
+                onPressed: () => context.go('/entrar'),
+                icon: const Icon(Icons.switch_account_outlined, color: AppColors.texto2),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -72,7 +78,9 @@ class InicioScreen extends StatelessWidget {
           ],
           if (painel.partidas.isNotEmpty) ...[
             TituloSecao(
-              'Classificação · 1º Turno',
+              painel.turno == Painel.geral
+                  ? 'Classificação geral'
+                  : 'Classificação · ${painel.turno}º Turno',
               acao: 'Ver tabela',
               onAcao: () => context.go('/torcedor/tabela'),
             ),

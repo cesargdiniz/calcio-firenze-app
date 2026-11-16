@@ -1,3 +1,4 @@
+import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
 import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -61,7 +62,11 @@ void main() {
   });
 
   testWidgets('login com Google leva ao vínculo; pedido fica pendente', (tester) async {
-    await abrirApp(tester, inicio: '/participante');
+    await abrirApp(
+      tester,
+      inicio: '/participante',
+      dados: montarTemporadaExemplo(demonstracao: false),
+    );
     await tester.tap(find.text('Continuar com Google'));
     await tester.pumpAndSettle();
     expect(find.text('Vincular ao elenco'), findsOneWidget);

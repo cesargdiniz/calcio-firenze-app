@@ -104,7 +104,21 @@ class _VincularScreenState extends State<VincularScreen> {
                   label: Text('Ver ${c.nome}, onde você já tem vínculo'),
                 ),
               ),
-            if (widget.dados.times.isEmpty || widget.dados.pessoas.isEmpty)
+            if (widget.dados.demonstracao)
+              Container(
+                margin: const EdgeInsets.only(top: AppSpacing.md),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: const BoxDecoration(
+                  color: AppColors.amareloSuave,
+                  borderRadius: AppRadius.botao,
+                ),
+                child: const Text(
+                  'Os elencos desta categoria ainda não foram cadastrados pela Organização. O '
+                  'pedido de vínculo abre assim que eles estiverem no app.',
+                  style: AppTextStyles.corpo,
+                ),
+              )
+            else if (widget.dados.times.isEmpty || widget.dados.pessoas.isEmpty)
               Container(
                 margin: const EdgeInsets.only(top: AppSpacing.md),
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -130,6 +144,7 @@ class _VincularScreenState extends State<VincularScreen> {
                   style: AppTextStyles.corpo,
                 ),
               ),
+            if (!widget.dados.demonstracao) ...[
             const TituloSecao('Função'),
             Wrap(
               spacing: AppSpacing.sm,
@@ -206,6 +221,7 @@ class _VincularScreenState extends State<VincularScreen> {
               onPressed: _pessoaId == null || _enviando ? null : _enviar,
               child: Text(_enviando ? 'Enviando…' : 'Enviar para aprovação'),
             ),
+            ],
           ],
         ),
       ),

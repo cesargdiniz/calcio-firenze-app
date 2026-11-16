@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/entities/temporada.dart';
+import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
@@ -38,7 +39,11 @@ class _SuspensosState extends State<_Suspensos> {
       children: [
         CabecalhoTela(
           'Suspensos',
-          subtitulo: etapa == null ? 'Sem jogos marcados' : 'Para ${etapa.rotulo} · ${etapa.turno}º Turno',
+          subtitulo: switch (etapa) {
+            null => 'Sem jogos marcados',
+            Etapa(turno: 0) => 'Para a ${etapa.rotulo}',
+            _ => 'Para ${etapa.rotulo} · ${etapa.turno}º Turno',
+          },
         ),
         const SizedBox(height: AppSpacing.md),
         Wrap(

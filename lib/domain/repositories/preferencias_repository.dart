@@ -4,4 +4,10 @@ abstract interface class PreferenciasRepository {
   Future<String?> categoria();
 
   Future<void> salvarCategoria(String temporadaId);
+
+  /// Rota do último perfil escolhido ('/torcedor', '/participante' ou
+  /// '/organizacao'); nula na primeira vez.
+  Future<String?> perfil();
+
+  Future<void> salvarPerfil(String rota);
 }

@@ -1,15 +1,23 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/repositories/preferencias_repository.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
 import '../../shared/widgets/logo_calcio.dart';
 
-/// 02 · Como você quer entrar
+/// 02 · Como você quer entrar. A escolha fica guardada: nas próximas
+/// aberturas o app vai direto para o perfil (troca pelo "Trocar de perfil").
 class EntradaScreen extends StatelessWidget {
   const EntradaScreen({super.key});
+
+  static void _entrar(BuildContext context, String rota) {
+    context.read<PreferenciasRepository>().salvarPerfil(rota);
+    context.go(rota);
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -28,19 +36,19 @@ class EntradaScreen extends StatelessWidget {
             titulo: 'Torcedor',
             tag: 'Sem login',
             descricao: 'Jogos, tabela e suspensos da temporada.',
-            onTap: () => context.go('/torcedor'),
+            onTap: () => _entrar(context, '/torcedor'),
           ),
           _Opcao(
             titulo: 'Participante',
             tag: 'Com login',
             descricao: 'Atletas, técnicos e dirigentes: sua situação e a do seu time.',
-            onTap: () => context.go('/participante'),
+            onTap: () => _entrar(context, '/participante'),
           ),
           _Opcao(
             titulo: 'Organização',
             tag: 'Acesso restrito',
             descricao: 'Súmulas, disciplina e gestão da temporada.',
-            onTap: () => context.go('/organizacao'),
+            onTap: () => _entrar(context, '/organizacao'),
           ),
         ],
       ),
