@@ -2,11 +2,13 @@ import 'package:calcio_regras/calcio_regras.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/card_jogo.dart';
+import '../../../shared/widgets/datas_copa.dart';
 import '../widgets/com_painel.dart';
 
 /// T2 · Torcedor · Jogos
@@ -34,6 +36,9 @@ class _Jogos extends StatefulWidget {
 class _JogosState extends State<_Jogos> {
   late Etapa? _etapa = _etapaInicial();
 
+  /// Mostrando as datas reservadas da Copa (só no Master).
+  bool _copa = false;
+
   /// Abre na última etapa com jogo encerrado, como no Figma.
   Etapa? _etapaInicial() {
     final encerradas = widget.painel.partidas.where((p) => p.encerrada);
@@ -47,7 +52,8 @@ class _JogosState extends State<_Jogos> {
     final etapas = painel.etapas;
     final doisTurnos = etapas.any((e) => e.turno == 2);
     final etapa = etapas.contains(_etapa) ? _etapa : etapas.firstOrNull;
-    final jogos = etapa == null ? const <Partida>[] : painel.jogosDa(etapa);
+    final jogos = etapa == null || _copa ? const <Partida>[] : painel.jogosDa(etapa);
+    final temCopa = painel.categoria == Categoria.master;
     return ListView(
       padding: AppSpacing.tela,
       children: [
@@ -62,15 +68,20 @@ class _JogosState extends State<_Jogos> {
               for (final e in etapas) ...[
                 ChipFiltro(
                   doisTurnos && e.turno > 0 ? '${e.turno}ºT ${e.curto}' : e.curto,
-                  ativo: e == etapa,
-                  onTap: () => setState(() => _etapa = e),
+                  ativo: !_copa && e == etapa,
+                  onTap: () => setState(() {
+                    _etapa = e;
+                    _copa = false;
+                  }),
                 ),
                 const SizedBox(width: AppSpacing.sm),
               ],
+              if (temCopa)
+                ChipFiltro('Copa', ativo: _copa, onTap: () => setState(() => _copa = true)),
             ],
           ),
         ),
-        if (etapa != null) TituloSecao(etapa.rotulo),
+        if (_copa) const DatasCopa() else if (etapa != null) TituloSecao(etapa.rotulo),
         for (final p in jogos) ...[
           CardJogo(
             partida: p,

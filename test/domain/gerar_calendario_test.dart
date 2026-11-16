@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:calcio_firenze/domain/entities/categoria.dart';
 import 'package:calcio_firenze/domain/usecases/gerar_calendario.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -85,5 +86,64 @@ void main() {
       () => gerar(turno: 2, times: times, horarios: horariosMaster2027[2]!.take(40).toList()),
       throwsA(predicate((e) => e is StateError && e.message.contains('faltam 5'))),
     );
+  });
+
+  group('outras categorias', () {
+    test('Livre: 8 times, 7 rodadas de 4 jogos, a partir de 27/02', () {
+      final oito = times.take(8).toList();
+      for (final t in [1, 2]) {
+        expect(horariosLivre2027[t], hasLength(28 + 5), reason: '$tº turno');
+      }
+      final p = gerar(turno: 1, times: oito, horarios: horariosLivre2027[1]!, sorteio: Random(2));
+      expect(p, hasLength(28));
+      expect(p.map((x) => x.rodada).toSet(), {1, 2, 3, 4, 5, 6, 7});
+      final inicios = p.map((x) => x.inicio).toList()..sort();
+      expect(inicios.first, DateTime(2027, 2, 27, 17));
+      expect(inicios.last, DateTime(2027, 5, 21, 21, 30));
+      expect(horariosLivre2027[0], [DateTime(2027, 12, 15, 20, 30)]);
+    });
+
+    test('Super Master: 6 times, 5 rodadas de 3 jogos, semifinal e final', () {
+      final seis = times.take(6).toList();
+      for (final t in [1, 2]) {
+        expect(horariosSuperMaster2027[t], hasLength(15 + 3), reason: '$tº turno');
+      }
+      final p = gerar(
+        turno: 2,
+        times: seis,
+        horarios: horariosSuperMaster2027[2]!,
+        sorteio: Random(2),
+      );
+      expect(p, hasLength(15));
+      final inicios = p.map((x) => x.inicio).toList()..sort();
+      expect(inicios.first, DateTime(2027, 8, 9, 20, 30));
+      expect(inicios.last, DateTime(2027, 10, 13, 20, 30));
+      expect(horariosSuperMaster2027[0], [DateTime(2027, 11, 6, 19)]);
+    });
+
+    test('cada categoria usa o próprio calendário', () {
+      expect(horariosDe(Categoria.master), same(horariosMaster2027));
+      expect(horariosDe(Categoria.livre), same(horariosLivre2027));
+      expect(horariosDe(Categoria.superMaster), same(horariosSuperMaster2027));
+    });
+  });
+
+  test('Copa Master: 9 jogos em 5 datas reservadas, de 06/04 a 11/06', () {
+    expect(datasCopaMaster2027.map((d) => d.etapa), [
+      'Preliminar',
+      'Quartas de final',
+      'Quartas de final',
+      'Semifinais',
+      'Final',
+    ]);
+    expect(datasCopaMaster2027.expand((d) => d.horarios), hasLength(9));
+    expect(datasCopaMaster2027.first.horarios, [
+      DateTime(2027, 4, 6, 20, 30),
+      DateTime(2027, 4, 6, 21, 30),
+    ]);
+    expect(datasCopaMaster2027.last.horarios, [DateTime(2027, 6, 11, 20, 30)]);
+    // Nenhuma data da Copa cai em horário do Master.
+    final master = {...horariosMaster2027[1]!, ...horariosMaster2027[2]!};
+    expect(datasCopaMaster2027.expand((d) => d.horarios).where(master.contains), isEmpty);
   });
 }

@@ -8,6 +8,8 @@ import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
 import '../../shared/widgets/logo_calcio.dart';
+import '../../domain/entities/categoria.dart';
+import '../categoria/seletor_categoria.dart';
 import '../login/login_screen.dart';
 import 'organizacao_controller.dart';
 
@@ -38,6 +40,7 @@ class OrganizacaoShell extends StatelessWidget {
         subtitulo: 'Acesso restrito a quem organiza o campeonato.',
       ),
       OrgSemAcesso(:final sessao) => _SemAcesso(uid: sessao.uid, email: sessao.email),
+      OrgSemCategoria(:final sessao) => _InformarCategoria(email: sessao.email),
       OrgFalha(:final mensagem) => Scaffold(
         body: Center(
           child: Padding(
@@ -46,8 +49,20 @@ class OrganizacaoShell extends StatelessWidget {
           ),
         ),
       ),
-      OrgPronta() => Scaffold(
-        body: SafeArea(bottom: false, child: navegacao),
+      OrgPronta(:final categoria, :final categorias) => Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              BarraCategoria(
+                atual: categoria,
+                opcoes: categorias,
+                onEscolher: context.read<OrganizacaoController>().escolherCategoria,
+              ),
+              Expanded(child: navegacao),
+            ],
+          ),
+        ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: navegacao.currentIndex,
           onDestinationSelected: (i) =>
@@ -62,6 +77,98 @@ class OrganizacaoShell extends StatelessWidget {
         ),
       ),
     },
+  );
+}
+
+/// Primeiro acesso da conta da Organização: informar a categoria que organiza.
+/// A escolha limita tudo o que a conta altera; trocar depois só pelo console.
+class _InformarCategoria extends StatefulWidget {
+  final String email;
+  const _InformarCategoria({required this.email});
+
+  @override
+  State<_InformarCategoria> createState() => _InformarCategoriaState();
+}
+
+class _InformarCategoriaState extends State<_InformarCategoria> {
+  bool _gravando = false;
+
+  Future<void> _escolher(Categoria c) async {
+    final controller = context.read<OrganizacaoController>();
+    final avisos = ScaffoldMessenger.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text('Organizar a categoria ${c.nome}?'),
+        content: Text(
+          'Esta conta vai alterar só a ${c.nome}: calendário, súmulas, elencos, disciplina e '
+          'pedidos de vínculo. Para trocar depois, fale com quem administra o Firebase.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(d, true), child: const Text('Confirmar')),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _gravando = true);
+    try {
+      await controller.definirMinhaCategoria(c);
+    } catch (_) {
+      avisos.showSnackBar(const SnackBar(content: Text('Não foi possível gravar. Tente de novo.')));
+    } finally {
+      if (mounted) setState(() => _gravando = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: ListView(
+        padding: AppSpacing.tela,
+        children: [
+          const SizedBox(height: AppSpacing.xl),
+          const Align(alignment: Alignment.centerLeft, child: LogoCalcio()),
+          const SizedBox(height: AppSpacing.xl),
+          const Text('Qual categoria você organiza?', style: AppTextStyles.tituloTela),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Você entrou como ${widget.email}. Cada categoria tem a sua Organização: esta conta '
+            'só vai poder alterar a categoria escolhida.',
+            style: AppTextStyles.corpo,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          for (final c in Categoria.values) ...[
+            Cartao(
+              onTap: _gravando ? null : () => _escolher(c),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(c.nome, style: AppTextStyles.tituloSecao),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text('${c.times} times', style: AppTextStyles.pequeno),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded, color: AppColors.dica),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          TextButton(
+            onPressed: () async {
+              await context.read<OrganizacaoController>().sair();
+              if (context.mounted) context.go('/entrar');
+            },
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    ),
   );
 }
 

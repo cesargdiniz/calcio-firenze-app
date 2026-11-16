@@ -1,14 +1,27 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
-/// Barra de baixo do Torcedor (componente "Nav/Torcedor").
+import '../categoria/seletor_categoria.dart';
+
+/// Barra de baixo do Torcedor (componente "Nav/Torcedor") e a categoria no
+/// topo. Na primeira abertura, pede a categoria antes.
 class TorcedorShell extends StatelessWidget {
   final StatefulNavigationShell navegacao;
   const TorcedorShell({super.key, required this.navegacao});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(bottom: false, child: navegacao),
+  Widget build(BuildContext context) => ComCategoria(child: _abas());
+
+  Widget _abas() => Scaffold(
+    body: SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          const BarraCategoriaDoApp(),
+          Expanded(child: navegacao),
+        ],
+      ),
+    ),
     bottomNavigationBar: NavigationBar(
       selectedIndex: navegacao.currentIndex,
       onDestinationSelected: (i) =>

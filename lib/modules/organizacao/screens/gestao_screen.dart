@@ -34,7 +34,14 @@ class GestaoScreen extends StatelessWidget {
       return ListView(
         padding: AppSpacing.tela,
         children: [
-          const CabecalhoTela('Gestão', subtitulo: 'Master · Temporada 2027'),
+          CabecalhoTela('Gestão', subtitulo: o.dados.nome),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            o.categorias.length == 1
+                ? 'Esta conta organiza a categoria ${o.categoria.nome} e só altera os dados dela.'
+                : 'Esta conta organiza: ${o.categorias.map((c) => c.nome).join(', ')}.',
+            style: AppTextStyles.pequeno,
+          ),
           grupo('Temporada', [
             item('Times da temporada', rota: '/organizacao/gestao/times'),
             item('Regulamento e parâmetros', rota: '/organizacao/gestao/parametros'),

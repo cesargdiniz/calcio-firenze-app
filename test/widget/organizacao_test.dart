@@ -10,12 +10,12 @@ const _pedido = Usuario(
   uid: 'u1',
   email: 'rafael@exemplo.com',
   nome: 'Rafael Souza',
-  vinculo: Vinculo(
+  vinculos: [Vinculo(
     temporadaId: 'master-2027',
     pessoaId: 'rafael-souza',
     timeId: 'SAM',
     papel: Papel.atleta,
-  ),
+  )],
 );
 
 void main() {
@@ -49,7 +49,7 @@ void main() {
     await tester.tap(find.text('Aprovar'));
     await tester.pumpAndSettle();
     expect(find.text('Nenhum pedido'), findsOneWidget);
-    final aprovados = await gestao.observarAprovados().first;
+    final aprovados = await gestao.observarAprovados('master-2027').first;
     expect(aprovados.single.uid, 'u1');
   });
 
@@ -77,11 +77,20 @@ void main() {
     tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'Conferir')).onPressed!();
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.text('Pronto'), 200, scrollable: lista);
+    // Rola a lista direto até o fim: arrastar pelo meio da tela cairia no
+    // campo de texto, que tem rolagem própria.
+    Future<void> irAoFim() async {
+      for (var i = 0; i < 3; i++) {
+        final p = tester.state<ScrollableState>(lista).position;
+        p.jumpTo(p.maxScrollExtent);
+        await tester.pumpAndSettle();
+      }
+    }
+
+    await irAoFim();
     expect(find.text('Pronto'), findsOneWidget);
     expect(find.text('12 atletas · 13 pessoas'), findsOneWidget);
 
-    await tester.scrollUntilVisible(find.text('Importar 1 time'), 200, scrollable: lista);
     tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Importar 1 time')).onPressed!();
     await tester.pumpAndSettle();
 

@@ -16,6 +16,13 @@ class Confronto {
   String toString() => '$mandanteId x $visitanteId';
 }
 
+/// Semifinal direta, sem quartas (categorias com 4 classificados): 1º x 4º e
+/// 2º x 3º, com o mais bem colocado como mandante.
+List<Confronto> chaveamentoSemifinaisDiretas(List<LinhaClassificacao> tabela) {
+  String pos(int n) => tabela[n - 1].timeId;
+  return [Confronto(pos(1), pos(4)), Confronto(pos(2), pos(3))];
+}
+
 /// Quartas de final (art. 16.1): 3º x 6º e 4º x 5º; 3º e 4º jogam pelo empate.
 List<Confronto> chaveamentoQuartas(List<LinhaClassificacao> tabela) {
   String pos(int n) => tabela[n - 1].timeId;

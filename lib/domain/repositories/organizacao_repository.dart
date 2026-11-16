@@ -1,22 +1,44 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../entities/categoria.dart';
 import '../entities/temporada.dart';
 import '../entities/usuario.dart';
 
-/// Quem é da Organização (documento `organizacao/{uid}`).
+/// Acesso de uma conta à área da Organização.
+class AcessoOrganizacao {
+  /// A conta está em `organizacao/{uid}`.
+  final bool ehOrganizacao;
+
+  /// Categorias que a conta organiza. Vazia numa conta da Organização: ainda
+  /// não informou a categoria no perfil.
+  final List<Categoria> categorias;
+
+  const AcessoOrganizacao({required this.ehOrganizacao, this.categorias = const []});
+
+  static const nenhum = AcessoOrganizacao(ehOrganizacao: false);
+}
+
+/// Quem é da Organização e de quais categorias (documento
+/// `organizacao/{uid}`, campo `temporadas`).
 abstract interface class OrganizacaoRepository {
-  Stream<bool> ehOrganizacao(String uid);
+  Stream<AcessoOrganizacao> acesso(String uid);
+
+  /// O organizador informa no perfil a categoria que organiza. Só vale na
+  /// primeira vez: trocar depois é feito no console do Firebase.
+  Future<void> definirCategoria(String uid, Categoria categoria);
 }
 
 /// Gravações da Organização na temporada.
 abstract interface class GestaoRepository {
-  /// Pedidos de vínculo aguardando decisão.
-  Stream<List<Usuario>> observarPedidos();
+  /// Pedidos de vínculo da categoria aguardando decisão. Cada usuário vem só
+  /// com o vínculo desta categoria.
+  Stream<List<Usuario>> observarPedidos(String temporadaId);
 
-  /// Contas já aprovadas (para avisar de nome vinculado a duas contas).
-  Stream<List<Usuario>> observarAprovados();
+  /// Contas já aprovadas na categoria (para avisar de nome vinculado a duas
+  /// contas).
+  Stream<List<Usuario>> observarAprovados(String temporadaId);
 
-  Future<void> decidirPedido(String uid, StatusVinculo status);
+  Future<void> decidirPedido(String temporadaId, String uid, StatusVinculo status);
 
   /// Cria ou atualiza os times da temporada.
   Future<void> salvarTimes(String temporadaId, List<Time> times);
@@ -47,7 +69,7 @@ abstract interface class GestaoRepository {
   Future<void> salvarPatrocinador(String temporadaId, String? patrocinador);
 
   /// Saídas de elenco registradas (só a Organização lê).
-  Stream<List<Movimentacao>> observarMovimentacoes();
+  Stream<List<Movimentacao>> observarMovimentacoes(String temporadaId);
 
   /// Registra a saída: marca a pessoa como fora do elenco a partir da data
   /// e, na troca de goleiro, inscreve o [substituto].

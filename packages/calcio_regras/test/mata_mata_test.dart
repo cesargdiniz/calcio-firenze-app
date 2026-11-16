@@ -16,6 +16,12 @@ void main() {
     expect(q.map((c) => c.vantagemEmpate), ['P3', 'P4']);
   });
 
+  test('semifinal direta (4 classificados): 1º x 4º e 2º x 3º', () {
+    final s = chaveamentoSemifinaisDiretas(t);
+    expect(s.map((c) => '$c'), ['P1 x P4', 'P2 x P3']);
+    expect(s.every((c) => c.vantagemEmpate == null), isTrue);
+  });
+
   test('semis: 1º pega o pior índice técnico; 2º, o melhor (art. 16.2)', () {
     final s = chaveamentoSemifinais(t, ['P6', 'P4']);
     expect(s.map((c) => '$c'), ['P1 x P6', 'P2 x P4']);

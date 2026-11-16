@@ -48,6 +48,9 @@ void main() {
     final d = gestao.temporada.dados;
     expect(d.demonstracao, isFalse);
     expect(d.partidas, hasLength(45));
+    // Volta ao topo: o botão de sortear ficava no fim da lista.
+    tester.state<ScrollableState>(find.byType(Scrollable).first).position.jumpTo(0);
+    await tester.pumpAndSettle();
     expect(find.text('Rodada 1'), findsOneWidget);
   });
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:calcio_regras/calcio_regras.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/organizacao_repository.dart';
@@ -12,21 +13,22 @@ import 'firestore_usuario_repository.dart';
 import 'mapeadores.dart';
 
 /// Temporada no Firestore: `temporadas/{id}/times`, `/pessoas`, `/partidas`,
-/// `/decisoes` e `/pagamentos`.
+/// `/decisoes` e `/pagamentos`. Uma temporada por categoria.
 ///
-/// Enquanto não houver elencos nem jogos cadastrados, mostra a temporada de
-/// exemplo (com os times já salvos no Firestore, se houver).
+/// No Master, enquanto não houver elencos nem jogos cadastrados, mostra a
+/// temporada de exemplo (com os times já salvos no Firestore, se houver). As
+/// outras categorias começam vazias, com os times que a Organização cadastrar.
 class FirestoreTemporadaRepository implements TemporadaRepository {
   final FirebaseFirestore _db;
-  final String temporadaId;
 
-  FirestoreTemporadaRepository(this._db, {this.temporadaId = 'master-2027'});
-
-  CollectionReference<Map<String, dynamic>> _col(String nome) =>
-      _db.collection('temporadas').doc(temporadaId).collection(nome);
+  FirestoreTemporadaRepository(this._db);
 
   @override
-  Stream<DadosTemporada> observar() {
+  Stream<DadosTemporada> observar(String temporadaId) {
+    final categoria = Categoria.deTemporada(temporadaId) ?? Categoria.master;
+    CollectionReference<Map<String, dynamic>> col(String nome) =>
+        _db.collection('temporadas').doc(temporadaId).collection(nome);
+
     late StreamController<DadosTemporada> saida;
     final subs = <StreamSubscription<void>>[];
     List<Time>? times;
@@ -46,12 +48,15 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
           parametros == null) {
         return;
       }
-      final porId = {for (final t in timesMaster2027) t.id: t};
+      final porId = {
+        if (categoria == Categoria.master)
+          for (final t in timesMaster2027) t.id: t,
+      };
       for (final t in times!) {
         porId[t.id] = t;
       }
       final listaTimes = porId.values.toList();
-      if (pessoas!.isEmpty && partidas!.isEmpty) {
+      if (categoria == Categoria.master && pessoas!.isEmpty && partidas!.isEmpty) {
         final exemplo = montarTemporadaExemplo();
         saida.add(
           DadosTemporada(
@@ -72,7 +77,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
         saida.add(
           DadosTemporada(
             id: temporadaId,
-            nome: 'Master · Temporada 2027',
+            nome: categoria.titulo,
             local: 'Arena Gugu',
             times: listaTimes,
             pessoas: pessoas!,
@@ -98,7 +103,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
       bool opcional = false,
     }) {
       subs.add(
-        _col(colecao).snapshots().listen(
+        col(colecao).snapshots().listen(
           (s) {
             guardar([for (final d in s.docs) ler(d.id, d.data())]);
             emitir();
@@ -155,40 +160,64 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
   }
 }
 
+/// `organizacao/{uid}`: quem existe ali é da Organização. O campo
+/// `temporadas` (lista de ids) diz quais categorias a pessoa organiza; sem
+/// ele, ela ainda precisa informar a categoria no perfil.
 class FirestoreOrganizacaoRepository implements OrganizacaoRepository {
   final FirebaseFirestore _db;
   FirestoreOrganizacaoRepository(this._db);
 
+  DocumentReference<Map<String, dynamic>> _doc(String uid) =>
+      _db.collection('organizacao').doc(uid);
+
   @override
-  Stream<bool> ehOrganizacao(String uid) =>
-      _db.collection('organizacao').doc(uid).snapshots().map((s) => s.exists);
+  Stream<AcessoOrganizacao> acesso(String uid) => _doc(uid).snapshots().map((s) {
+    if (!s.exists) return AcessoOrganizacao.nenhum;
+    final ids = s.data()?['temporadas'];
+    return AcessoOrganizacao(
+      ehOrganizacao: true,
+      categorias: [
+        if (ids is List)
+          for (final c in Categoria.values)
+            if (ids.contains(c.temporadaId)) c,
+      ],
+    );
+  });
+
+  @override
+  Future<void> definirCategoria(String uid, Categoria categoria) =>
+      _doc(uid).update({'temporadas': [categoria.temporadaId]});
 }
 
 class FirestoreGestaoRepository implements GestaoRepository {
   final FirebaseFirestore _db;
 
-  /// Temporada cujas movimentações a Organização acompanha.
-  final String temporadaId;
+  FirestoreGestaoRepository(this._db);
 
-  FirestoreGestaoRepository(this._db, {this.temporadaId = 'master-2027'});
-
-  Stream<List<Usuario>> _porStatus(StatusVinculo status) => _db
-      .collection('usuarios')
-      .where('vinculo.status', isEqualTo: status.name)
-      .snapshots()
-      .map((s) => [for (final d in s.docs) FirestoreUsuarioRepository.deMapa(d.id, d.data())]);
-
-  @override
-  Stream<List<Usuario>> observarPedidos() => _porStatus(StatusVinculo.pendente);
+  Stream<List<Usuario>> _porStatus(String temporadaId, StatusVinculo status) =>
+      _col(temporadaId, 'vinculos')
+          .where('status', isEqualTo: status.name)
+          .snapshots()
+          .map(
+            (s) => [
+              for (final d in s.docs) FirestoreUsuarioRepository.pedidoDeMapa(temporadaId, d.id, d.data()),
+            ],
+          );
 
   @override
-  Stream<List<Usuario>> observarAprovados() => _porStatus(StatusVinculo.aprovado);
+  Stream<List<Usuario>> observarPedidos(String temporadaId) =>
+      _porStatus(temporadaId, StatusVinculo.pendente);
 
   @override
-  Future<void> decidirPedido(String uid, StatusVinculo status) => _db
-      .collection('usuarios')
-      .doc(uid)
-      .update({'vinculo.status': status.name, 'decididoEm': FieldValue.serverTimestamp()});
+  Stream<List<Usuario>> observarAprovados(String temporadaId) =>
+      _porStatus(temporadaId, StatusVinculo.aprovado);
+
+  @override
+  Future<void> decidirPedido(String temporadaId, String uid, StatusVinculo status) =>
+      _col(temporadaId, 'vinculos').doc(uid).update({
+        'status': status.name,
+        'decididoEm': FieldValue.serverTimestamp(),
+      });
 
   @override
   Future<void> salvarTimes(String temporadaId, List<Time> times) async {
@@ -283,7 +312,8 @@ class FirestoreGestaoRepository implements GestaoRepository {
       .set({'patrocinador': patrocinador}, SetOptions(merge: true));
 
   @override
-  Stream<List<Movimentacao>> observarMovimentacoes() => _col(temporadaId, 'movimentacoes')
+  Stream<List<Movimentacao>> observarMovimentacoes(String temporadaId) =>
+      _col(temporadaId, 'movimentacoes')
       .snapshots()
       .map((s) => [for (final d in s.docs) movimentacaoDeMapa(d.id, d.data())]);
 

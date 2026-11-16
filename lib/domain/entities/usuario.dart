@@ -27,7 +27,9 @@ enum Papel {
 
 enum StatusVinculo { pendente, aprovado, recusado }
 
-/// Pedido para ligar a conta a uma pessoa do elenco. A Organização aprova.
+/// Pedido para ligar a conta a uma pessoa do elenco de uma categoria. A
+/// Organização da categoria aprova. Uma conta pode ter um vínculo em cada
+/// categoria (o mesmo atleta pode jogar Master e Livre).
 class Vinculo {
   final String temporadaId;
   final String pessoaId;
@@ -42,21 +44,37 @@ class Vinculo {
     required this.papel,
     this.status = StatusVinculo.pendente,
   });
+
+  Vinculo comStatus(StatusVinculo s) =>
+      Vinculo(temporadaId: temporadaId, pessoaId: pessoaId, timeId: timeId, papel: papel, status: s);
 }
 
-/// Cadastro do usuário no app (documento `usuarios/{uid}`).
+/// Cadastro do usuário no app (documento `usuarios/{uid}`) e os vínculos
+/// dele, um por categoria (`temporadas/{id}/vinculos/{uid}`).
 class Usuario {
   final String uid;
   final String email;
   final String nome;
   final PerfilUsuario perfil;
-  final Vinculo? vinculo;
+  final List<Vinculo> vinculos;
 
   const Usuario({
     required this.uid,
     required this.email,
     required this.nome,
     this.perfil = PerfilUsuario.participante,
-    this.vinculo,
+    this.vinculos = const [],
   });
+
+  /// Vínculo na temporada (categoria) informada, se houver.
+  Vinculo? vinculoEm(String temporadaId) =>
+      vinculos.where((v) => v.temporadaId == temporadaId).firstOrNull;
+
+  Usuario comVinculo(Vinculo v) => Usuario(
+    uid: uid,
+    email: email,
+    nome: nome,
+    perfil: perfil,
+    vinculos: [...vinculos.where((x) => x.temporadaId != v.temporadaId), v],
+  );
 }

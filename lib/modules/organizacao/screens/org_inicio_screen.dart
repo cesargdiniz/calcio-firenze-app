@@ -23,16 +23,18 @@ class OrgInicioScreen extends StatelessWidget {
       return ListView(
         padding: AppSpacing.tela,
         children: [
-          const Row(
+          Row(
             children: [
-              LogoCalcio(),
-              SizedBox(width: AppSpacing.md),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Organização', style: AppTextStyles.tituloSecao),
-                  Text('Master · Temporada 2027', style: AppTextStyles.subtitulo),
-                ],
+              const LogoCalcio(),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Organização', style: AppTextStyles.tituloSecao),
+                    Text(d.nome, style: AppTextStyles.subtitulo),
+                  ],
+                ),
               ),
             ],
           ),

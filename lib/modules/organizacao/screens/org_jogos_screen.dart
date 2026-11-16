@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/mata_mata.dart';
 import '../../../shared/format.dart';
@@ -11,6 +12,7 @@ import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/card_jogo.dart';
+import '../../../shared/widgets/datas_copa.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 
@@ -19,12 +21,13 @@ class OrgJogosScreen extends StatelessWidget {
   const OrgJogosScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => ComOrg(builder: (context, o) => _Jogos(o: o));
+  Widget build(BuildContext context) =>
+      ComOrg(builder: (context, o) => _Jogos(key: ValueKey(o.dados.id), o: o));
 }
 
 class _Jogos extends StatefulWidget {
   final OrgPronta o;
-  const _Jogos({required this.o});
+  const _Jogos({super.key, required this.o});
 
   @override
   State<_Jogos> createState() => _JogosState();
@@ -45,15 +48,17 @@ class _JogosState extends State<_Jogos> {
 
   Future<void> _gerar({required bool refazer}) async {
     final demo = widget.o.dados.demonstracao;
+    final cat = widget.o.categoria;
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(refazer ? 'Refazer o sorteio?' : 'Sortear o $_turnoº turno?'),
         content: Text(
           [
-            'O app sorteia os confrontos (todos contra todos, 9 rodadas, 45 jogos) e '
-                'ocupa os horários oficiais do calendário do Master, na Arena Gugu. '
-                'Depois dá para mudar data, hora e local de cada jogo.',
+            'O app sorteia os confrontos (todos contra todos, ${cat.rodadas} rodadas, '
+                '${cat.rodadas * cat.times ~/ 2} jogos) e ocupa os horários oficiais do '
+                'calendário ${cat.nome}, na Arena Gugu. Depois dá para mudar data, hora e '
+                'local de cada jogo.',
             if (refazer) 'Os confrontos atuais deste turno serão substituídos.',
             if (demo) 'Os jogos e cartões de exemplo saem do app.',
           ].join('\n\n'),
@@ -125,7 +130,8 @@ class _JogosState extends State<_Jogos> {
             texto: o.dados.demonstracao
                 ? 'O app está mostrando a temporada de exemplo. Ao sortear o turno, '
                       'os jogos reais entram no lugar.'
-                : 'Sorteie os confrontos do $_turnoº turno para montar as 9 rodadas.',
+                : 'Sorteie os confrontos do $_turnoº turno para montar as '
+                      '${o.categoria.rodadas} rodadas.',
           ),
           FilledButton(
             onPressed: _gerando ? null : () => _gerar(refazer: false),
@@ -171,11 +177,15 @@ class _JogosState extends State<_Jogos> {
               style: AppTextStyles.pequeno,
             ),
         ],
+        if (o.categoria == Categoria.master && _turno == 1) ...[
+          const SizedBox(height: AppSpacing.md),
+          const DatasCopa(),
+        ],
         if (o.dados.demonstracao)
           const Padding(
             padding: EdgeInsets.only(top: AppSpacing.md),
             child: Text(
-              'Dica: importe os elencos antes ou depois. O sorteio usa os 10 times da temporada.',
+              'Dica: importe os elencos antes ou depois. O sorteio usa os times da temporada.',
               style: TextStyle(fontFamily: 'OpenSans', fontSize: 11, color: AppColors.dica),
             ),
           ),

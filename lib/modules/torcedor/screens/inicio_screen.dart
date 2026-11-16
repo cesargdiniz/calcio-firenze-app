@@ -27,16 +27,25 @@ class InicioScreen extends StatelessWidget {
             children: [
               const LogoCalcio(),
               const SizedBox(width: AppSpacing.md),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Calcio Firenze', style: AppTextStyles.tituloSecao.copyWith(fontSize: 20)),
-                  Text(painel.nomeTemporada, style: AppTextStyles.subtitulo),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Calcio Firenze', style: AppTextStyles.tituloSecao.copyWith(fontSize: 20)),
+                    Text(painel.nomeTemporada, style: AppTextStyles.subtitulo),
+                  ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
+          if (painel.partidas.isEmpty)
+            const ListaVazia(
+              icone: Icons.event_outlined,
+              titulo: 'Calendário ainda não publicado',
+              texto: 'Os jogos, a tabela e os suspensos desta categoria aparecem aqui assim que '
+                  'a Organização sortear o calendário.',
+            ),
           if (painel.proximaEtapa != null && suspensos > 0)
             _AvisoSuspensos(
               texto: suspensos == 1
@@ -61,16 +70,18 @@ class InicioScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
             ],
           ],
-          TituloSecao(
-            'Classificação · 1º Turno',
-            acao: 'Ver tabela',
-            onAcao: () => context.go('/torcedor/tabela'),
-          ),
-          TabelaClassificacao(
-            painel: painel,
-            linhas: painel.tabela.take(4).toList(),
-            compacta: true,
-          ),
+          if (painel.partidas.isNotEmpty) ...[
+            TituloSecao(
+              'Classificação · 1º Turno',
+              acao: 'Ver tabela',
+              onAcao: () => context.go('/torcedor/tabela'),
+            ),
+            TabelaClassificacao(
+              painel: painel,
+              linhas: painel.tabela.take(4).toList(),
+              compacta: true,
+            ),
+          ],
         ],
       );
     },

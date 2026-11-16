@@ -15,7 +15,7 @@ class AvisosScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ComParticipante(
     builder: (context, p) {
-      final avisos = montarAvisos(p.pessoal, p.time, veTime: p.papel.veTime);
+      final avisos = avisosDoParticipante(p);
       final meus = avisos.where((a) => !a.doTime).toList();
       final doTime = avisos.where((a) => a.doTime).toList();
       return ListView(

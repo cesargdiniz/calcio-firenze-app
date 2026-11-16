@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:calcio_firenze/app/app.dart';
 import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
 import 'package:calcio_firenze/data/memoria/memoria_repositories.dart';
+import 'package:calcio_firenze/domain/entities/categoria.dart';
 import 'package:calcio_firenze/domain/entities/temporada.dart';
 import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
@@ -37,13 +38,13 @@ Usuario _usuario(StatusVinculo status, {String uid = 'u1'}) => Usuario(
   uid: uid,
   email: 'rafael@exemplo.com',
   nome: 'Rafael Souza',
-  vinculo: Vinculo(
+  vinculos: [Vinculo(
     temporadaId: 'master-2027',
     pessoaId: 'rafael-souza',
     timeId: 'SAM',
     papel: Papel.atleta,
     status: status,
-  ),
+  )],
 );
 
 /// A temporada de exemplo como se fosse a real (elencos importados, três
@@ -106,6 +107,8 @@ Future<MemoriaGestaoRepository> _abrir(
   Set<String> organizacao = const {},
   DadosTemporada? dados,
   bool assentar = true,
+  String? categoria = 'master-2027',
+  Map<String, List<Categoria>>? organizacaoPorCategoria,
 }) async {
   tester.view.physicalSize = Size(_largura * _densidade, _altura * _densidade);
   tester.view.devicePixelRatio = _densidade;
@@ -120,10 +123,11 @@ Future<MemoriaGestaoRepository> _abrir(
       temporada: temporada,
       auth: MemoriaAuthRepository(sessao: sessao),
       usuarios: repoUsuarios,
-      organizacao: MemoriaOrganizacaoRepository(organizacao),
+      organizacao: MemoriaOrganizacaoRepository(organizacao, organizacaoPorCategoria),
       gestao: gestao,
       montarPainel: MontarPainel(agora: agora),
       montarSituacao: MontarSituacao(agora: agora),
+      preferencias: MemoriaPreferencias(categoria),
       initialLocation: rota,
     ),
   );
@@ -218,6 +222,35 @@ void main() {
     });
   });
 
+  group('Categorias', () {
+    _tela('02b escolher categoria', (t) async {
+      await _abrir(t, '/torcedor', categoria: null);
+      await _capturar(t, '02b_escolher_categoria');
+    });
+    _tela('02c trocar categoria', (t) async {
+      await _abrir(t, '/torcedor');
+      await t.tap(find.byKey(const Key('seletor-categoria')));
+      await t.pumpAndSettle();
+      await _capturar(t, '02c_trocar_categoria');
+    });
+    _tela('02d categoria sem calendário', (t) async {
+      await _abrir(t, '/torcedor', categoria: 'livre-2027');
+      await _capturar(t, '02d_livre_sem_calendario');
+    });
+    _tela('02e organização de uma categoria', (t) async {
+      await _abrir(
+        t,
+        '/organizacao/gestao/times',
+        sessao: _org,
+        categoria: 'livre-2027',
+        organizacaoPorCategoria: {
+          'org1': [Categoria.livre],
+        },
+      );
+      await _capturar(t, '02e_org_livre_times');
+    });
+  });
+
   group('Torcedor', () {
     _tela('03 início', (t) async {
       await _abrir(t, '/torcedor');
@@ -299,13 +332,13 @@ void main() {
             uid: 'u1',
             email: 'helio@exemplo.com',
             nome: 'Hélio Ramos',
-            vinculo: Vinculo(
+            vinculos: [Vinculo(
               temporadaId: 'master-2027',
               pessoaId: 'helio-ramos',
               timeId: 'SAM',
               papel: Papel.tecnico,
               status: StatusVinculo.aprovado,
-            ),
+            )],
           ),
         },
       );

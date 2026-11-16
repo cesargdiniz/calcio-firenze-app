@@ -1,8 +1,14 @@
 rules_version = '2';
 
 // Regras de acesso. Perfis: Torcedor (sem login), Participante (login +
-// vínculo aprovado) e Organização (quem tem documento em organizacao/{uid},
-// criado à mão no console do Firebase).
+// vínculo aprovado na categoria) e Organização (quem tem documento em
+// organizacao/{uid}, criado à mão no console do Firebase).
+//
+// Cada categoria é uma temporada (temporadas/master-2027, /livre-2027,
+// /super-master-2027). O campo `temporadas` em organizacao/{uid} (lista de
+// ids) diz quais categorias a conta organiza: ela só altera essas. No
+// primeiro acesso, o próprio organizador informa a categoria no app; trocar
+// depois (ou dar mais de uma) é feito aqui no console.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -10,11 +16,23 @@ service cloud.firestore {
     function organizacao() {
       return logado() && exists(/databases/$(database)/documents/organizacao/$(request.auth.uid));
     }
+    function organizacaoDe(t) {
+      return organizacao()
+        && t in get(/databases/$(database)/documents/organizacao/$(request.auth.uid)).data.get('temporadas', []);
+    }
 
     // Lista de quem é da Organização: só leitura do próprio registro.
+    // O organizador lê o próprio registro e informa a categoria uma única vez
+    // (só se ainda não tiver `temporadas`, e só uma categoria).
     match /organizacao/{uid} {
       allow read: if logado() && request.auth.uid == uid;
-      allow write: if false;
+      allow update: if logado() && request.auth.uid == uid
+        && !('temporadas' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['temporadas'])
+        && request.resource.data.temporadas is list
+        && request.resource.data.temporadas.size() == 1
+        && request.resource.data.temporadas[0] in ['master-2027', 'super-master-2027', 'livre-2027'];
+      allow create, delete: if false;
     }
 
     // Dados públicos: qualquer pessoa lê; só a Organização escreve.
@@ -25,36 +43,46 @@ service cloud.firestore {
 
     match /temporadas/{t} {
       allow read: if true;
-      allow write: if organizacao();
+      allow write: if organizacaoDe(t);
 
-      match /times/{id}     { allow read: if true; allow write: if organizacao(); }
-      match /partidas/{id}  { allow read: if true; allow write: if organizacao(); }
-      match /decisoes/{id}  { allow read: if true; allow write: if organizacao(); }
-      match /ajustes/{id}   { allow read: if true; allow write: if organizacao(); }
-      match /publico/{doc}  { allow read: if true; allow write: if organizacao(); }
+      match /times/{id}     { allow read: if true; allow write: if organizacaoDe(t); }
+      match /partidas/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
+      match /decisoes/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
+      match /ajustes/{id}   { allow read: if true; allow write: if organizacaoDe(t); }
+      match /publico/{doc}  { allow read: if true; allow write: if organizacaoDe(t); }
 
       // Elencos: nome e número são públicos (aparecem na súmula e na lista de
-      // suspensos); só a Organização grava.
-      match /pessoas/{id}   { allow read: if true; allow write: if organizacao(); }
+      // suspensos); só a Organização da categoria grava.
+      match /pessoas/{id}   { allow read: if true; allow write: if organizacaoDe(t); }
 
-      // Financeiro e documentos: só a Organização.
+      // Financeiro e documentos: só a Organização da categoria.
       // Quitações: quem tem login lê (para ver a própria situação); só a
       // Organização registra.
-      match /pagamentos/{id}    { allow read: if logado(); allow write: if organizacao(); }
-      match /movimentacoes/{id} { allow read, write: if organizacao(); }
-      match /privado/{doc}      { allow read, write: if organizacao(); }
+      match /pagamentos/{id}    { allow read: if logado(); allow write: if organizacaoDe(t); }
+      match /movimentacoes/{id} { allow read, write: if organizacaoDe(t); }
+      match /privado/{doc}      { allow read, write: if organizacaoDe(t); }
+
+      // Vínculo da conta nesta categoria. O próprio usuário lê e pede (ou
+      // refaz) o vínculo, sempre como pendente; só a Organização da categoria
+      // aprova ou recusa.
+      match /vinculos/{uid} {
+        function proprio() { return logado() && request.auth.uid == uid; }
+        function pedidoValido() { return request.resource.data.status == 'pendente'; }
+        allow read: if organizacaoDe(t) || proprio();
+        allow create, update: if organizacaoDe(t) || (proprio() && pedidoValido());
+        allow delete: if organizacaoDe(t) || proprio();
+      }
     }
 
-    // Cada usuário lê o próprio cadastro e pede (ou refaz) o vínculo, sempre
-    // como pendente. Só a Organização aprova ou recusa.
+    // Cadastro da conta (nome e e-mail). Os vínculos ficam em cada categoria
+    // (temporadas/{t}/vinculos/{uid}).
     match /usuarios/{uid} {
-      function pedidoValido() {
+      function cadastroValido() {
         return request.resource.data.perfil == 'participante'
-          && request.resource.data.vinculo.status == 'pendente';
+          && !('vinculo' in request.resource.data);
       }
       allow read: if organizacao() || (logado() && request.auth.uid == uid);
-      allow create: if logado() && request.auth.uid == uid && pedidoValido();
-      allow update: if organizacao() || (logado() && request.auth.uid == uid && pedidoValido());
+      allow create, update: if logado() && request.auth.uid == uid && cadastroValido();
       allow delete: if organizacao() || (logado() && request.auth.uid == uid);
 
       match /situacao/{doc} {

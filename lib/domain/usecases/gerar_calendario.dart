@@ -2,11 +2,14 @@ import 'dart:math';
 
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../entities/categoria.dart';
+
 DateTime _h(int mes, int dia, int hora, [int minuto = 0]) => DateTime(2027, mes, dia, hora, minuto);
 
-/// Horários de um dia de jogos do Master: em dia de semana, 20:30 e 21:30;
-/// no sábado, a partir das 17h, um por hora. Jogo único de sábado (finais)
-/// às 19h.
+/// Horários de um dia de jogos: em dia de semana, a partir das 20:30, um por
+/// hora; no sábado, a partir das 17h, um por hora. Jogo único de sábado
+/// (finais) às 19h. Os horários exatos de cada jogo podem ser ajustados pela
+/// Organização na tela do jogo.
 List<DateTime> _dia(int mes, int dia, int jogos) {
   final sabado = DateTime(2027, mes, dia).weekday == DateTime.saturday;
   if (sabado) {
@@ -57,9 +60,88 @@ final horariosMaster2027 = <int, List<DateTime>>{
   0: _dias(const [(12, 11, 1)]), // grande final
 };
 
+/// Livre 2027: 8 times, 7 rodadas de 4 jogos por turno.
+final horariosLivre2027 = <int, List<DateTime>>{
+  1: _dias(const [
+    (2, 27, 4), // 1ª rodada
+    (3, 10, 2), (3, 12, 2),
+    (3, 24, 2), (3, 25, 2),
+    (4, 7, 2), (4, 9, 2),
+    (4, 24, 4),
+    (5, 5, 2), (5, 7, 2),
+    (5, 19, 2), (5, 21, 2), // 7ª rodada
+    (6, 2, 2), // quartas
+    (6, 23, 2), // semifinais
+    (6, 26, 1), // final do 1º turno
+  ]),
+  2: _dias(const [
+    (7, 31, 4), // 1ª rodada
+    (8, 11, 2), (8, 13, 2),
+    (8, 25, 2), (8, 27, 2),
+    (9, 8, 2), (9, 10, 2),
+    (10, 14, 2), (10, 15, 2),
+    (10, 18, 2), (10, 19, 2),
+    (10, 20, 2), (10, 22, 2), // 7ª rodada
+    (11, 5, 2), // quartas
+    (11, 17, 2), // semifinais
+    (11, 20, 1), // final do 2º turno
+  ]),
+  0: _dias(const [(12, 15, 1)]), // grande final
+};
+
+/// Super Master 2027: 6 times, 5 rodadas de 3 jogos por turno, semifinal
+/// direta.
+final horariosSuperMaster2027 = <int, List<DateTime>>{
+  1: _dias(const [
+    (3, 13, 3), // 1ª rodada
+    (3, 22, 1), (3, 23, 2),
+    (4, 5, 1), (4, 8, 2),
+    (4, 19, 2), (4, 23, 1),
+    (5, 3, 1), (5, 6, 2), // 5ª rodada
+    (5, 20, 2), // semifinais
+    (6, 5, 1), // final do 1º turno
+  ]),
+  2: _dias(const [
+    (8, 9, 1), (8, 10, 2), // 1ª rodada
+    (8, 12, 2), (8, 14, 1),
+    (8, 23, 1), (8, 26, 2),
+    (9, 6, 1), (9, 9, 2),
+    (10, 11, 2), (10, 13, 1), // 5ª rodada
+    (10, 16, 2), // semifinais
+    (10, 23, 1), // final do 2º turno
+  ]),
+  0: _dias(const [(11, 6, 1)]), // grande final
+};
+
+/// Um dia reservado no calendário, com os horários dos jogos. Os confrontos
+/// ainda não estão definidos.
+class DiaReservado {
+  final String etapa;
+  final List<DateTime> horarios;
+  const DiaReservado(this.etapa, this.horarios);
+}
+
+/// Copa Master 2027: mata-mata exclusivo dos times do Master. Por enquanto
+/// só as datas ficam reservadas; quem joga é definido depois.
+final datasCopaMaster2027 = [
+  DiaReservado('Preliminar', _dia(4, 6, 2)),
+  DiaReservado('Quartas de final', _dia(4, 20, 2)),
+  DiaReservado('Quartas de final', _dia(4, 22, 2)),
+  DiaReservado('Semifinais', _dia(5, 18, 2)),
+  DiaReservado('Final', _dia(6, 11, 1)),
+];
+
+/// Horários oficiais da categoria, por turno (0 = grande final).
+Map<int, List<DateTime>> horariosDe(Categoria c) => switch (c) {
+  Categoria.master => horariosMaster2027,
+  Categoria.superMaster => horariosSuperMaster2027,
+  Categoria.livre => horariosLivre2027,
+};
+
 /// Sorteia a tabela da fase classificatória de um turno (todos contra todos,
-/// art. 16) e ocupa os horários na ordem: os primeiros 5 jogos são a
-/// Rodada 1, os 5 seguintes a Rodada 2, e assim por diante.
+/// art. 16) e ocupa os horários na ordem: os primeiros jogos (metade do
+/// número de times) são a Rodada 1, os seguintes a Rodada 2, e assim por
+/// diante.
 class GerarCalendario {
   final String local;
 
