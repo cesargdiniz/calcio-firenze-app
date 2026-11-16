@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../categoria/seletor_categoria.dart';
+import 'widgets/faixa_exemplo.dart';
 
 /// Barra de baixo do Torcedor (componente "Nav/Torcedor") e a categoria no
 /// topo. Na primeira abertura, pede a categoria antes.
@@ -18,6 +19,7 @@ class TorcedorShell extends StatelessWidget {
       child: Column(
         children: [
           const BarraCategoriaDoApp(),
+          const FaixaExemplo(),
           Expanded(child: navegacao),
         ],
       ),

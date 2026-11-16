@@ -171,4 +171,38 @@ void main() {
     expect(find.byIcon(Icons.expand_more_rounded), findsNothing);
     expect(find.text('Super Master · Temporada 2027'), findsOneWidget);
   });
+
+  testWidgets('Tabela troca entre 1º turno, 2º turno e geral', (tester) async {
+    await abrirApp(tester, inicio: '/torcedor/tabela');
+    expect(find.text('Fase classificatória · 1º Turno'), findsOneWidget);
+
+    await tester.tap(find.text('2º Turno'));
+    await tester.pumpAndSettle();
+    expect(find.text('Fase classificatória · 2º Turno'), findsOneWidget);
+
+    await tester.tap(find.text('Geral'));
+    await tester.pumpAndSettle();
+    expect(find.text('Geral · os dois turnos somados'), findsOneWidget);
+    await tester.scrollUntilVisible(find.textContaining('rebaixados'), 200);
+    expect(find.textContaining('rebaixados'), findsOneWidget);
+  });
+
+  testWidgets('dados de exemplo: faixa de aviso para o Torcedor', (tester) async {
+    await abrirApp(tester, inicio: '/torcedor');
+    expect(find.byKey(const Key('faixa-exemplo')), findsOneWidget);
+  });
+
+  testWidgets('dados de exemplo: sem pedido de vínculo', (tester) async {
+    await abrirApp(tester, inicio: '/participante', sessao: _marcos);
+    expect(find.text('Vincular ao elenco'), findsOneWidget);
+    expect(find.text('Enviar para aprovação'), findsNothing);
+  });
+
+  testWidgets('o app lembra o perfil e pula a escolha', (tester) async {
+    await abrirApp(tester, perfilSalvo: '/torcedor');
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.text('Como você quer entrar?'), findsNothing);
+    expect(find.text('Próximos jogos · Rodada 4'), findsOneWidget);
+  });
 }

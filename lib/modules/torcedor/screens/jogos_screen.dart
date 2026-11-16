@@ -36,8 +36,13 @@ class _Jogos extends StatefulWidget {
 class _JogosState extends State<_Jogos> {
   late Etapa? _etapa = _etapaInicial();
 
+  /// Turno dos botões de etapa (o 2º inclui a grande final).
+  late int _turno = _etapa == null ? widget.painel.turnoAtual : _turnoDa(_etapa!);
+
   /// Mostrando as datas reservadas da Copa (só no Master).
   bool _copa = false;
+
+  static int _turnoDa(Etapa e) => e.turno == 0 ? 2 : e.turno;
 
   /// Abre na última etapa com jogo encerrado, como no Figma.
   Etapa? _etapaInicial() {
@@ -49,17 +54,33 @@ class _JogosState extends State<_Jogos> {
   @override
   Widget build(BuildContext context) {
     final painel = widget.painel;
-    final etapas = painel.etapas;
-    final doisTurnos = etapas.any((e) => e.turno == 2);
+    final etapas = [
+      for (final e in painel.etapas)
+        if (_turnoDa(e) == _turno) e,
+    ];
     final etapa = etapas.contains(_etapa) ? _etapa : etapas.firstOrNull;
     final jogos = etapa == null || _copa ? const <Partida>[] : painel.jogosDa(etapa);
-    final temCopa = painel.categoria == Categoria.master;
+    final temCopa = painel.categoria == Categoria.master && _turno == 1;
     return ListView(
       padding: AppSpacing.tela,
       children: [
         const CabecalhoTela('Jogos'),
         const SizedBox(height: AppSpacing.md),
-        const Row(children: [ChipFiltro('1º Turno', ativo: true)]),
+        Wrap(
+          spacing: AppSpacing.sm,
+          children: [
+            for (final t in [1, 2])
+              ChipFiltro(
+                '$tº Turno',
+                ativo: _turno == t,
+                onTap: () => setState(() {
+                  _turno = t;
+                  _etapa = null;
+                  _copa = false;
+                }),
+              ),
+          ],
+        ),
         const SizedBox(height: AppSpacing.md),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -67,7 +88,7 @@ class _JogosState extends State<_Jogos> {
             children: [
               for (final e in etapas) ...[
                 ChipFiltro(
-                  doisTurnos && e.turno > 0 ? '${e.turno}ºT ${e.curto}' : e.curto,
+                  e.curto,
                   ativo: !_copa && e == etapa,
                   onTap: () => setState(() {
                     _etapa = e;
@@ -81,7 +102,16 @@ class _JogosState extends State<_Jogos> {
             ],
           ),
         ),
-        if (_copa) const DatasCopa() else if (etapa != null) TituloSecao(etapa.rotulo),
+        if (_copa)
+          const DatasCopa()
+        else if (etapa != null)
+          TituloSecao(etapa.rotulo)
+        else
+          ListaVazia(
+            icone: Icons.event_outlined,
+            titulo: 'Sem jogos no $_turnoº turno',
+            texto: 'Os jogos aparecem aqui quando a Organização sortear o calendário do turno.',
+          ),
         for (final p in jogos) ...[
           CardJogo(
             partida: p,

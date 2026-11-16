@@ -16,15 +16,13 @@ Convenções: as skills em `.claude/skills` (Clean Architecture, Cubit com statu
 
 O Firebase gratuito (plano Spark) não roda Cloud Functions, e as regras estão em Dart. Por isso:
 
-- **As regras rodam no app.** Quando a Organização encerra uma súmula, registra um pagamento ou uma decisão, o próprio app recalcula com `calcio_regras` e publica o resultado.
-- **O Torcedor lê um documento pronto** (`publico/painel`): tabela, jogos, suspensos e pendurados. Uma leitura por abertura, sem cálculo e sem dados financeiros.
+- **As regras rodam no app.** Cada aparelho lê os dados da categoria (times, elencos, jogos com súmula, decisões e, com login, quitações) e calcula tabela, suspensões e pendências com `calcio_regras`.
 - **As fontes de verdade** são as súmulas, as decisões e os pagamentos. Pendências, suspensões e tabela são sempre derivados delas e podem ser recalculados a qualquer momento.
+- **Custo de leitura:** cada abertura lê todos os documentos da categoria (algumas centenas). O plano gratuito permite 50 mil leituras por dia. Se o uso crescer, a saída é um resumo pronto por categoria (`publico/painel`), gravado pelo app da Organização a cada alteração, para o público ler em poucas leituras.
 
 ## Firestore
 
 ```
-clubes/{clubeId}                      nome, sigla, cor, escudoUrl, historico[]   (cadastrado uma vez)
-
 temporadas/{temporadaId}              uma por categoria: master-2027, super-master-2027,
                                       livre-2027. parametros{...}, patrocinador? (nome da
                                       competição na súmula: "CF <patrocinador> <ano>")
@@ -45,14 +43,11 @@ temporadas/{temporadaId}              uma por categoria: master-2027, super-mast
                                       pessoaId, timeId, nome, data, laudo, motivoTroca?,
                                       substitutoId?, substitutoNome?, observacoes?
                                       (só a Organização lê)
-  publico/painel                      gerado pelo app da Organização (leitura aberta)
-  privado/disciplina                  pendências calculadas (só Organização)
   vinculos/{uid}                      nome, email, pessoaId, timeId, papel, status
                                       (pendente|aprovado|recusado). Um por categoria: o
                                       mesmo atleta pode jogar Master e Livre.
 
 usuarios/{uid}                        nome, email, perfil (participante)
-  situacao/atual                      pendências e cartões da própria pessoa (gerado)
 
 organizacao/{uid}                     quem organiza (criado à mão no console); temporadas[]:
                                       categorias que a conta altera. No primeiro acesso o
@@ -68,8 +63,9 @@ sua temporada, com times, elencos, calendário, tabela, regras e Organização p
 na primeira abertura e trocam pela barra do topo; a escolha fica guardada no aparelho. A
 Organização informa no primeiro acesso a categoria que organiza e só altera essa (as
 regras do Firestore garantem). Os avisos do Participante juntam todas as
-categorias em que ele tem vínculo aprovado. A Copa Master entra quando o formato estiver
-definido.
+categorias em que ele tem vínculo aprovado. A Copa Master fica dentro do Master (mesmos
+times e atletas): por enquanto só as datas estão reservadas (`datasCopaMaster2027`), com
+os confrontos a definir.
 
 O app não usa o armazenamento de arquivos do Firebase (Storage). O escudo do time é enviado em "Editar time", reduzido para caber em 256 px e guardado no próprio documento do time; sem imagem, vale a cor com a sigla. O laudo de lesão não é enviado: a movimentação só registra que ele foi apresentado.
 

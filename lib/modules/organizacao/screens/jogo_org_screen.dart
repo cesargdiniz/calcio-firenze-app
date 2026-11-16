@@ -22,43 +22,14 @@ class JogoOrgScreen extends StatelessWidget {
 
   Future<void> _editarAgenda(BuildContext context, Partida p) async {
     final c = context.read<OrganizacaoController>();
-    final data = await showDatePicker(
+    final nova = await showModalBottomSheet<Partida>(
       context: context,
-      initialDate: p.inicio,
-      firstDate: DateTime(p.inicio.year - 1),
-      lastDate: DateTime(p.inicio.year + 1, 12, 31),
-      helpText: 'Data do jogo',
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _FormAgenda(partida: p),
     );
-    if (data == null || !context.mounted) return;
-    final hora = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(p.inicio),
-      helpText: 'Horário do jogo',
-    );
-    if (hora == null || !context.mounted) return;
-    final localCtrl = TextEditingController(text: p.local ?? 'Arena Gugu');
-    final local = await showDialog<String>(
-      context: context,
-      builder: (d) => AlertDialog(
-        title: const Text('Local do jogo'),
-        content: TextField(controller: localCtrl, autofocus: true),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(d), child: const Text('Cancelar')),
-          TextButton(
-            onPressed: () => Navigator.pop(d, localCtrl.text.trim()),
-            child: const Text('Salvar'),
-          ),
-        ],
-      ),
-    );
-    localCtrl.dispose();
-    if (local == null || local.isEmpty) return;
-    await c.salvarPartida(
-      p.comAgenda(
-        inicio: DateTime(data.year, data.month, data.day, hora.hour, hora.minute),
-        local: local,
-      ),
-    );
+    if (nova == null || !context.mounted) return;
+    await c.salvarPartida(nova);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Agenda salva.')));
     }
@@ -204,4 +175,107 @@ class JogoOrgScreen extends StatelessWidget {
       );
     },
   );
+}
+
+/// Data, hora e local do jogo num formulário só.
+class _FormAgenda extends StatefulWidget {
+  final Partida partida;
+  const _FormAgenda({required this.partida});
+
+  @override
+  State<_FormAgenda> createState() => _FormAgendaState();
+}
+
+class _FormAgendaState extends State<_FormAgenda> {
+  late DateTime _inicio = widget.partida.inicio;
+  late final _local = TextEditingController(text: widget.partida.local ?? 'Arena Gugu');
+
+  @override
+  void dispose() {
+    _local.dispose();
+    super.dispose();
+  }
+
+  Future<void> _escolherData() async {
+    final d = await showDatePicker(
+      context: context,
+      initialDate: _inicio,
+      firstDate: DateTime(_inicio.year - 1),
+      lastDate: DateTime(_inicio.year + 1, 12, 31),
+      helpText: 'Data do jogo',
+    );
+    if (d != null) {
+      setState(() => _inicio = DateTime(d.year, d.month, d.day, _inicio.hour, _inicio.minute));
+    }
+  }
+
+  Future<void> _escolherHora() async {
+    final h = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_inicio),
+      helpText: 'Horário do jogo',
+    );
+    if (h != null) {
+      setState(() => _inicio = DateTime(_inicio.year, _inicio.month, _inicio.day, h.hour, h.minute));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final partes = dataHoraJogo(_inicio).split(' · ');
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        0,
+        24,
+        24 + MediaQuery.viewInsetsOf(context).bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('Agenda do jogo', style: AppTextStyles.tituloSecao),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _escolherData,
+                  icon: const Icon(Icons.event_outlined),
+                  label: Text(partes.first),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _escolherHora,
+                  icon: const Icon(Icons.schedule_rounded),
+                  label: Text(partes.last),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: _local,
+            onChanged: (_) => setState(() {}),
+            decoration: const InputDecoration(
+              labelText: 'Local',
+              border: OutlineInputBorder(borderRadius: AppRadius.botao),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: _local.text.trim().isEmpty
+                ? null
+                : () => Navigator.pop(
+                    context,
+                    widget.partida.comAgenda(inicio: _inicio, local: _local.text.trim()),
+                  ),
+            child: const Text('Salvar agenda'),
+          ),
+        ],
+      ),
+    );
+  }
 }

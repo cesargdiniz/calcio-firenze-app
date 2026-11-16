@@ -35,12 +35,6 @@ service cloud.firestore {
       allow create, delete: if false;
     }
 
-    // Dados públicos: qualquer pessoa lê; só a Organização escreve.
-    match /clubes/{id} {
-      allow read: if true;
-      allow write: if organizacao();
-    }
-
     match /temporadas/{t} {
       allow read: if true;
       allow write: if organizacaoDe(t);
@@ -49,7 +43,6 @@ service cloud.firestore {
       match /partidas/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
       match /decisoes/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
       match /ajustes/{id}   { allow read: if true; allow write: if organizacaoDe(t); }
-      match /publico/{doc}  { allow read: if true; allow write: if organizacaoDe(t); }
 
       // Elencos: nome e número são públicos (aparecem na súmula e na lista de
       // suspensos); só a Organização da categoria grava.
@@ -60,7 +53,6 @@ service cloud.firestore {
       // Organização registra.
       match /pagamentos/{id}    { allow read: if logado(); allow write: if organizacaoDe(t); }
       match /movimentacoes/{id} { allow read, write: if organizacaoDe(t); }
-      match /privado/{doc}      { allow read, write: if organizacaoDe(t); }
 
       // Vínculo da conta nesta categoria. O próprio usuário lê e pede (ou
       // refaz) o vínculo, sempre como pendente; só a Organização da categoria
@@ -84,11 +76,6 @@ service cloud.firestore {
       allow read: if organizacao() || (logado() && request.auth.uid == uid);
       allow create, update: if logado() && request.auth.uid == uid && cadastroValido();
       allow delete: if organizacao() || (logado() && request.auth.uid == uid);
-
-      match /situacao/{doc} {
-        allow read: if organizacao() || (logado() && request.auth.uid == uid);
-        allow write: if organizacao();
-      }
     }
   }
 }

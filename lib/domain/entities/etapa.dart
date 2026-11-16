@@ -47,8 +47,8 @@ class Etapa implements Comparable<Etapa> {
   }
 
   @override
-  bool operator ==(Object o) =>
-      o is Etapa && o.turno == turno && o.fase == fase && o.rodada == rodada;
+  bool operator ==(Object other) =>
+      other is Etapa && other.turno == turno && other.fase == fase && other.rodada == rodada;
 
   @override
   int get hashCode => Object.hash(turno, fase, rodada);

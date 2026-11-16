@@ -136,7 +136,7 @@ class MontarSumulaImpressa {
       // "CF CASA ASSIS 2027"; sem patrocinador, "CF 2027".
       competicao: [
         'CF',
-        if (d.patrocinador case final nome?) nome,
+        ?d.patrocinador,
         '${p.inicio.year}',
       ].join(' '),
       categoria: d.nome.replaceAll(' · ', ' '),

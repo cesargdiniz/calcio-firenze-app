@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/repositories/preferencias_repository.dart';
 import '../../shared/theme/app_colors.dart';
 
 /// Como cada forma do fundo entra em cena.
@@ -85,6 +87,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   bool _iniciou = false;
 
+  /// Perfil escolhido em outra abertura: o app vai direto para ele.
+  String? _perfilSalvo;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -94,10 +99,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // aguarda a pausa final.
     final semMovimento = MediaQuery.disableAnimationsOf(context);
     _controle.forward(from: semMovimento ? SplashScreen.fimDaAnimacao : 0);
+    context.read<PreferenciasRepository>().perfil().then((r) => _perfilSalvo = r);
   }
 
   void _aoTerminar(AnimationStatus status) {
-    if (status == AnimationStatus.completed && mounted) context.go('/entrar');
+    if (status == AnimationStatus.completed && mounted) context.go(_perfilSalvo ?? '/entrar');
   }
 
   @override

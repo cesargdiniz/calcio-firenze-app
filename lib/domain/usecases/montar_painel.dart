@@ -3,6 +3,7 @@ import 'package:calcio_regras/calcio_regras.dart';
 import '../entities/categoria.dart';
 import '../entities/etapa.dart';
 import '../entities/temporada.dart';
+import 'mata_mata.dart';
 
 /// Alguém fora da próxima partida do time, para a tela "Suspensos".
 class ItemSuspenso {
@@ -58,8 +59,27 @@ class Painel {
   /// Categoria da temporada (o Master também mostra as datas da Copa).
   final Categoria categoria;
 
+  /// Turno da tabela e das estatísticas: 1, 2 ou [geral] (soma dos dois).
+  final int turno;
+
+  /// Turno em andamento (o do próximo jogo, ou o do último).
+  final int turnoAtual;
+
+  /// Times rebaixados (só na classificação geral, art. 89).
+  final List<String> rebaixados;
+
+  /// Dados de exemplo: a temporada ainda não foi cadastrada.
+  final bool demonstracao;
+
+  /// Valor de [turno] para a classificação geral.
+  static const geral = 0;
+
   const Painel({
     this.categoria = Categoria.master,
+    this.turno = 1,
+    this.turnoAtual = 1,
+    this.rebaixados = const [],
+    this.demonstracao = false,
     required this.nomeTemporada,
     required this.local,
     required this.times,
@@ -103,19 +123,46 @@ class MontarPainel {
 
   MontarPainel({DateTime Function()? agora}) : _agora = agora ?? DateTime.now;
 
-  Painel call(DadosTemporada d, {int turno = 1}) {
+  /// Turno em andamento: o do próximo jogo (a grande final conta como 2º) ou,
+  /// com tudo encerrado, o do último jogo.
+  static int turnoAtualDe(List<Partida> partidas) {
+    final pendente = partidas.where((p) => !p.encerrada).firstOrNull;
+    final referencia = pendente ?? partidas.lastOrNull;
+    if (referencia == null) return 1;
+    return referencia.turno == 0 ? 2 : referencia.turno;
+  }
+
+  /// [turno] nulo: o turno em andamento. [Painel.geral]: os dois somados.
+  Painel call(DadosTemporada d, {int? turno}) {
     final times = {for (final t in d.times) t.id: t};
     final pessoas = {for (final p in d.pessoas) p.id: p};
     final partidas = [...d.partidas]..sort((a, b) => a.inicio.compareTo(b.inicio));
+    final atual = turnoAtualDe(partidas);
+    final t = turno ?? atual;
+    final geral = t == Painel.geral;
+    // Estatísticas da temporada inteira na visão geral.
+    final turnoStats = geral ? null : t;
 
-    final tabela = classificacaoDoTurno(
-      turno: turno,
-      times: times.keys,
-      partidas: partidas,
-      ajustes: d.ajustes,
-      ordemSorteio: d.ordemSorteio,
-      params: d.parametros,
-    );
+    final tabela = geral
+        ? classificacaoGeral(
+            times: times.keys,
+            partidas: partidas,
+            ajustes: d.ajustes,
+            ordemSorteio: d.ordemSorteio,
+            params: d.parametros,
+          )
+        : classificacaoDoTurno(
+            turno: t,
+            times: times.keys,
+            partidas: partidas,
+            ajustes: d.ajustes,
+            ordemSorteio: d.ordemSorteio,
+            params: d.parametros,
+          );
+    // Rebaixamento só faz sentido com jogos dos dois turnos lançados.
+    final caem = geral && partidas.any((p) => p.turno == 2 && p.encerrada)
+        ? rebaixados(tabela, campeao: const MataMata().grandeFinal(d).campeao, params: d.parametros)
+        : const <String>[];
 
     final motor = MotorDisciplinar(
       partidas: partidas,
@@ -174,18 +221,22 @@ class MontarPainel {
 
     return Painel(
       categoria: d.categoria,
+      turno: t,
+      turnoAtual: atual,
+      rebaixados: caem,
+      demonstracao: d.demonstracao,
       nomeTemporada: d.nome,
       local: d.local,
       times: times,
       nomes: {for (final p in d.pessoas) p.id: p.nome},
       tabela: tabela,
-      artilharia: artilharia(partidas, turno: turno),
-      melhoresDaPartida: melhoresDaPartida(partidas, turno: turno),
+      artilharia: artilharia(partidas, turno: turnoStats),
+      melhoresDaPartida: melhoresDaPartida(partidas, turno: turnoStats),
       melhorAtaque: melhorAtaque(tabela),
       melhorDefesa: melhorDefesa(tabela),
-      amarelos: cartoesPorPessoa(partidas, turno: turno, criterio: CriterioCartoes.amarelos),
-      vermelhos: cartoesPorPessoa(partidas, turno: turno, criterio: CriterioCartoes.vermelhos),
-      cartoes: cartoesPorPessoa(partidas, turno: turno),
+      amarelos: cartoesPorPessoa(partidas, turno: turnoStats, criterio: CriterioCartoes.amarelos),
+      vermelhos: cartoesPorPessoa(partidas, turno: turnoStats, criterio: CriterioCartoes.vermelhos),
+      cartoes: cartoesPorPessoa(partidas, turno: turnoStats),
       partidas: partidas,
       proximaRodada: proximaRodada,
       proximaEtapa: proximaEtapa,

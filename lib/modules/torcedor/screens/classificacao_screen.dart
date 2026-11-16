@@ -1,4 +1,5 @@
 import 'package:calcio_regras/calcio_regras.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/usecases/montar_painel.dart';
@@ -7,6 +8,7 @@ import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
+import '../torcedor_controller.dart';
 import '../widgets/com_painel.dart';
 import '../widgets/tabela.dart';
 
@@ -43,9 +45,15 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
       children: [
         CabecalhoTela(
           _estatisticas ? 'Estatísticas' : 'Classificação',
-          subtitulo: _estatisticas ? '1º Turno' : 'Fase classificatória · 1º Turno',
+          subtitulo: painel.turno == Painel.geral
+              ? (_estatisticas ? 'Temporada inteira' : 'Geral · os dois turnos somados')
+              : (_estatisticas
+                    ? '${painel.turno}º Turno'
+                    : 'Fase classificatória · ${painel.turno}º Turno'),
         ),
         const SizedBox(height: AppSpacing.md),
+        SeletorTurno(painel: painel),
+        const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
           children: [
@@ -85,8 +93,24 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
           const SizedBox(height: AppSpacing.sm),
           TabelaClassificacao(painel: painel, linhas: painel.tabela),
           const SizedBox(height: AppSpacing.md),
-          const _Legenda(AppColors.verde, '1º e 2º vão direto às semifinais'),
-          const _Legenda(AppColors.oliva, '3º ao 6º jogam as quartas de final'),
+          if (painel.turno == Painel.geral)
+            _Legenda(
+              AppColors.vermelho,
+              painel.rebaixados.isEmpty
+                  ? 'Os últimos da geral são rebaixados ao fim da temporada (art. 89)'
+                  : 'Rebaixados (art. 89)',
+            )
+          else if (painel.categoria.temQuartas) ...[
+            const _Legenda(AppColors.verde, '1º e 2º vão direto às semifinais'),
+            _Legenda(
+              AppColors.oliva,
+              '3º ao ${painel.categoria.classificados}º jogam as quartas de final',
+            ),
+          ] else
+            _Legenda(
+              AppColors.verde,
+              '1º ao ${painel.categoria.classificados}º vão às semifinais',
+            ),
           if (painel.tabela.any((l) => l.aguardaSorteio))
             const Padding(
               padding: EdgeInsets.only(top: AppSpacing.sm),
@@ -356,4 +380,26 @@ class _Legenda extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// Botões 1º Turno, 2º Turno e Geral da Tabela.
+class SeletorTurno extends StatelessWidget {
+  final Painel painel;
+  const SeletorTurno({super.key, required this.painel});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.read<TorcedorController>();
+    return Wrap(
+      spacing: AppSpacing.sm,
+      children: [
+        for (final (t, rotulo) in [(1, '1º Turno'), (2, '2º Turno'), (Painel.geral, 'Geral')])
+          ChipFiltro(
+            rotulo,
+            ativo: painel.turno == t,
+            onTap: () => controller.escolherTurno(t),
+          ),
+      ],
+    );
+  }
 }

@@ -1,10 +1,12 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
+import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 
 /// O6 · Organização · Gestão
@@ -45,7 +47,6 @@ class GestaoScreen extends StatelessWidget {
           grupo('Temporada', [
             item('Times da temporada', rota: '/organizacao/gestao/times'),
             item('Regulamento e parâmetros', rota: '/organizacao/gestao/parametros'),
-            item('Calendário e jogos', rota: '/organizacao/jogos'),
           ]),
           grupo('Elencos', [
             item('Importar elencos do turno', rota: '/organizacao/gestao/elencos'),
@@ -66,6 +67,20 @@ class GestaoScreen extends StatelessWidget {
                   ? 'Decisões e punições'
                   : 'Decisões e punições (${o.dados.decisoes.length})',
               rota: '/organizacao/gestao/decisoes',
+            ),
+          ]),
+          grupo('Conta', [
+            ListTile(
+              title: Text('Entrou como ${o.sessao.email}', style: AppTextStyles.pequeno),
+            ),
+            item('Trocar de perfil', rota: '/entrar'),
+            ListTile(
+              title: const Text('Sair da conta', style: AppTextStyles.rotulo),
+              trailing: const Icon(Icons.logout_rounded, color: AppColors.dica),
+              onTap: () async {
+                await context.read<OrganizacaoController>().sair();
+                if (context.mounted) context.go('/entrar');
+              },
             ),
           ]),
         ],

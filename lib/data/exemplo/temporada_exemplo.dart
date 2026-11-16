@@ -169,7 +169,9 @@ List<(String, String)> _confrontos(int rodada) {
   ];
 }
 
-DadosTemporada montarTemporadaExemplo() {
+/// [demonstracao] falso trata o exemplo como temporada real (capturas de
+/// tela e testes que cadastram dados).
+DadosTemporada montarTemporadaExemplo({bool demonstracao = true}) {
   final partidas = <Partida>[];
   const dias = [0, 2, 3, 7, 9];
   for (var rodada = 1; rodada <= 9; rodada++) {
@@ -273,7 +275,7 @@ DadosTemporada montarTemporadaExemplo() {
 
   return DadosTemporada(
     id: 'master-2027',
-    demonstracao: true,
+    demonstracao: demonstracao,
     relogio: TemporadaExemploRepository.agora,
     nome: 'Master · Temporada 2027',
     local: 'Arena Gugu',

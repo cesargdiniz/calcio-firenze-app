@@ -36,4 +36,32 @@ void main() {
   test('pendurados da Rodada 4: quem tem 2 amarelos', () {
     expect(painel.pendurados.map((p) => p.pessoa.nome).toSet(), {'Fábio Costa', 'Tiago Moura'});
   });
+
+  group('turnos', () {
+    test('sem escolha, segue o turno em andamento', () {
+      expect(painel.turno, 1);
+      expect(painel.turnoAtual, 1);
+    });
+
+    test('2º turno ainda sem jogos: tabela zerada', () {
+      final p2 = MontarPainel(agora: () => TemporadaExemploRepository.agora)(dados, turno: 2);
+      expect(p2.turno, 2);
+      expect(p2.tabela.every((l) => l.jogos == 0), isTrue);
+      expect(p2.artilharia, isEmpty);
+    });
+
+    test('geral soma os turnos e só aponta rebaixados com o 2º turno em jogo', () {
+      final g = MontarPainel(agora: () => TemporadaExemploRepository.agora)(
+        dados,
+        turno: Painel.geral,
+      );
+      expect(g.turno, Painel.geral);
+      expect(g.tabela.map((l) => l.pontos), painel.tabela.map((l) => l.pontos));
+      expect(g.rebaixados, isEmpty);
+    });
+
+    test('a grande final conta como 2º turno', () {
+      expect(MontarPainel.turnoAtualDe(const []), 1);
+    });
+  });
 }

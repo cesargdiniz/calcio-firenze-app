@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/categoria.dart';
+import '../../domain/entities/temporada.dart';
 import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/usecases/montar_painel.dart';
 import '../categoria/categoria_controller.dart';
@@ -33,6 +34,10 @@ class TorcedorController extends Cubit<TorcedorStatus> {
   final CategoriaController _categorias;
   StreamSubscription<void>? _assinatura;
   StreamSubscription<void>? _subCategoria;
+  DadosTemporada? _dados;
+
+  /// Turno escolhido na Tabela; nulo segue o turno em andamento.
+  int? _turno;
 
   TorcedorController(this._repository, this._montarPainel, this._categorias)
     : super(const TorcedorCarregando());
@@ -44,11 +49,23 @@ class TorcedorController extends Cubit<TorcedorStatus> {
 
   void _ouvir(Categoria c) {
     _assinatura?.cancel();
+    _turno = null;
+    _dados = null;
     emit(const TorcedorCarregando());
     _assinatura = _repository.observar(c.temporadaId).listen(
-      (dados) => emit(TorcedorPronto(_montarPainel(dados))),
+      (dados) {
+        _dados = dados;
+        emit(TorcedorPronto(_montarPainel(dados, turno: _turno)));
+      },
       onError: (Object e) => emit(const TorcedorFalha('Não foi possível carregar a temporada.')),
     );
+  }
+
+  /// 1, 2 ou [Painel.geral]. A escolha vale para Início e Tabela.
+  void escolherTurno(int turno) {
+    _turno = turno;
+    final d = _dados;
+    if (d != null) emit(TorcedorPronto(_montarPainel(d, turno: turno)));
   }
 
   @override

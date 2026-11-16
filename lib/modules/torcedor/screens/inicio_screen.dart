@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/etapa.dart';
+import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
@@ -35,6 +36,12 @@ class InicioScreen extends StatelessWidget {
                     Text(painel.nomeTemporada, style: AppTextStyles.subtitulo),
                   ],
                 ),
+              ),
+              // Atleta ou Organização que entrou como Torcedor volta à escolha.
+              IconButton(
+                tooltip: 'Trocar de perfil',
+                onPressed: () => context.go('/entrar'),
+                icon: const Icon(Icons.switch_account_outlined, color: AppColors.texto2),
               ),
             ],
           ),
@@ -72,7 +79,9 @@ class InicioScreen extends StatelessWidget {
           ],
           if (painel.partidas.isNotEmpty) ...[
             TituloSecao(
-              'Classificação · 1º Turno',
+              painel.turno == Painel.geral
+                  ? 'Classificação geral'
+                  : 'Classificação · ${painel.turno}º Turno',
               acao: 'Ver tabela',
               onAcao: () => context.go('/torcedor/tabela'),
             ),

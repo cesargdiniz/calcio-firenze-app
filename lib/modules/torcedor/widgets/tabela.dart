@@ -8,10 +8,16 @@ import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 
-/// Zona da posição na fase classificatória (art. 16).
-Color? corDaZona(int posicao, int totalTimes) {
-  if (posicao <= 2) return AppColors.verde; // direto às semifinais
-  if (posicao <= 6) return AppColors.oliva; // quartas de final
+/// Zona da posição: no turno, quem vai ao mata-mata (art. 16); na
+/// classificação geral, os rebaixados (art. 89).
+Color? corDaZona(Painel painel, LinhaClassificacao l) {
+  if (painel.turno == Painel.geral) {
+    return painel.rebaixados.contains(l.timeId) ? AppColors.vermelho : null;
+  }
+  final c = painel.categoria;
+  if (!c.temQuartas) return l.posicao <= c.classificados ? AppColors.verde : null;
+  if (l.posicao <= 2) return AppColors.verde; // direto às semifinais
+  if (l.posicao <= c.classificados) return AppColors.oliva; // quartas de final
   return null;
 }
 
@@ -83,7 +89,7 @@ class TabelaClassificacao extends StatelessWidget {
                     Container(
                       width: 3,
                       height: 24,
-                      color: corDaZona(l.posicao, painel.tabela.length) ?? Colors.transparent,
+                      color: corDaZona(painel, l) ?? Colors.transparent,
                     ),
                     SizedBox(
                       width: 23,
