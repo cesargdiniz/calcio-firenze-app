@@ -38,6 +38,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
     List<DecisaoDisciplinar>? decisoes;
     Parametros? parametros;
     String? patrocinador;
+    var sorteios = const <int, List<String>>{};
 
     void emitir() {
       if (times == null ||
@@ -85,6 +86,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             pagamentos: pagamentos!,
             parametros: parametros!,
             patrocinador: patrocinador,
+            sorteios: sorteios,
             // Decisão cujo jogo de origem saiu do calendário não tem como ser
             // calculada; fica de fora em vez de derrubar as telas.
             decisoes: [
@@ -141,6 +143,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             (s) {
               parametros = parametrosDeMapa(s.data()?['parametros'] as Map<String, dynamic>?);
               patrocinador = s.data()?['patrocinador'] as String?;
+              sorteios = sorteiosDeMapa(s.data()?['sorteios']);
               emitir();
             },
             onError: (Object _) {
@@ -306,6 +309,14 @@ class FirestoreGestaoRepository implements GestaoRepository {
       .set({'parametros': parametrosParaMapa(parametros)}, SetOptions(merge: true));
 
   @override
+  Future<void> salvarSorteio(String temporadaId, int turno, List<String> ordem) => _db
+      .collection('temporadas')
+      .doc(temporadaId)
+      .set({
+        'sorteios': {'$turno': ordem},
+      }, SetOptions(merge: true));
+
+  @override
   Future<void> salvarPatrocinador(String temporadaId, String? patrocinador) => _db
       .collection('temporadas')
       .doc(temporadaId)
@@ -348,4 +359,14 @@ class FirestoreGestaoRepository implements GestaoRepository {
     if (substituto != null) lote.delete(pessoas.doc(substituto));
     await lote.commit();
   }
+}
+
+/// `sorteios` do documento da temporada: {"1": [ids], "2": [...], "0": [...]}.
+Map<int, List<String>> sorteiosDeMapa(Object? m) {
+  if (m is! Map) return const {};
+  return {
+    for (final e in m.entries)
+      if (int.tryParse('${e.key}') case final turno? when e.value is List)
+        turno: [for (final id in e.value as List) '$id'],
+  };
 }

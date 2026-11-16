@@ -1,5 +1,6 @@
 import 'package:calcio_regras/calcio_regras.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/usecases/montar_painel.dart';
@@ -8,6 +9,7 @@ import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
+import '../../organizacao/widgets/sorteio_empate.dart';
 import '../torcedor_controller.dart';
 import '../widgets/com_painel.dart';
 import '../widgets/tabela.dart';
@@ -91,6 +93,9 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
           _Estatistica(painel: painel, categoria: _categoria),
         ] else ...[
           const SizedBox(height: AppSpacing.sm),
+          // Só a Organização registra o resultado do sorteio do art. 42.
+          if (GoRouterState.of(context).uri.path.startsWith('/organizacao'))
+            SorteiosDaTabela(painel: painel),
           TabelaClassificacao(painel: painel, linhas: painel.tabela),
           const SizedBox(height: AppSpacing.md),
           if (painel.turno == Painel.geral)

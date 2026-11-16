@@ -150,7 +150,9 @@ class DadosTemporada {
   final List<DecisaoDisciplinar> decisoes;
   final List<Pagamento> pagamentos;
   final List<AjustePontos> ajustes;
-  final List<String> ordemSorteio;
+  /// Resultado dos sorteios do art. 42 por tabela: chave 1 e 2 para os
+  /// turnos, 0 para a classificação geral.
+  final Map<int, List<String>> sorteios;
 
   /// Valores do regulamento em vigor na temporada (pontos, reais, prazos).
   final Parametros parametros;
@@ -175,12 +177,15 @@ class DadosTemporada {
     this.decisoes = const [],
     this.pagamentos = const [],
     this.ajustes = const [],
-    this.ordemSorteio = const [],
+    this.sorteios = const {},
     this.parametros = Parametros.master2027,
     this.patrocinador,
     this.demonstracao = false,
     this.relogio,
   });
+
+  /// Ordem sorteada para a tabela do turno (0: classificação geral).
+  List<String> ordemSorteio(int turno) => sorteios[turno] ?? const [];
 
   /// Categoria desta temporada (Master se o id não for conhecido).
   Categoria get categoria => Categoria.deTemporada(id) ?? Categoria.master;

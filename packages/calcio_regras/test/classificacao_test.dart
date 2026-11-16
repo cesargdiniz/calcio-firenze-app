@@ -179,6 +179,39 @@ void main() {
       expect(comSorteio.any((l) => l.aguardaSorteio), isFalse);
     });
 
+    test('cada grupo empatado é identificado e o sorteio é registrado grupo a grupo', () {
+      final c = Calendario()
+        ..jogo('A', 'X', sumula: placar(1, 0))
+        ..jogo('B', 'Y', sumula: placar(1, 0));
+      List<LinhaClassificacao> tabela(List<String> sorteio) => calcularClassificacao(
+        times: ['A', 'B', 'X', 'Y'],
+        partidas: c.partidas,
+        ordemSorteio: sorteio,
+      );
+      final antes = tabela(const []);
+      expect({for (final l in antes) l.timeId: l.empatadosNoSorteio}, {
+        'A': ['A', 'B'],
+        'B': ['A', 'B'],
+        'X': ['X', 'Y'],
+        'Y': ['X', 'Y'],
+      });
+
+      // Só o grupo de cima sorteado: o de baixo continua aguardando.
+      var ordemSorteio = registrarSorteioNaOrdem(const [], ['B', 'A']);
+      var t = tabela(ordemSorteio);
+      expect(ordem(t).take(2), ['B', 'A']);
+      expect(t.where((l) => l.aguardaSorteio).map((l) => l.timeId), ['X', 'Y']);
+      expect(t.first.empatadosNoSorteio, ['B', 'A'], reason: 'resolvido, mas ainda marcado');
+
+      ordemSorteio = registrarSorteioNaOrdem(ordemSorteio, ['Y', 'X']);
+      t = tabela(ordemSorteio);
+      expect(ordem(t), ['B', 'A', 'Y', 'X']);
+      expect(t.any((l) => l.aguardaSorteio), isFalse);
+
+      // Corrigir um grupo refaz só a ordem dele.
+      expect(registrarSorteioNaOrdem(ordemSorteio, ['A', 'B']), ['Y', 'X', 'A', 'B']);
+    });
+
     test('confronto direto entre três empatados usa a mini-tabela', () {
       // A, B, C: cada um vence um e perde um entre si por 1x0, e todos
       // vencem D por 1x0. A mini-tabela empata; segue para vermelhos.
