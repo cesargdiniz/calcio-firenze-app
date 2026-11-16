@@ -32,13 +32,13 @@ class _SuspensosState extends State<_Suspensos> {
   @override
   Widget build(BuildContext context) {
     final p = widget.painel;
-    final rodada = p.proximaRodada;
+    final etapa = p.proximaEtapa;
     return ListView(
       padding: AppSpacing.tela,
       children: [
         CabecalhoTela(
           'Suspensos',
-          subtitulo: rodada == null ? 'Sem jogos marcados' : 'Para a Rodada $rodada · 1º Turno',
+          subtitulo: etapa == null ? 'Sem jogos marcados' : 'Para ${etapa.rotulo} · ${etapa.turno}º Turno',
         ),
         const SizedBox(height: AppSpacing.md),
         Wrap(

@@ -1,6 +1,8 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:calcio_regras/calcio_regras.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
+import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/widgets/basicos.dart';
@@ -30,19 +32,22 @@ class _Jogos extends StatefulWidget {
 }
 
 class _JogosState extends State<_Jogos> {
-  late int _rodada = _rodadaInicial();
+  late Etapa? _etapa = _etapaInicial();
 
-  /// Abre na última rodada com jogo encerrado, como no Figma.
-  int _rodadaInicial() {
-    final encerradas = widget.painel.partidas.where((p) => p.encerrada && p.rodada != null);
-    if (encerradas.isNotEmpty) return encerradas.last.rodada!;
-    return widget.painel.rodadas.isEmpty ? 1 : widget.painel.rodadas.first;
+  /// Abre na última etapa com jogo encerrado, como no Figma.
+  Etapa? _etapaInicial() {
+    final encerradas = widget.painel.partidas.where((p) => p.encerrada);
+    if (encerradas.isNotEmpty) return Etapa.de(encerradas.last);
+    return widget.painel.etapas.firstOrNull;
   }
 
   @override
   Widget build(BuildContext context) {
     final painel = widget.painel;
-    final jogos = painel.jogosDaRodada(_rodada);
+    final etapas = painel.etapas;
+    final doisTurnos = etapas.any((e) => e.turno == 2);
+    final etapa = etapas.contains(_etapa) ? _etapa : etapas.firstOrNull;
+    final jogos = etapa == null ? const <Partida>[] : painel.jogosDa(etapa);
     return ListView(
       padding: AppSpacing.tela,
       children: [
@@ -54,14 +59,18 @@ class _JogosState extends State<_Jogos> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              for (final r in painel.rodadas) ...[
-                ChipFiltro('R$r', ativo: r == _rodada, onTap: () => setState(() => _rodada = r)),
+              for (final e in etapas) ...[
+                ChipFiltro(
+                  doisTurnos && e.turno > 0 ? '${e.turno}ºT ${e.curto}' : e.curto,
+                  ativo: e == etapa,
+                  onTap: () => setState(() => _etapa = e),
+                ),
                 const SizedBox(width: AppSpacing.sm),
               ],
             ],
           ),
         ),
-        TituloSecao('Rodada $_rodada'),
+        if (etapa != null) TituloSecao(etapa.rotulo),
         for (final p in jogos) ...[
           CardJogo(
             partida: p,

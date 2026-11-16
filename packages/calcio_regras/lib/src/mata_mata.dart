@@ -64,3 +64,10 @@ String? vencedor(Partida p, {String? vantagemEmpate}) {
 /// grande final. Caso contrário, devolve nulo e a grande final decide.
 String? campeaoSemGrandeFinal(String campeao1, String campeao2) =>
     campeao1 == campeao2 ? campeao1 : null;
+
+/// Time que avança com empate no tempo normal. Só nas quartas (art. 16.1),
+/// em que o mandante é sempre o mais bem colocado (3º ou 4º).
+String? vantagemDoEmpate(Partida p) => p.fase == Fase.quartas ? p.mandanteId : null;
+
+/// Quem avança numa partida de mata-mata, já com a vantagem das quartas.
+String? vencedorMataMata(Partida p) => vencedor(p, vantagemEmpate: vantagemDoEmpate(p));

@@ -47,4 +47,20 @@ void main() {
     expect(campeaoSemGrandeFinal('A', 'A'), 'A');
     expect(campeaoSemGrandeFinal('A', 'B'), isNull);
   });
+
+  group('vencedorMataMata', () {
+    final c = Calendario();
+
+    test('quartas: empate classifica o mandante, mais bem colocado (art. 16.1)', () {
+      final p = c.jogo('P3', 'P6', fase: Fase.quartas, sumula: placar(1, 1));
+      expect(vantagemDoEmpate(p), 'P3');
+      expect(vencedorMataMata(p), 'P3');
+    });
+
+    test('semifinal: empate sem pênaltis ainda não tem vencedor', () {
+      final p = c.jogo('P1', 'P6', fase: Fase.semifinal, sumula: placar(1, 1));
+      expect(vantagemDoEmpate(p), isNull);
+      expect(vencedorMataMata(p), isNull);
+    });
+  });
 }

@@ -70,7 +70,14 @@ class _SumulaState extends State<_Sumula> {
     super.dispose();
   }
 
-  bool get _precisaPenaltis => p.fase.eliminatoria && _ausente == null && _golsM == _golsV;
+  /// Empate no mata-mata vai aos pênaltis, menos nas quartas, em que o mais
+  /// bem colocado avança com o empate (art. 16.1).
+  bool get _precisaPenaltis =>
+      p.fase.eliminatoria &&
+      p.fase != Fase.quartas &&
+      _ausente == null &&
+      _semPontos.isEmpty &&
+      _golsM == _golsV;
 
   String? get _problema {
     if (_ausente != null) return null;
@@ -78,6 +85,9 @@ class _SumulaState extends State<_Sumula> {
     final doV = _gols.where((g) => g.timeId == p.visitanteId).length;
     if (doM > _golsM || doV > _golsV) {
       return 'Há mais gols na lista do que no placar.';
+    }
+    if (_precisaPenaltis && _penM == _penV) {
+      return 'Empate no mata-mata: lance os pênaltis com um vencedor.';
     }
     return null;
   }
@@ -233,6 +243,15 @@ class _SumulaState extends State<_Sumula> {
                 const Text('×', style: AppTextStyles.placar),
                 _placar(v, _golsV, (x) => setState(() => _golsV = x)),
               ],
+            ),
+          ),
+        if (p.fase == Fase.quartas && _ausente == null && _golsM == _golsV)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: Text(
+              'Empate: ${time(p.mandanteId).nome} avança, por ter terminado à frente na fase '
+              'classificatória (art. 16.1).',
+              style: AppTextStyles.pequeno,
             ),
           ),
         if (_precisaPenaltis) ...[

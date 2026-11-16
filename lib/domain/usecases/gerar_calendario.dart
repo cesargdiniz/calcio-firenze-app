@@ -4,79 +4,57 @@ import 'package:calcio_regras/calcio_regras.dart';
 
 DateTime _h(int mes, int dia, int hora, [int minuto = 0]) => DateTime(2027, mes, dia, hora, minuto);
 
-/// Horários oficiais do Master 2027 (calendário atualizado da Organização).
-/// Datas ainda "a definir" (19/06, 13/10, 11/12 e 18/12) ficam de fora até
-/// terem horário.
+/// Horários de um dia de jogos do Master: em dia de semana, 20:30 e 21:30;
+/// no sábado, a partir das 17h, um por hora. Jogo único de sábado (finais)
+/// às 19h.
+List<DateTime> _dia(int mes, int dia, int jogos) {
+  final sabado = DateTime(2027, mes, dia).weekday == DateTime.saturday;
+  if (sabado) {
+    return jogos == 1
+        ? [_h(mes, dia, 19)]
+        : [for (var i = 0; i < jogos; i++) _h(mes, dia, 17 + i)];
+  }
+  return [for (var i = 0; i < jogos; i++) _h(mes, dia, 20 + i, 30)];
+}
+
+/// Dias de jogo de uma lista `(mês, dia, jogos)`.
+List<DateTime> _dias(List<(int, int, int)> dias) => [
+  for (final (m, d, n) in dias) ..._dia(m, d, n),
+];
+
+/// Horários oficiais do Master 2027, conforme "Calcio Firenze 2027 —
+/// Rodadas e Datas". Cada turno: 9 rodadas de 5 jogos, quartas (2), semis
+/// (2) e final (1). A chave 0 é a grande final.
 final horariosMaster2027 = <int, List<DateTime>>{
-  1: [
-    // Rodada 1: abertura, sexta e sábado.
-    _h(1, 29, 20, 30), _h(1, 29, 21, 30), _h(1, 30, 17), _h(1, 30, 18), _h(1, 30, 19),
-    for (final (m, t, q, s) in const [
-      (2, 2, 4, 5),
-      (2, 16, 18, 19),
-      (3, 2, 4, 5),
-      (3, 16, 18, 19),
-    ]) ...[
-      _h(m, t, 20, 30),
-      _h(m, t, 21, 30),
-      _h(m, q, 20, 30),
-      _h(m, q, 21, 30),
-      _h(m, s, 20, 30),
-    ],
-    // Rodada 6: 30/03 (terça), 01/04 (quinta) e 02/04 (sexta).
-    _h(3, 30, 20, 30), _h(3, 30, 21, 30), _h(4, 1, 20, 30), _h(4, 1, 21, 30), _h(4, 2, 20, 30),
-    for (final (m, t, q, s) in const [(4, 13, 15, 16), (4, 27, 29, 30), (5, 11, 13, 14)]) ...[
-      _h(m, t, 20, 30),
-      _h(m, t, 21, 30),
-      _h(m, q, 20, 30),
-      _h(m, q, 21, 30),
-      _h(m, s, 20, 30),
-    ],
-    // Mata-mata: quartas 27/05, semifinais 10/06 (final em 19/06, a definir).
-    _h(5, 27, 20, 30), _h(5, 27, 21, 30), _h(6, 10, 20, 30), _h(6, 10, 21, 30),
-  ],
-  2: [
-    _h(8, 5, 20, 30),
-    _h(8, 5, 21, 30),
-    _h(8, 6, 20, 30),
-    _h(8, 17, 20, 30),
-    _h(8, 17, 21, 30),
-    _h(8, 19, 20, 30),
-    _h(8, 19, 21, 30),
-    _h(8, 20, 20, 30),
-    _h(8, 31, 20, 30),
-    _h(8, 31, 21, 30),
-    _h(9, 2, 20, 30),
-    _h(9, 2, 21, 30),
-    _h(9, 3, 20, 30),
-    _h(9, 16, 20, 30),
-    _h(9, 16, 21, 30),
-    _h(9, 17, 20, 30),
-    _h(9, 28, 20, 30),
-    _h(9, 28, 21, 30),
-    _h(9, 30, 20, 30),
-    _h(9, 30, 21, 30),
-    _h(10, 1, 20, 30),
-    _h(10, 14, 20, 30),
-    _h(10, 14, 21, 30),
-    _h(10, 15, 20, 30),
-    _h(10, 26, 20, 30),
-    _h(10, 26, 21, 30),
-    _h(10, 28, 20, 30),
-    _h(10, 28, 21, 30),
-    _h(10, 29, 20, 30),
-    _h(11, 9, 20, 30),
-    _h(11, 9, 21, 30),
-    _h(11, 11, 20, 30),
-    _h(11, 11, 21, 30),
-    _h(11, 12, 20, 30),
-    _h(11, 23, 20, 30),
-    _h(11, 23, 21, 30),
-    _h(11, 30, 20, 30),
-    _h(11, 30, 21, 30),
-    _h(12, 7, 20, 30),
-    _h(12, 7, 21, 30),
-  ],
+  1: _dias(const [
+    (1, 29, 2), (1, 30, 3), // 1ª rodada
+    (2, 2, 2), (2, 4, 2), (2, 5, 1),
+    (2, 16, 2), (2, 18, 2), (2, 19, 1),
+    (3, 2, 2), (3, 4, 2), (3, 5, 1),
+    (3, 16, 2), (3, 18, 2), (3, 19, 1),
+    (3, 30, 2), (4, 1, 2), (4, 2, 1),
+    (4, 13, 2), (4, 15, 2), (4, 16, 1),
+    (4, 27, 2), (4, 29, 2), (4, 30, 1),
+    (5, 11, 2), (5, 13, 2), (5, 14, 1), // 9ª rodada
+    (5, 27, 2), // quartas
+    (6, 10, 2), // semifinais
+    (6, 19, 1), // final do 1º turno
+  ]),
+  2: _dias(const [
+    (8, 6, 2), (8, 7, 3), // 1ª rodada
+    (8, 17, 2), (8, 19, 2), (8, 20, 1),
+    (8, 31, 2), (9, 2, 2), (9, 3, 1),
+    (9, 14, 2), (9, 16, 2), (9, 17, 1),
+    (9, 21, 2), (9, 23, 2), (9, 24, 1),
+    (9, 28, 2), (9, 30, 2), (10, 1, 1),
+    (10, 5, 2), (10, 7, 2), (10, 8, 1),
+    (10, 26, 2), (10, 28, 2), (10, 29, 1),
+    (11, 9, 2), (11, 11, 2), (11, 12, 1), // 9ª rodada
+    (11, 23, 2), // quartas
+    (11, 30, 2), // semifinais
+    (12, 4, 1), // final do 2º turno
+  ]),
+  0: _dias(const [(12, 11, 1)]), // grande final
 };
 
 /// Sorteia a tabela da fase classificatória de um turno (todos contra todos,

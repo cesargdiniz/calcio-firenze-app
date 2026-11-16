@@ -1,5 +1,6 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../entities/etapa.dart';
 import '../entities/temporada.dart';
 
 /// Alguém fora da próxima partida do time, para a tela "Suspensos".
@@ -46,6 +47,9 @@ class Painel {
 
   /// Rodada com os próximos jogos (a primeira com partida sem súmula).
   final int? proximaRodada;
+
+  /// Etapa dos próximos jogos: uma rodada ou uma fase do mata-mata.
+  final Etapa? proximaEtapa;
   final List<Partida> proximosJogos;
   final List<ItemSuspenso> suspensos;
   final List<ItemPendurado> pendurados;
@@ -65,6 +69,7 @@ class Painel {
     required this.cartoes,
     required this.partidas,
     required this.proximaRodada,
+    required this.proximaEtapa,
     required this.proximosJogos,
     required this.suspensos,
     required this.pendurados,
@@ -78,6 +83,11 @@ class Painel {
   }.toList()..sort();
 
   List<Partida> jogosDaRodada(int rodada) => partidas.where((p) => p.rodada == rodada).toList();
+
+  /// Rodadas e etapas do mata-mata, em ordem.
+  List<Etapa> get etapas => etapasDe(partidas);
+
+  List<Partida> jogosDa(Etapa e) => partidas.where(e.contem).toList();
 
   Partida partida(String id) => partidas.firstWhere((p) => p.id == id);
 }
@@ -111,12 +121,9 @@ class MontarPainel {
     );
 
     final pendentes = partidas.where((p) => !p.encerrada).toList();
-    final proximaRodada = pendentes.isEmpty ? null : pendentes.first.rodada;
-    final proximos = proximaRodada == null
-        ? <Partida>[]
-        : partidas
-              .where((p) => p.rodada == proximaRodada && p.turno == pendentes.first.turno)
-              .toList();
+    final proximaEtapa = pendentes.isEmpty ? null : Etapa.de(pendentes.first);
+    final proximaRodada = proximaEtapa?.rodada;
+    final proximos = proximaEtapa == null ? <Partida>[] : partidas.where(proximaEtapa.contem).toList();
 
     Pessoa pessoaOuAnonima(String id, String timeId) =>
         pessoas[id] ?? Pessoa(id: id, nome: id, timeId: timeId);
@@ -175,6 +182,7 @@ class MontarPainel {
       cartoes: cartoesPorPessoa(partidas, turno: turno),
       partidas: partidas,
       proximaRodada: proximaRodada,
+      proximaEtapa: proximaEtapa,
       proximosJogos: proximos,
       suspensos: suspensos,
       pendurados: pendurados,
