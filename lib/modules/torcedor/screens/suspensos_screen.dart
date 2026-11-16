@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../domain/entities/temporada.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/montar_painel.dart';
+import '../../../shared/compartilhar/compartilhar_imagem.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
@@ -30,6 +31,42 @@ class _Suspensos extends StatefulWidget {
 class _SuspensosState extends State<_Suspensos> {
   bool _verPendurados = false;
 
+  /// Suspensos e pendurados da próxima etapa, como imagem.
+  void _compartilhar(Painel p) {
+    final etapa = p.proximaEtapa;
+    compartilharComoImagem(
+      context,
+      titulo: 'Suspensos e pendurados',
+      subtitulo: '${p.categoria.nome} 2027${etapa == null ? '' : ' · ${etapa.rotulo}'}',
+      conteudo: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const TituloSecao('Suspensos'),
+          if (p.suspensos.isEmpty) const Text('Ninguém suspenso.', style: AppTextStyles.corpo),
+          for (final s in p.suspensos)
+            _Linha(
+              pessoa: s.pessoa,
+              time: s.time,
+              detalhe: s.motivo,
+              lateral: s.retorno ?? '',
+              corLateral: AppColors.vermelho,
+            ),
+          const TituloSecao('Pendurados'),
+          if (p.pendurados.isEmpty) const Text('Ninguém pendurado.', style: AppTextStyles.corpo),
+          for (final x in p.pendurados)
+            _Linha(
+              pessoa: x.pessoa,
+              time: x.time,
+              detalhe: '${x.amarelos} amarelos',
+              lateral: 'Pendurado',
+              corLateral: AppColors.amareloEscuro,
+            ),
+        ],
+      ),
+      nomeArquivo: 'calcio-${p.categoria.name}-suspensos.png',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = widget.painel;
@@ -39,6 +76,7 @@ class _SuspensosState extends State<_Suspensos> {
       children: [
         CabecalhoTela(
           'Suspensos',
+          acao: BotaoCompartilhar(onPressed: () => _compartilhar(p)),
           subtitulo: switch (etapa) {
             null => 'Sem jogos marcados',
             Etapa(turno: 0) => 'Para a ${etapa.rotulo}',

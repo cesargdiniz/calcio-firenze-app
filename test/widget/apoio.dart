@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:calcio_firenze/app/app.dart';
 import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
 import 'package:calcio_firenze/data/memoria/memoria_repositories.dart';
@@ -6,6 +8,7 @@ import 'package:calcio_firenze/domain/entities/temporada.dart';
 import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
 import 'package:calcio_firenze/domain/usecases/montar_situacao.dart';
+import 'package:calcio_firenze/shared/compartilhar/saida_imagem.dart';
 import 'package:calcio_firenze/shared/pdf/saida_pdf.dart';
 import 'package:calcio_firenze/shared/seletor_imagem.dart';
 import 'package:material_ui/material_ui.dart';
@@ -22,6 +25,7 @@ Future<MemoriaGestaoRepository> abrirApp(
   Set<String> organizacao = const {},
   DadosTemporada? dados,
   SaidaPdf? saidaPdf,
+  SaidaImagem? saidaImagem,
   SeletorImagem? seletorImagem,
   String? categoria = 'master-2027',
   String? perfilSalvo,
@@ -51,6 +55,7 @@ Future<MemoriaGestaoRepository> abrirApp(
       montarSituacao: MontarSituacao(agora: agora),
       preferencias: MemoriaPreferencias(categoria, perfilSalvo),
       saidaPdf: saidaPdf ?? const SaidaPdfDoAparelho(),
+      saidaImagem: saidaImagem ?? const SaidaImagemDoAparelho(),
       seletorImagem: seletorImagem ?? const SeletorImagemDoAparelho(),
       initialLocation: inicio,
     ),
@@ -71,4 +76,16 @@ Future<void> acionar(WidgetTester tester, String texto) async {
   );
   (tester.widget(botao.first) as ButtonStyleButton).onPressed!();
   await tester.pumpAndSettle();
+}
+
+/// Guarda as imagens compartilhadas em vez de abrir o compartilhamento.
+class ImagensCompartilhadas implements SaidaImagem {
+  final enviadas = <(String nome, String legenda, int bytes)>[];
+
+  @override
+  Future<void> compartilhar(
+    Uint8List png, {
+    required String nomeArquivo,
+    required String legenda,
+  }) async => enviadas.add((nomeArquivo, legenda, png.length));
 }

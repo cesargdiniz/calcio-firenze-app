@@ -8,19 +8,29 @@ import '../theme/app_text_styles.dart';
 class CabecalhoTela extends StatelessWidget {
   final String titulo;
   final String? subtitulo;
-  const CabecalhoTela(this.titulo, {super.key, this.subtitulo});
+
+  /// Botão à direita do título (ex.: compartilhar).
+  final Widget? acao;
+  const CabecalhoTela(this.titulo, {super.key, this.subtitulo, this.acao});
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(titulo, style: AppTextStyles.tituloTela),
-      if (subtitulo != null) ...[
-        const SizedBox(height: AppSpacing.xs),
-        Text(subtitulo!, style: AppTextStyles.subtitulo),
+  Widget build(BuildContext context) {
+    final textos = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(titulo, style: AppTextStyles.tituloTela),
+        if (subtitulo != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(subtitulo!, style: AppTextStyles.subtitulo),
+        ],
       ],
-    ],
-  );
+    );
+    if (acao == null) return textos;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [Expanded(child: textos), acao!],
+    );
+  }
 }
 
 /// Título de seção com ação opcional à direita ("Ver todos").

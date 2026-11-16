@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/montar_painel.dart';
+import '../../../shared/compartilhar/compartilhar_imagem.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/card_jogo.dart';
@@ -44,6 +45,41 @@ class _JogosState extends State<_Jogos> {
 
   static int _turnoDa(Etapa e) => e.turno == 0 ? 2 : e.turno;
 
+  /// Jogos e resultados da etapa escolhida (ou as datas da Copa), como imagem.
+  void _compartilhar(Painel painel, Etapa? etapa, List<Partida> jogos) {
+    final competicao = '${painel.categoria.nome} 2027';
+    if (_copa) {
+      compartilharComoImagem(
+        context,
+        titulo: 'Copa Master',
+        subtitulo: 'Datas reservadas',
+        conteudo: const DatasCopa(),
+        nomeArquivo: 'calcio-copa-master-datas.png',
+      );
+      return;
+    }
+    compartilharComoImagem(
+      context,
+      titulo: etapa!.rotulo,
+      subtitulo: etapa.turno == 0 ? competicao : '$competicao · ${etapa.turno}º Turno',
+      conteudo: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final p in jogos) ...[
+            CardJogo(
+              partida: p,
+              mandante: painel.time(p.mandanteId),
+              visitante: painel.time(p.visitanteId),
+              local: painel.local,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ],
+      ),
+      nomeArquivo: 'calcio-${painel.categoria.name}-t${etapa.turno}-${etapa.curto.toLowerCase().replaceAll(' ', '-')}.png',
+    );
+  }
+
   /// Abre na última etapa com jogo encerrado, como no Figma.
   Etapa? _etapaInicial() {
     final encerradas = widget.painel.partidas.where((p) => p.encerrada);
@@ -64,7 +100,12 @@ class _JogosState extends State<_Jogos> {
     return ListView(
       padding: AppSpacing.tela,
       children: [
-        const CabecalhoTela('Jogos'),
+        CabecalhoTela(
+          'Jogos',
+          acao: _copa || etapa != null
+              ? BotaoCompartilhar(onPressed: () => _compartilhar(painel, etapa, jogos))
+              : null,
+        ),
         const SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.sm,

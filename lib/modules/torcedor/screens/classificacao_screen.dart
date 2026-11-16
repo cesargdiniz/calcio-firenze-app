@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/usecases/montar_painel.dart';
+import '../../../shared/compartilhar/compartilhar_imagem.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
@@ -37,6 +38,37 @@ class ClassificacaoScreen extends StatefulWidget {
 }
 
 class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
+  /// Tabela inteira ou a estatística escolhida, como imagem.
+  void _compartilhar(Painel painel) {
+    final turno = painel.turno == Painel.geral ? 'Geral' : '${painel.turno}º Turno';
+    final competicao = '${painel.categoria.nome} 2027 · $turno';
+    final arquivo = 'calcio-${painel.categoria.name}-${painel.turno == Painel.geral ? 'geral' : 't${painel.turno}'}';
+    if (_estatisticas) {
+      compartilharComoImagem(
+        context,
+        titulo: _categoria.rotulo,
+        subtitulo: competicao,
+        conteudo: _Estatistica(painel: painel, categoria: _categoria, limite: 20),
+        nomeArquivo: '$arquivo-${_categoria.name}.png',
+      );
+      return;
+    }
+    compartilharComoImagem(
+      context,
+      titulo: 'Classificação',
+      subtitulo: competicao,
+      conteudo: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TabelaClassificacao(painel: painel, linhas: painel.tabela),
+          const SizedBox(height: AppSpacing.sm),
+          ..._legendas(painel),
+        ],
+      ),
+      nomeArquivo: '$arquivo-classificacao.png',
+    );
+  }
+
   bool _estatisticas = false;
   _Categoria _categoria = _Categoria.artilharia;
 
@@ -47,6 +79,7 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
       children: [
         CabecalhoTela(
           _estatisticas ? 'Estatísticas' : 'Classificação',
+          acao: BotaoCompartilhar(onPressed: () => _compartilhar(painel)),
           subtitulo: painel.turno == Painel.geral
               ? (_estatisticas ? 'Temporada inteira' : 'Geral · os dois turnos somados')
               : (_estatisticas
@@ -98,24 +131,7 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
             SorteiosDaTabela(painel: painel),
           TabelaClassificacao(painel: painel, linhas: painel.tabela),
           const SizedBox(height: AppSpacing.md),
-          if (painel.turno == Painel.geral)
-            _Legenda(
-              AppColors.vermelho,
-              painel.rebaixados.isEmpty
-                  ? 'Os últimos da geral são rebaixados ao fim da temporada (art. 89)'
-                  : 'Rebaixados (art. 89)',
-            )
-          else if (painel.categoria.temQuartas) ...[
-            const _Legenda(AppColors.verde, '1º e 2º vão direto às semifinais'),
-            _Legenda(
-              AppColors.oliva,
-              '3º ao ${painel.categoria.classificados}º jogam as quartas de final',
-            ),
-          ] else
-            _Legenda(
-              AppColors.verde,
-              '1º ao ${painel.categoria.classificados}º vão às semifinais',
-            ),
+          ..._legendas(painel),
           if (painel.tabela.any((l) => l.aguardaSorteio))
             const Padding(
               padding: EdgeInsets.only(top: AppSpacing.sm),
@@ -152,7 +168,10 @@ class _Item {
 class _Estatistica extends StatelessWidget {
   final Painel painel;
   final _Categoria categoria;
-  const _Estatistica({required this.painel, required this.categoria});
+
+  /// Na imagem compartilhada, só os primeiros (listas longas não cabem).
+  final int? limite;
+  const _Estatistica({required this.painel, required this.categoria, this.limite});
 
   String _nome(String id) => (painel.nomes[id] ?? id).toUpperCase();
   String _time(String id) => painel.times[id]?.nome ?? id;
@@ -259,6 +278,8 @@ class _Estatistica extends StatelessWidget {
     };
 
     if (itens.isEmpty) return ListaVazia(titulo: categoria.rotulo, texto: vazio);
+    final mostrados = limite == null ? itens : itens.take(limite!).toList();
+    final ocultos = itens.length - mostrados.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -266,10 +287,18 @@ class _Estatistica extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Column(
             children: [
-              for (final (i, item) in itens.indexed) ...[
+              for (final (i, item) in mostrados.indexed) ...[
                 if (i > 0) const Divider(height: 1, color: AppColors.linha),
                 _Linha(painel: painel, item: item),
               ],
+              if (ocultos > 0)
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  child: Text(
+                    ocultos == 1 ? 'e mais 1 no app' : 'e mais $ocultos no app',
+                    style: AppTextStyles.pequeno,
+                  ),
+                ),
             ],
           ),
         ),
@@ -408,3 +437,25 @@ class SeletorTurno extends StatelessWidget {
     );
   }
 }
+
+/// Legendas das cores da tabela (zona de classificação ou rebaixamento).
+List<Widget> _legendas(Painel painel) => [
+  if (painel.turno == Painel.geral)
+            _Legenda(
+              AppColors.vermelho,
+              painel.rebaixados.isEmpty
+                  ? 'Os últimos da geral são rebaixados ao fim da temporada (art. 89)'
+                  : 'Rebaixados (art. 89)',
+            )
+          else if (painel.categoria.temQuartas) ...[
+            const _Legenda(AppColors.verde, '1º e 2º vão direto às semifinais'),
+            _Legenda(
+              AppColors.oliva,
+              '3º ao ${painel.categoria.classificados}º jogam as quartas de final',
+            ),
+          ] else
+            _Legenda(
+              AppColors.verde,
+              '1º ao ${painel.categoria.classificados}º vão às semifinais',
+            ),
+];
