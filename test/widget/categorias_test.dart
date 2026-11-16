@@ -138,6 +138,8 @@ void main() {
 
   testWidgets('Master mostra as datas reservadas da Copa em Jogos', (tester) async {
     await abrirApp(tester, inicio: '/torcedor/jogos');
+    await tester.ensureVisible(find.text('Copa'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Copa'));
     await tester.pumpAndSettle();
     expect(find.text('Copa Master · datas reservadas'), findsOneWidget);
