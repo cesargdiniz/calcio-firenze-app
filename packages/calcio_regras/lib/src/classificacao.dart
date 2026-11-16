@@ -20,6 +20,11 @@ class LinhaClassificacao {
   /// Verdadeiro quando os 7 critérios não desempataram e falta o sorteio (art. 42).
   bool aguardaSorteio = false;
 
+  /// Times que empataram com este em todos os critérios (ele incluído), na
+  /// ordem da tabela. Vazio quando os critérios bastaram. Com o sorteio já
+  /// registrado, continua preenchido e [aguardaSorteio] fica falso.
+  List<String> empatadosNoSorteio = const [];
+
   LinhaClassificacao(this.timeId);
 
   int get saldo => golsPro - golsContra;
@@ -188,15 +193,27 @@ int Function(LinhaClassificacao) _confrontoDireto(
 
 List<LinhaClassificacao> _sorteio(List<LinhaClassificacao> grupo, List<String> ordemSorteio) {
   final todosSorteados = grupo.every((l) => ordemSorteio.contains(l.timeId));
-  if (!todosSorteados) {
-    for (final l in grupo) {
-      l.aguardaSorteio = true;
-    }
-    return grupo;
+  final ordenado = todosSorteados
+      ? ([...grupo]..sort(
+          (a, b) => ordemSorteio.indexOf(a.timeId).compareTo(ordemSorteio.indexOf(b.timeId)),
+        ))
+      : grupo;
+  final ids = [for (final l in ordenado) l.timeId];
+  for (final l in ordenado) {
+    l.aguardaSorteio = !todosSorteados;
+    l.empatadosNoSorteio = ids;
   }
-  return [...grupo]
-    ..sort((a, b) => ordemSorteio.indexOf(a.timeId).compareTo(ordemSorteio.indexOf(b.timeId)));
+  return ordenado;
 }
+
+/// Ordem de sorteio depois de registrar o resultado de um grupo empatado:
+/// os times do grupo saem de onde estavam e entram na ordem sorteada. A ordem
+/// relativa entre grupos diferentes não importa, só a de dentro de cada um.
+List<String> registrarSorteioNaOrdem(List<String> ordemAtual, List<String> grupoNaOrdemSorteada) => [
+  for (final t in ordemAtual)
+    if (!grupoNaOrdemSorteada.contains(t)) t,
+  ...grupoNaOrdemSorteada,
+];
 
 /// Tabela da fase classificatória de um turno.
 List<LinhaClassificacao> classificacaoDoTurno({

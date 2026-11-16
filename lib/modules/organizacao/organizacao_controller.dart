@@ -270,6 +270,14 @@ class OrganizacaoController extends Cubit<OrgStatus> {
 
   Future<void> salvarPartida(Partida p) => _gestao.salvarPartidas(_dados!.id, [p]);
 
+  /// Resultado do sorteio do art. 42 (feito fora do app) para um grupo de
+  /// times empatados em todos os critérios: [ordem] é a ordem sorteada, do
+  /// mais bem colocado ao pior. [turno] 0 é a classificação geral.
+  Future<void> registrarSorteio(int turno, List<String> ordem) {
+    final d = _dados!;
+    return _gestao.salvarSorteio(d.id, turno, registrarSorteioNaOrdem(d.ordemSorteio(turno), ordem));
+  }
+
   /// Grava os jogos de uma etapa do mata-mata (quartas, semifinais, final).
   Future<void> criarEtapa(List<Partida> jogos) => _gestao.salvarPartidas(_dados!.id, jogos);
 

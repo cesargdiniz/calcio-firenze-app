@@ -301,6 +301,12 @@ class MemoriaGestaoRepository implements GestaoRepository {
       );
 
   @override
+  Future<void> salvarSorteio(String temporadaId, int turno, List<String> ordem) async {
+    final d = temporada.daTemporada(temporadaId);
+    temporada.substituir(_copiar(d, sorteios: {...d.sorteios, turno: ordem}));
+  }
+
+  @override
   Stream<List<Movimentacao>> observarMovimentacoes(String temporadaId) async* {
     yield movimentacoes;
     yield* _mudouMovimentacoes.stream.map((_) => movimentacoes);
@@ -353,6 +359,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
     List<Partida>? partidas,
     List<Pagamento>? pagamentos,
     List<DecisaoDisciplinar>? decisoes,
+    Map<int, List<String>>? sorteios,
     bool? demonstracao,
   }) {
     final demo = demonstracao ?? d.demonstracao;
@@ -369,6 +376,8 @@ class MemoriaGestaoRepository implements GestaoRepository {
       decisoes: decisoes ?? (saindoDaDemo ? const [] : d.decisoes),
       parametros: parametros ?? d.parametros,
       patrocinador: patrocinador == null ? d.patrocinador : patrocinador(),
+      ajustes: d.ajustes,
+      sorteios: sorteios ?? d.sorteios,
       demonstracao: demo,
       relogio: demo ? d.relogio : null,
     );

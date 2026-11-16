@@ -148,7 +148,7 @@ class MontarPainel {
             times: times.keys,
             partidas: partidas,
             ajustes: d.ajustes,
-            ordemSorteio: d.ordemSorteio,
+            ordemSorteio: d.ordemSorteio(Painel.geral),
             params: d.parametros,
           )
         : classificacaoDoTurno(
@@ -156,7 +156,7 @@ class MontarPainel {
             times: times.keys,
             partidas: partidas,
             ajustes: d.ajustes,
-            ordemSorteio: d.ordemSorteio,
+            ordemSorteio: d.ordemSorteio(t),
             params: d.parametros,
           );
     // Rebaixamento só faz sentido com jogos dos dois turnos lançados.

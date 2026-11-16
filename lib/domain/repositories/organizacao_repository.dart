@@ -68,6 +68,9 @@ abstract interface class GestaoRepository {
   /// Patrocinador que dá nome à competição na súmula; nulo para tirar.
   Future<void> salvarPatrocinador(String temporadaId, String? patrocinador);
 
+  /// Ordem do sorteio do art. 42 na tabela do turno (0: classificação geral).
+  Future<void> salvarSorteio(String temporadaId, int turno, List<String> ordem);
+
   /// Saídas de elenco registradas (só a Organização lê).
   Stream<List<Movimentacao>> observarMovimentacoes(String temporadaId);
 

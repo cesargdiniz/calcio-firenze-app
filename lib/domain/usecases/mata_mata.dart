@@ -76,7 +76,7 @@ class MataMata {
       times: [for (final t in d.times) t.id],
       partidas: d.partidas,
       ajustes: d.ajustes,
-      ordemSorteio: d.ordemSorteio,
+      ordemSorteio: d.ordemSorteio(turno),
       params: d.parametros,
     );
     // Um empate decidido só por sorteio entre os classificados e o primeiro
@@ -84,8 +84,8 @@ class MataMata {
     final corte = categoria.classificados + 1;
     if (tabela.take(corte).any((l) => l.aguardaSorteio)) {
       return SituacaoMataMata(
-        aguardando: 'Há times empatados em todos os critérios entre os $corte primeiros. O '
-            'sorteio do art. 42 precisa ser feito antes de montar o mata-mata.',
+        aguardando: 'Há times empatados em todos os critérios entre os $corte primeiros. Faça o '
+            'sorteio do art. 42 e registre o resultado na aba Tabela.',
         desfazivel: desfazer?.$1,
         idsDesfaziveis: desfazer?.$2 ?? const [],
       );
