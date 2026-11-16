@@ -4,10 +4,28 @@ import '../entities/categoria.dart';
 import '../entities/temporada.dart';
 import '../entities/usuario.dart';
 
+/// Acesso de uma conta à área da Organização.
+class AcessoOrganizacao {
+  /// A conta está em `organizacao/{uid}`.
+  final bool ehOrganizacao;
+
+  /// Categorias que a conta organiza. Vazia numa conta da Organização: ainda
+  /// não informou a categoria no perfil.
+  final List<Categoria> categorias;
+
+  const AcessoOrganizacao({required this.ehOrganizacao, this.categorias = const []});
+
+  static const nenhum = AcessoOrganizacao(ehOrganizacao: false);
+}
+
 /// Quem é da Organização e de quais categorias (documento
-/// `organizacao/{uid}`). Lista vazia: não é da Organização.
+/// `organizacao/{uid}`, campo `temporadas`).
 abstract interface class OrganizacaoRepository {
-  Stream<List<Categoria>> categoriasQueOrganiza(String uid);
+  Stream<AcessoOrganizacao> acesso(String uid);
+
+  /// O organizador informa no perfil a categoria que organiza. Só vale na
+  /// primeira vez: trocar depois é feito no console do Firebase.
+  Future<void> definirCategoria(String uid, Categoria categoria);
 }
 
 /// Gravações da Organização na temporada.

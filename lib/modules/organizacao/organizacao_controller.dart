@@ -27,10 +27,17 @@ final class OrgSemLogin extends OrgStatus {
   const OrgSemLogin();
 }
 
-/// Logado, mas a conta não organiza nenhuma categoria.
+/// Logado, mas a conta não está em `organizacao/{uid}`.
 final class OrgSemAcesso extends OrgStatus {
   final Sessao sessao;
   const OrgSemAcesso(this.sessao);
+}
+
+/// Conta da Organização que ainda não informou no perfil a categoria que
+/// organiza.
+final class OrgSemCategoria extends OrgStatus {
+  final Sessao sessao;
+  const OrgSemCategoria(this.sessao);
 }
 
 final class OrgPronta extends OrgStatus {
@@ -88,7 +95,7 @@ class OrganizacaoController extends Cubit<OrgStatus> {
 
   Sessao? _sessao;
   bool _sessaoCarregada = false;
-  List<Categoria>? _categorias;
+  AcessoOrganizacao? _acesso;
   Categoria? _categoria;
   DadosTemporada? _dados;
   List<Usuario>? _pedidos;
@@ -103,7 +110,7 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     _subSessao = _auth.observarSessao().listen((s) {
       _sessao = s;
       _sessaoCarregada = true;
-      _categorias = null;
+      _acesso = null;
       for (final x in _porConta) {
         x.cancel();
       }
@@ -112,8 +119,8 @@ class OrganizacaoController extends Cubit<OrgStatus> {
       _categoria = null;
       if (s != null) {
         _porConta.add(
-          _org.categoriasQueOrganiza(s.uid).listen((l) {
-            _categorias = l;
+          _org.acesso(s.uid).listen((a) {
+            _acesso = a;
             _definirCategoria();
           }, onError: _falhar),
         );
@@ -125,7 +132,7 @@ class OrganizacaoController extends Cubit<OrgStatus> {
   /// Categoria a mostrar: a do seletor, se esta conta organiza; se não, a
   /// primeira que organiza.
   void _definirCategoria() {
-    final permitidas = _categorias;
+    final permitidas = _acesso?.categorias;
     if (permitidas == null || permitidas.isEmpty) return _recalcular();
     final escolhida = _escolha.atual;
     final c = permitidas.contains(escolhida) ? escolhida! : permitidas.first;
@@ -186,6 +193,14 @@ class OrganizacaoController extends Cubit<OrgStatus> {
   /// Troca a categoria da área (e do seletor do app inteiro).
   Future<void> escolherCategoria(Categoria c) => _escolha.escolher(c);
 
+  /// Primeira vez na área: o organizador informa a categoria que organiza.
+  Future<void> definirMinhaCategoria(Categoria c) async {
+    final s = _sessao;
+    if (s == null) return;
+    await _org.definirCategoria(s.uid, c);
+    await _escolha.escolher(c);
+  }
+
   void _falhar(Object _) {
     if (!isClosed) emit(const OrgFalha('Não foi possível carregar os dados da Organização.'));
   }
@@ -195,9 +210,11 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     final sessao = _sessao;
     if (!_sessaoCarregada) return emit(const OrgCarregando());
     if (sessao == null) return emit(const OrgSemLogin());
-    final categorias = _categorias;
-    if (categorias == null) return emit(const OrgCarregando());
-    if (categorias.isEmpty) return emit(OrgSemAcesso(sessao));
+    final acesso = _acesso;
+    if (acesso == null) return emit(const OrgCarregando());
+    if (!acesso.ehOrganizacao) return emit(OrgSemAcesso(sessao));
+    final categorias = acesso.categorias;
+    if (categorias.isEmpty) return emit(OrgSemCategoria(sessao));
     final dados = _dados;
     final movimentacoes = _movimentacoes;
     if (dados == null || _pedidos == null || _aprovados == null || movimentacoes == null) {

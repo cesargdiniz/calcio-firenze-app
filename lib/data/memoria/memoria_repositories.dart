@@ -143,17 +143,31 @@ class MemoriaTemporadaRepository implements TemporadaRepository {
 }
 
 class MemoriaOrganizacaoRepository implements OrganizacaoRepository {
-  /// uid → categorias que organiza (lista vazia: todas).
+  /// uid → categorias que organiza (lista vazia: ainda não informou). Os
+  /// [uids] organizam todas.
   final Map<String, List<Categoria>> contas;
+  final _mudancas = StreamController<String>.broadcast();
 
-  MemoriaOrganizacaoRepository([Set<String> uids = const {}, Map<String, List<Categoria>>? porCategoria])
-    : contas = {for (final u in uids) u: const [], ...?porCategoria};
+  MemoriaOrganizacaoRepository([
+    Set<String> uids = const {},
+    Map<String, List<Categoria>>? porCategoria,
+  ]) : contas = {for (final u in uids) u: Categoria.values, ...?porCategoria};
+
+  AcessoOrganizacao _de(String uid) {
+    final c = contas[uid];
+    return c == null ? AcessoOrganizacao.nenhum : AcessoOrganizacao(ehOrganizacao: true, categorias: c);
+  }
 
   @override
-  Stream<List<Categoria>> categoriasQueOrganiza(String uid) {
-    final c = contas[uid];
-    if (c == null) return Stream.value(const []);
-    return Stream.value(c.isEmpty ? Categoria.values : c);
+  Stream<AcessoOrganizacao> acesso(String uid) async* {
+    yield _de(uid);
+    yield* _mudancas.stream.where((u) => u == uid).map(_de);
+  }
+
+  @override
+  Future<void> definirCategoria(String uid, Categoria categoria) async {
+    if (contas[uid]?.isEmpty ?? false) contas[uid] = [categoria];
+    _mudancas.add(uid);
   }
 }
 

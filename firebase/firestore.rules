@@ -5,9 +5,10 @@ rules_version = '2';
 // organizacao/{uid}, criado à mão no console do Firebase).
 //
 // Cada categoria é uma temporada (temporadas/master-2027, /livre-2027,
-// /super-master-2027). O campo opcional `temporadas` em organizacao/{uid}
-// (lista de ids) limita a conta às categorias que ela organiza; sem o campo,
-// a conta organiza todas.
+// /super-master-2027). O campo `temporadas` em organizacao/{uid} (lista de
+// ids) diz quais categorias a conta organiza: ela só altera essas. No
+// primeiro acesso, o próprio organizador informa a categoria no app; trocar
+// depois (ou dar mais de uma) é feito aqui no console.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -16,16 +17,22 @@ service cloud.firestore {
       return logado() && exists(/databases/$(database)/documents/organizacao/$(request.auth.uid));
     }
     function organizacaoDe(t) {
-      return organizacao() && (
-        !('temporadas' in get(/databases/$(database)/documents/organizacao/$(request.auth.uid)).data)
-        || t in get(/databases/$(database)/documents/organizacao/$(request.auth.uid)).data.temporadas
-      );
+      return organizacao()
+        && t in get(/databases/$(database)/documents/organizacao/$(request.auth.uid)).data.get('temporadas', []);
     }
 
     // Lista de quem é da Organização: só leitura do próprio registro.
+    // O organizador lê o próprio registro e informa a categoria uma única vez
+    // (só se ainda não tiver `temporadas`, e só uma categoria).
     match /organizacao/{uid} {
       allow read: if logado() && request.auth.uid == uid;
-      allow write: if false;
+      allow update: if logado() && request.auth.uid == uid
+        && !('temporadas' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['temporadas'])
+        && request.resource.data.temporadas is list
+        && request.resource.data.temporadas.size() == 1
+        && request.resource.data.temporadas[0] in ['master-2027', 'super-master-2027', 'livre-2027'];
+      allow create, delete: if false;
     }
 
     // Dados públicos: qualquer pessoa lê; só a Organização escreve.

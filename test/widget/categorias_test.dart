@@ -149,4 +149,26 @@ void main() {
     await _trocarPara(tester, 'Livre');
     expect(find.text('Copa'), findsNothing);
   });
+
+  testWidgets('organizador informa a categoria no primeiro acesso e fica só nela', (
+    tester,
+  ) async {
+    await abrirApp(
+      tester,
+      inicio: '/organizacao',
+      sessao: _org,
+      organizacaoPorCategoria: {'org1': []},
+    );
+    expect(find.text('Qual categoria você organiza?'), findsOneWidget);
+
+    await tester.tap(find.text('Super Master'));
+    await tester.pumpAndSettle();
+    expect(find.text('Organizar a categoria Super Master?'), findsOneWidget);
+    await tester.tap(find.text('Confirmar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('SUPER MASTER'), findsOneWidget);
+    expect(find.byIcon(Icons.expand_more_rounded), findsNothing);
+    expect(find.text('Super Master · Temporada 2027'), findsOneWidget);
+  });
 }

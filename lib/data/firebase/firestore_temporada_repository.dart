@@ -161,23 +161,32 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
 }
 
 /// `organizacao/{uid}`: quem existe ali é da Organização. O campo
-/// `temporadas` (lista de ids) limita às categorias que a pessoa organiza;
-/// sem ele, organiza todas.
+/// `temporadas` (lista de ids) diz quais categorias a pessoa organiza; sem
+/// ele, ela ainda precisa informar a categoria no perfil.
 class FirestoreOrganizacaoRepository implements OrganizacaoRepository {
   final FirebaseFirestore _db;
   FirestoreOrganizacaoRepository(this._db);
 
+  DocumentReference<Map<String, dynamic>> _doc(String uid) =>
+      _db.collection('organizacao').doc(uid);
+
   @override
-  Stream<List<Categoria>> categoriasQueOrganiza(String uid) =>
-      _db.collection('organizacao').doc(uid).snapshots().map((s) {
-        if (!s.exists) return const <Categoria>[];
-        final ids = s.data()?['temporadas'];
-        if (ids is! List) return Categoria.values;
-        return [
+  Stream<AcessoOrganizacao> acesso(String uid) => _doc(uid).snapshots().map((s) {
+    if (!s.exists) return AcessoOrganizacao.nenhum;
+    final ids = s.data()?['temporadas'];
+    return AcessoOrganizacao(
+      ehOrganizacao: true,
+      categorias: [
+        if (ids is List)
           for (final c in Categoria.values)
             if (ids.contains(c.temporadaId)) c,
-        ];
-      });
+      ],
+    );
+  });
+
+  @override
+  Future<void> definirCategoria(String uid, Categoria categoria) =>
+      _doc(uid).update({'temporadas': [categoria.temporadaId]});
 }
 
 class FirestoreGestaoRepository implements GestaoRepository {

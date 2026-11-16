@@ -54,8 +54,10 @@ temporadas/{temporadaId}              uma por categoria: master-2027, super-mast
 usuarios/{uid}                        nome, email, perfil (participante)
   situacao/atual                      pendências e cartões da própria pessoa (gerado)
 
-organizacao/{uid}                     quem organiza; temporadas[]? limita às categorias
-                                      (sem o campo, organiza todas). Criado à mão no console.
+organizacao/{uid}                     quem organiza (criado à mão no console); temporadas[]:
+                                      categorias que a conta altera. No primeiro acesso o
+                                      organizador informa a categoria no app (uma vez só);
+                                      trocar ou dar mais de uma, pelo console.
 ```
 
 ## Categorias
@@ -64,7 +66,8 @@ Master (10 times), Super Master (6) e Livre (8) são competições separadas, ca
 sua temporada, com times, elencos, calendário, tabela, regras e Organização próprios
 (`lib/domain/entities/categoria.dart`). O Torcedor e o Participante escolhem a categoria
 na primeira abertura e trocam pela barra do topo; a escolha fica guardada no aparelho. A
-Organização vê só as categorias que organiza. Os avisos do Participante juntam todas as
+Organização informa no primeiro acesso a categoria que organiza e só altera essa (as
+regras do Firestore garantem). Os avisos do Participante juntam todas as
 categorias em que ele tem vínculo aprovado. A Copa Master entra quando o formato estiver
 definido.
 
