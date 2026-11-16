@@ -70,6 +70,8 @@ void main() {
   testWidgets('Torcedor não vê o registro do sorteio', (tester) async {
     await abrirApp(tester, inicio: '/torcedor/tabela', dados: _tudoEmpatado());
     expect(find.text('Empate em todos os critérios (art. 42)'), findsNothing);
-    expect(find.text('* Empate em todos os critérios: decidido por sorteio (art. 42).'), findsOneWidget);
+    final nota = find.text('* Empate em todos os critérios: decidido por sorteio (art. 42).');
+    await tester.scrollUntilVisible(nota, 200);
+    expect(nota, findsOneWidget);
   });
 }
