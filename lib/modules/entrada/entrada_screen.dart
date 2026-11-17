@@ -25,7 +25,11 @@ class EntradaScreen extends StatelessWidget {
       child: ListView(
         padding: AppSpacing.tela,
         children: [
-          const SizedBox(height: AppSpacing.xl),
+          // Aberta pelo "Trocar de perfil": volta para onde estava.
+          if (context.canPop())
+            const BotaoVoltar(rotulo: 'Voltar', rota: '/torcedor')
+          else
+            const SizedBox(height: AppSpacing.xl),
           const Align(alignment: Alignment.centerLeft, child: LogoCalcio()),
           const SizedBox(height: AppSpacing.xl),
           const Text('Como você quer entrar?', style: AppTextStyles.tituloTela),

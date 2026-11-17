@@ -73,7 +73,11 @@ class GestaoScreen extends StatelessWidget {
             ListTile(
               title: Text('Entrou como ${o.sessao.email}', style: AppTextStyles.pequeno),
             ),
-            item('Trocar de perfil', rota: '/entrar'),
+            ListTile(
+              title: const Text('Trocar de perfil', style: AppTextStyles.rotulo),
+              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.dica),
+              onTap: () => context.push('/entrar'),
+            ),
             ListTile(
               title: const Text('Sair da conta', style: AppTextStyles.rotulo),
               trailing: const Icon(Icons.logout_rounded, color: AppColors.dica),

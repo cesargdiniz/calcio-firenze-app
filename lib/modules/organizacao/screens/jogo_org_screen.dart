@@ -35,30 +35,6 @@ class JogoOrgScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _reabrir(BuildContext context, Partida p) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (d) => AlertDialog(
-        title: const Text('Reabrir a súmula?'),
-        content: const Text(
-          'O resultado sai da tabela e os cartões deixam de contar até você encerrar de novo.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(d, true), child: const Text('Reabrir')),
-        ],
-      ),
-    );
-    if (ok == true && context.mounted) {
-      final c = context.read<OrganizacaoController>();
-      final rascunho = p.sumula;
-      await c.salvarPartida(p.comSumula(null));
-      if (context.mounted) {
-        context.go('/organizacao/jogos/${p.id}/sumula', extra: rascunho);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) => ComOrg(
     builder: (context, o) {
@@ -110,9 +86,10 @@ class JogoOrgScreen extends StatelessWidget {
               style: AppTextStyles.corpo,
             ),
             const SizedBox(height: AppSpacing.md),
-            FilledButton(
+            FilledButton.icon(
               onPressed: () => context.go('/organizacao/jogos/${p.id}/sumula'),
-              child: const Text('Lançar súmula'),
+              icon: const Icon(Icons.edit_outlined),
+              label: const Text('Lançar placar e súmula'),
             ),
           ] else ...[
             Cartao(
@@ -166,9 +143,12 @@ class JogoOrgScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () => _reabrir(context, p),
-              child: const Text('Reabrir para corrigir'),
+            // A súmula abre preenchida; a publicada continua valendo até salvar
+            // a corrigida.
+            FilledButton.icon(
+              onPressed: () => context.go('/organizacao/jogos/${p.id}/sumula'),
+              icon: const Icon(Icons.edit_outlined),
+              label: const Text('Editar placar e súmula'),
             ),
           ],
         ],

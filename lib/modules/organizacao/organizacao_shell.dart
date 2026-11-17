@@ -148,7 +148,7 @@ class _InformarCategoriaState extends State<_InformarCategoria> {
       child: ListView(
         padding: AppSpacing.tela,
         children: [
-          const SizedBox(height: AppSpacing.xl),
+          const BotaoVoltar(rotulo: 'Voltar', rota: '/entrar'),
           const Align(alignment: Alignment.centerLeft, child: LogoCalcio()),
           const SizedBox(height: AppSpacing.xl),
           const Text('Qual categoria você organiza?', style: AppTextStyles.tituloTela),
@@ -204,7 +204,7 @@ class _SemAcesso extends StatelessWidget {
       child: ListView(
         padding: AppSpacing.tela,
         children: [
-          const SizedBox(height: AppSpacing.xl),
+          const BotaoVoltar(rotulo: 'Voltar', rota: '/entrar'),
           const Align(alignment: Alignment.centerLeft, child: LogoCalcio()),
           const SizedBox(height: AppSpacing.xl),
           const Icon(Icons.lock_outline_rounded, size: 44, color: AppColors.texto2),

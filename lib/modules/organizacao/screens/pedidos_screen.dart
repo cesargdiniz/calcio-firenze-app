@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/usuario.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -18,14 +17,7 @@ class VoltarGestao extends StatelessWidget {
   const VoltarGestao({super.key, this.rotulo = 'Gestão', this.rota = '/organizacao/gestao'});
 
   @override
-  Widget build(BuildContext context) => Align(
-    alignment: Alignment.centerLeft,
-    child: TextButton.icon(
-      onPressed: () => context.go(rota),
-      icon: const Icon(Icons.chevron_left_rounded, color: AppColors.oliva),
-      label: Text(rotulo, style: AppTextStyles.subtitulo.copyWith(fontSize: 14)),
-    ),
-  );
+  Widget build(BuildContext context) => BotaoVoltar(rotulo: rotulo, rota: rota);
 }
 
 /// G3 · Gestão · Pedidos de vínculo

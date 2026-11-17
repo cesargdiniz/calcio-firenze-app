@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../theme/app_colors.dart';
@@ -174,6 +175,29 @@ class ListaVazia extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Text(texto, style: AppTextStyles.corpo, textAlign: TextAlign.center),
       ],
+    ),
+  );
+}
+
+/// Voltar no topo das telas que não são abas: volta para a tela anterior e,
+/// se o app foi aberto direto nesta, para [rota].
+class BotaoVoltar extends StatelessWidget {
+  final String rotulo;
+  final String rota;
+  const BotaoVoltar({super.key, required this.rotulo, required this.rota});
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.centerLeft,
+    child: TextButton.icon(
+      key: const Key('voltar'),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.fromLTRB(0, 8, 12, 8),
+        minimumSize: const Size(48, 48),
+      ),
+      onPressed: () => context.canPop() ? context.pop() : context.go(rota),
+      icon: const Icon(Icons.chevron_left_rounded, color: AppColors.oliva, size: 28),
+      label: Text(rotulo, style: AppTextStyles.subtitulo.copyWith(fontSize: 15)),
     ),
   );
 }
