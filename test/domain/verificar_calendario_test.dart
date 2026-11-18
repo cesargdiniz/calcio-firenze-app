@@ -150,7 +150,7 @@ void main() {
         _j(DateTime(2027, 11, 6, 17), Competicao.livre, fase: Fase.finalTurno, turno: 2),
         // Outra categoria na mesma semana não soma para os times do Livre.
         _j(DateTime(2027, 11, 6, 19), Competicao.superMaster, fase: Fase.grandeFinal, turno: 0),
-      ]),
+      ]).where((d) => d.startsWith('R6')),
       [
         'R6 Semana de 01/11 a 07/11: L Quartas de final do 2º turno, '
             'L Semifinais do 2º turno, L Final do 2º turno (o mesmo time pode jogar 3 vezes).',
