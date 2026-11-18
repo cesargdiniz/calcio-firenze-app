@@ -1,3 +1,5 @@
+import 'package:calcio_firenze/shared/pdf/saida_pdf.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'apoio.dart';
@@ -22,4 +24,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Calendário completo'), findsOneWidget);
   });
+
+  testWidgets('baixa o calendário anual em PDF', (tester) async {
+    final saida = _PdfGuardado();
+    await abrirApp(tester, inicio: '/calendario', saidaPdf: saida);
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Baixar calendário anual (PDF)'));
+      for (var i = 0; i < 40 && saida.nome == null; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await tester.pump();
+      }
+    });
+    expect(saida.nome, 'Calcio_Firenze_2027_Calendario.pdf');
+    expect(String.fromCharCodes(saida.bytes!.take(5)), '%PDF-');
+  });
+}
+
+class _PdfGuardado implements SaidaPdf {
+  Uint8List? bytes;
+  String? nome;
+
+  @override
+  Future<void> abrir(Uint8List bytes, String nomeArquivo) async {
+    this.bytes = bytes;
+    nome = nomeArquivo;
+  }
 }

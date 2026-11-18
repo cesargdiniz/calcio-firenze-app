@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/usecases/calendario_geral.dart';
 import '../../shared/format.dart';
+import '../../shared/pdf/saida_pdf.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
@@ -109,6 +110,12 @@ class _CalendarioState extends State<_Calendario> {
               const CabecalhoTela(
                 'Calendário',
                 subtitulo: 'Todos os jogos do Calcio Firenze 2027',
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton.icon(
+                onPressed: () => abrirCalendarioPdf(context),
+                icon: const Icon(Icons.download_rounded),
+                label: const Text('Baixar calendário anual (PDF)'),
               ),
               const SizedBox(height: AppSpacing.md),
               Wrap(
