@@ -146,10 +146,17 @@ Future<Uint8List> gerarCalendarioPdf(
               ),
               child: numero,
             ),
-          for (final c in Competicao.values)
-            if (contagem[c] case final n?) selo('${c.sigla}$n', _cor(c)),
-          for (final e in doDia)
-            if (e.ehDraft) selo('D${e.draft} ${e.competicao.sigla}', _draft),
+          // Selos lado a lado, para caber mais de uma competição no dia.
+          pw.Wrap(
+            alignment: pw.WrapAlignment.center,
+            spacing: 1.5,
+            children: [
+              for (final c in Competicao.values)
+                if (contagem[c] case final n?) selo('${c.sigla}$n', _cor(c)),
+              for (final e in doDia)
+                if (e.ehDraft) selo('D${e.draft} ${e.competicao.sigla}', _draft),
+            ],
+          ),
         ],
       ),
     );
