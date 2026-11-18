@@ -113,6 +113,19 @@ void main() {
     );
   });
 
+  test('regra 9: nenhum jogo em feriado, nem nos facultativos', () {
+    expect(
+      _detalhes([
+        _j(DateTime(2027, 11, 2, 20, 30), Competicao.master),
+        _j(DateTime(2027, 10, 25, 20, 30), Competicao.livre, rodada: 7),
+      ]).where((d) => d.startsWith('R9')),
+      [
+        'R9 Seg 25/10 (Data local a confirmar): L1.',
+        'R9 Ter 02/11 (Finados): M1.',
+      ],
+    );
+  });
+
   test('regra 8: sábado com até 4 jogos, a partir das 17:00', () {
     expect(
       _detalhes([

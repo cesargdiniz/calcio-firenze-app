@@ -429,8 +429,14 @@ Future<Uint8List> gerarCalendarioPdf(
               children: [
                 for (final c in Competicao.values) legenda(c.sigla, c.nome.toUpperCase(), _cor(c)),
                 legenda('D', 'DRAFT', _draft),
-                pw.Spacer(),
-                pw.Text('Número no selo = partidas no dia', style: t(7, cor: _dica)),
+                pw.Expanded(
+                  child: pw.Text(
+                    'O número depois da sigla é a quantidade de jogos no dia: '
+                    'M2 = 2 jogos do Master, L1 = 1 jogo do Livre.',
+                    style: t(7, negrito: true, cor: _texto2),
+                    textAlign: pw.TextAlign.right,
+                  ),
+                ),
               ],
             ),
           ),

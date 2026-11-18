@@ -17,7 +17,8 @@ enum RegraCalendario {
     'Entre dois jogos do mesmo time, pelo menos 4 dias: quem joga segunda volta na sexta; '
     'quem joga terça, no sábado.',
   ),
-  sabado('No sábado, no máximo 4 jogos, a partir das 17:00.');
+  sabado('No sábado, no máximo 4 jogos, a partir das 17:00.'),
+  feriado('Nenhum jogo em feriado, nem nos facultativos.');
 
   final String texto;
   const RegraCalendario(this.texto);
@@ -181,7 +182,21 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
     }
   }
 
-  // 7: descanso de 72 horas.
+  // 9: feriados (oficiais e facultativos).
+  final datasFeriados = {for (final f in feriados2027) _dia(f.data): f.nome};
+  for (final MapEntry(key: dia, value: doDia) in porDia.entries) {
+    if (datasFeriados[dia] case final nome?) {
+      saida.add(
+        Inconsistencia(
+          RegraCalendario.feriado,
+          '${_data(dia)} ($nome): ${_contagem(doDia)}.',
+          doDia,
+        ),
+      );
+    }
+  }
+
+  // 7: descanso de 4 dias.
   saida.addAll(_descanso(jogos, grupo));
 
   // 4 e 5: por jogo (um aviso por etapa e dia).
