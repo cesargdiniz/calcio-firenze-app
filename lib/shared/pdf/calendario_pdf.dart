@@ -95,7 +95,8 @@ Future<Uint8List> gerarCalendarioPdf(
 
   // Altura das casas para caber tudo numa folha: meses + 2 quadros, 3 por linha.
   final linhasDaGrade = (meses.length + 2 + 2) ~/ 3;
-  final alturaCasa = ((1040 / linhasDaGrade - 66) / 6).clamp(13.0, 26.0);
+  // Sobra ~1040 pt para a grade; cada quadro gasta ~54 pt fora as casas.
+  final alturaCasa = (((940 - 6 * (linhasDaGrade - 1)) / linhasDaGrade - 54) / 6).clamp(13.0, 26.0);
 
   final porDia = <DateTime, List<JogoDoCalendario>>{};
   for (final e in eventos) {
@@ -111,7 +112,7 @@ Future<Uint8List> gerarCalendarioPdf(
       pw.TextStyle(font: r.titulo, fontSize: tamanho, color: cor);
 
   pw.Widget selo(String texto, PdfColor cor) => pw.Container(
-    margin: const pw.EdgeInsets.only(top: 1),
+    margin: const pw.EdgeInsets.only(top: 0.8),
     padding: const pw.EdgeInsets.symmetric(horizontal: 2.5, vertical: 0.6),
     decoration: pw.BoxDecoration(color: cor, borderRadius: pw.BorderRadius.circular(2)),
     child: pw.Text(texto, style: t(5.6, negrito: true, cor: PdfColors.white)),
@@ -127,7 +128,7 @@ Future<Uint8List> gerarCalendarioPdf(
     final domingo = d.weekday == DateTime.sunday;
     final numero = pw.Text(
       '${d.day}',
-      style: t(7.5, negrito: true, cor: feriado != null ? _vermelho : (domingo ? _dica : _tinta)),
+      style: t(7, negrito: true, cor: feriado != null ? _vermelho : (domingo ? _dica : _tinta)),
     );
     return pw.Container(
       height: alturaCasa,
@@ -142,8 +143,8 @@ Future<Uint8List> gerarCalendarioPdf(
             numero
           else
             pw.Container(
-              width: 13,
-              height: 13,
+              width: 11.5,
+              height: 11.5,
               alignment: pw.Alignment.center,
               decoration: pw.BoxDecoration(
                 shape: pw.BoxShape.circle,
@@ -360,7 +361,7 @@ Future<Uint8List> gerarCalendarioPdf(
     final trio = quadros.sublist(i, (i + 3).clamp(0, quadros.length));
     linhasGrade.add(
       pw.Padding(
-        padding: const pw.EdgeInsets.only(bottom: 8),
+        padding: const pw.EdgeInsets.only(bottom: 6),
         child: pw.Row(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
