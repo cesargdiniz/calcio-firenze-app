@@ -35,7 +35,7 @@ class TemporadaExemploRepository implements TemporadaRepository {
 /// ajusta cor e escudo em Gestão › Times da temporada).
 const timesMaster2027 = [
   Time(id: 'INT', nome: 'Inter', sigla: 'INT', cor: 0xFF0A3D91),
-  Time(id: 'FIO', nome: 'Fiori', sigla: 'FIO', cor: 0xFF5B2A86),
+  Time(id: 'FIO', nome: 'Fiorentina', sigla: 'FIO', cor: 0xFF5B2A86),
   Time(id: 'SAM', nome: 'Sampdoria', sigla: 'SAM', cor: 0xFF1B5CC1),
   Time(id: 'FOG', nome: 'Foggia', sigla: 'FOG', cor: 0xFFC8102E),
   Time(id: 'BEN', nome: 'Benevento', sigla: 'BEN', cor: 0xFFD9A400),

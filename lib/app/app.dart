@@ -91,6 +91,7 @@ class _CalcioAppState extends State<CalcioApp> {
             widget.temporada,
             widget.montarSituacao,
             _categoria,
+            widget.gestao,
           )..iniciar(),
         ),
         BlocProvider(

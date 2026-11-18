@@ -39,7 +39,25 @@ service cloud.firestore {
       allow read: if true;
       allow write: if organizacaoDe(t);
 
-      match /times/{id}     { allow read: if true; allow write: if organizacaoDe(t); }
+      // Times: a Organização da categoria grava tudo; o dirigente aprovado do
+      // time só troca o escudo (nome, sigla e cor continuam os mesmos).
+      match /times/{id} {
+        function vinculo() {
+          return /databases/$(database)/documents/temporadas/$(t)/vinculos/$(request.auth.uid);
+        }
+        function dirigenteDoTime() {
+          return logado() && exists(vinculo())
+            && get(vinculo()).data.status == 'aprovado'
+            && get(vinculo()).data.papel == 'dirigente'
+            && get(vinculo()).data.timeId == id;
+        }
+        allow read: if true;
+        allow create: if organizacaoDe(t) || (dirigenteDoTime()
+          && request.resource.data.keys().hasOnly(['nome', 'sigla', 'cor', 'escudo']));
+        allow update: if organizacaoDe(t) || (dirigenteDoTime()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escudo']));
+        allow delete: if organizacaoDe(t);
+      }
       match /partidas/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
       match /decisoes/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
       match /ajustes/{id}   { allow read: if true; allow write: if organizacaoDe(t); }

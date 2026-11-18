@@ -88,4 +88,59 @@ void main() {
     await acionar(tester, 'Salvar');
     expect(_sam(gestao).escudo, isNull);
   });
+
+  testWidgets('dirigente troca o escudo do próprio time', (tester) async {
+    final gestao = await abrirApp(
+      tester,
+      inicio: '/participante/time',
+      sessao: const Sessao(uid: 'u1', email: 'dirigente@exemplo.com'),
+      seletorImagem: _SeletorFixo(_png),
+      usuarios: {
+        'u1': const Usuario(
+          uid: 'u1',
+          email: 'dirigente@exemplo.com',
+          nome: 'Rafael Souza',
+          vinculos: [
+            Vinculo(
+              temporadaId: 'master-2027',
+              pessoaId: 'rafael-souza',
+              timeId: 'SAM',
+              papel: Papel.dirigente,
+              status: StatusVinculo.aprovado,
+            ),
+          ],
+        ),
+      },
+    );
+    expect(_sam(gestao).escudo, isNull);
+    await tester.tap(find.text('Trocar escudo do time'));
+    await tester.pumpAndSettle();
+    expect(_sam(gestao).escudo, _png);
+    expect(_sam(gestao).nome, 'Sampdoria', reason: 'só o escudo muda');
+  });
+
+  testWidgets('atleta não vê a troca de escudo', (tester) async {
+    await abrirApp(
+      tester,
+      inicio: '/participante/time',
+      sessao: const Sessao(uid: 'u1', email: 'atleta@exemplo.com'),
+      usuarios: {
+        'u1': const Usuario(
+          uid: 'u1',
+          email: 'atleta@exemplo.com',
+          nome: 'Rafael Souza',
+          vinculos: [
+            Vinculo(
+              temporadaId: 'master-2027',
+              pessoaId: 'rafael-souza',
+              timeId: 'SAM',
+              papel: Papel.atleta,
+              status: StatusVinculo.aprovado,
+            ),
+          ],
+        ),
+      },
+    );
+    expect(find.text('Trocar escudo do time'), findsNothing);
+  });
 }
