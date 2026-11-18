@@ -6,12 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final dados = montarTemporadaExemplo();
   final montar = MontarSumulaImpressa(agora: () => TemporadaExemploRepository.agora);
-  final proximoDoMonza = dados.partidas.firstWhere((p) => !p.encerrada && p.envolve('MON'));
+  final proximoDoComo 1907 = dados.partidas.firstWhere((p) => !p.encerrada && p.envolve('COM'));
 
-  TimeSumulaImpresso monza(SumulaImpressa s) => s.mandante.sigla == 'MON' ? s.mandante : s.visitante;
+  TimeSumulaImpresso monza(SumulaImpressa s) => s.mandante.sigla == 'COM' ? s.mandante : s.visitante;
 
   test('lista os atletas em ordem alfabética, com técnico à parte e sem placar', () {
-    final s = montar(dados, proximoDoMonza.id);
+    final s = montar(dados, proximoDoComo 1907.id);
     final nomes = [for (final j in s.mandante.jogadores) j.nome.toLowerCase()];
     expect(nomes, [...nomes]..sort());
     expect(s.mandante.jogadores, hasLength(12));
@@ -19,7 +19,7 @@ void main() {
     expect(s.mandante.jogadores.map((j) => j.nome), isNot(contains(s.mandante.tecnico)));
     expect(s.mandante.gols, isNull);
     expect(s.fase, '1º Turno');
-    expect(s.rodada, '${proximoDoMonza.rodada}ª Rodada');
+    expect(s.rodada, '${proximoDoComo 1907.rodada}ª Rodada');
     expect(s.nomeArquivo, startsWith('sumula-'));
   });
 
@@ -34,17 +34,17 @@ void main() {
       relogio: dados.relogio,
       patrocinador: patrocinador,
     );
-    expect(montar(com('CASA ASSIS'), proximoDoMonza.id).competicao, 'CF CASA ASSIS 2027');
-    expect(montar(com(null), proximoDoMonza.id).competicao, 'CF 2027');
-    expect(montar(com(null), proximoDoMonza.id).categoria, 'Master Temporada 2027');
+    expect(montar(com('CASA ASSIS'), proximoDoComo 1907.id).competicao, 'CF CASA ASSIS 2027');
+    expect(montar(com(null), proximoDoComo 1907.id).competicao, 'CF 2027');
+    expect(montar(com(null), proximoDoComo 1907.id).categoria, 'Master Temporada 2027');
   });
 
   test('risca quem está suspenso na partida', () {
-    final ricardo = monza(montar(dados, proximoDoMonza.id)).jogadores.firstWhere(
+    final ricardo = monza(montar(dados, proximoDoComo 1907.id)).jogadores.firstWhere(
       (j) => j.nome == 'Ricardo Alves',
     );
     expect(ricardo.fora, isTrue);
-    expect(monza(montar(dados, proximoDoMonza.id)).jogadores.where((j) => j.fora), hasLength(1));
+    expect(monza(montar(dados, proximoDoComo 1907.id)).jogadores.where((j) => j.fora), hasLength(1));
   });
 
   test('quem saiu do elenco antes do jogo não aparece', () {
@@ -60,7 +60,7 @@ void main() {
       partidas: dados.partidas,
       relogio: dados.relogio,
     );
-    final nomes = monza(montar(semRicardo, proximoDoMonza.id)).jogadores.map((j) => j.nome);
+    final nomes = monza(montar(semRicardo, proximoDoComo 1907.id)).jogadores.map((j) => j.nome);
     expect(nomes, isNot(contains('Ricardo Alves')));
     expect(nomes, hasLength(11));
   });

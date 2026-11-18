@@ -48,7 +48,7 @@ void main() {
   });
 
   test('elenco com menos de 12 é aviso, não erro', () {
-    final r = importar(elenco('CAS', atletas: 11), times);
+    final r = importar(elenco('JUV', atletas: 11), times);
     expect(r.times.single.ok, isTrue);
     expect(r.times.single.avisos.first, contains('11 atletas'));
   });

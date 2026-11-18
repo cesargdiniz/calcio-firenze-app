@@ -61,9 +61,9 @@ void main() {
     test('vermelho: suspenso no jogo seguinte do time (art. 73)', () {
       final c = Calendario();
       c.jogo('SAM', 'INT', sumula: placar(0, 1, cartoes: [vermelho('rafael', 'SAM')]));
-      final outroTime = c.jogo('UDI', 'ROM');
+      final outroTime = c.jogo('UDI', 'MIL');
       final proximo = c.jogo('SAM', 'UDI');
-      final depois = c.jogo('SAM', 'ROM');
+      final depois = c.jogo('SAM', 'MIL');
       final m = MotorDisciplinar(partidas: c.partidas, agora: cedo);
       expect(m.suspensosPara(proximo.id).map((s) => s.pessoaId), ['rafael']);
       expect(m.suspensosPara(outroTime.id), isEmpty);
@@ -100,10 +100,10 @@ void main() {
       c.jogo('SAM', 'UDI', sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM')]));
       final terceiro = c.jogo(
         'SAM',
-        'ROM',
+        'MIL',
         sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM')]),
       );
-      final quarto = c.jogo('SAM', 'NAP');
+      final quarto = c.jogo('SAM', 'BEN');
       final m = MotorDisciplinar(partidas: c.partidas, agora: cedo);
       expect(m.penduradosPara(terceiro.id).single.amarelos, 2);
       expect(m.suspensosPara(quarto.id).single.motivo, MotivoSuspensao.amarelos);
@@ -118,7 +118,7 @@ void main() {
         'UDI',
         sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM'), segundoAmarelo('rafael', 'SAM')]),
       );
-      c.jogo('SAM', 'ROM');
+      c.jogo('SAM', 'MIL');
       final m = MotorDisciplinar(partidas: c.partidas, agora: cedo);
       expect(m.amarelosNoCiclo('rafael', (turno: 1, eliminatoria: false)), 1);
     });
@@ -141,12 +141,12 @@ void main() {
       c.jogo('SAM', 'UDI', sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM')]));
       c.jogo(
         'SAM',
-        'ROM',
+        'MIL',
         sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM'), vermelho('rafael', 'SAM')]),
       );
-      final p4 = c.jogo('SAM', 'NAP');
-      final p5 = c.jogo('SAM', 'MON');
-      final p6 = c.jogo('SAM', 'CAS');
+      final p4 = c.jogo('SAM', 'BEN');
+      final p5 = c.jogo('SAM', 'COM');
+      final p6 = c.jogo('SAM', 'JUV');
       final m = MotorDisciplinar(partidas: c.partidas, agora: cedo);
       expect(m.suspensosPara(p4.id), hasLength(1));
       expect(m.suspensosPara(p5.id), hasLength(1));
@@ -157,8 +157,8 @@ void main() {
       final c = Calendario();
       c.jogo('SAM', 'INT', sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM')]));
       c.jogo('SAM', 'UDI', sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM')]));
-      c.jogo('SAM', 'ROM', sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM')]));
-      final quartas = c.jogo('SAM', 'NAP', fase: Fase.quartas);
+      c.jogo('SAM', 'MIL', sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM')]));
+      final quartas = c.jogo('SAM', 'BEN', fase: Fase.quartas);
       final m = MotorDisciplinar(partidas: c.partidas, agora: cedo);
       expect(m.suspensosPara(quartas.id).map((s) => s.pessoaId), ['rafael']);
     });
@@ -167,17 +167,17 @@ void main() {
       final c = Calendario();
       c.jogo('SAM', 'INT', sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM')]));
       c.jogo('SAM', 'UDI', sumula: placar(0, 0, cartoes: [amarelo('rafael', 'SAM')]));
-      final quartas = c.jogo('SAM', 'NAP', fase: Fase.quartas);
+      final quartas = c.jogo('SAM', 'BEN', fase: Fase.quartas);
       final m = MotorDisciplinar(partidas: c.partidas, agora: cedo);
       expect(m.penduradosPara(quartas.id), isEmpty);
     });
 
     test('decisão da Governança: suspensão e multa', () {
       final c = Calendario();
-      final origem = c.jogo('ROM', 'MON', sumula: placar(1, 1));
-      final r4 = c.jogo('MON', 'SAM');
-      final r5 = c.jogo('MON', 'INT');
-      final r6 = c.jogo('MON', 'UDI');
+      final origem = c.jogo('MIL', 'COM', sumula: placar(1, 1));
+      final r4 = c.jogo('COM', 'SAM');
+      final r5 = c.jogo('COM', 'INT');
+      final r6 = c.jogo('COM', 'UDI');
       final m = MotorDisciplinar(
         partidas: c.partidas,
         agora: cedo,
@@ -185,7 +185,7 @@ void main() {
           DecisaoDisciplinar(
             id: 'd1',
             pessoaId: 'ricardo',
-            timeId: 'MON',
+            timeId: 'COM',
             partidaOrigemId: origem.id,
             motivo: 'Análise de vídeo · art. 87',
             jogosSuspensao: 2,
@@ -255,7 +255,7 @@ void main() {
     });
 
     test('pago depois do prazo: multa gerada, impedido naquele jogo, liberado no seguinte se quitar a multa', () {
-      final terceiro = c.jogo('SAM', 'ROM');
+      final terceiro = c.jogo('SAM', 'MIL');
       final pagouAtrasado = proximo.inicio.subtract(const Duration(hours: 2));
       final m = MotorDisciplinar(
         partidas: c.partidas,
