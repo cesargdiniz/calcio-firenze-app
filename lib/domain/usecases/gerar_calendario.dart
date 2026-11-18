@@ -65,7 +65,7 @@ final horariosLivre2027 = <int, List<DateTime>>{
   1: _dias(const [
     (2, 27, 4), // 1ª rodada
     (3, 10, 2), (3, 12, 2), // 2ª rodada
-    (3, 24, 2), (3, 25, 2), // 3ª rodada
+    (3, 22, 2), (3, 24, 2), // 3ª rodada
     (4, 7, 2), (4, 9, 2), // 4ª rodada
     (4, 20, 2), (4, 22, 2), // 5ª rodada
     (5, 5, 2), (5, 7, 2), // 6ª rodada
@@ -94,7 +94,7 @@ final horariosLivre2027 = <int, List<DateTime>>{
 final horariosSuperMaster2027 = <int, List<DateTime>>{
   1: _dias(const [
     (3, 13, 3), // 1ª rodada
-    (3, 22, 1), (3, 23, 2), // 2ª rodada
+    (3, 23, 2), (3, 25, 1), // 2ª rodada
     (4, 6, 1), (4, 8, 2), // 3ª rodada
     (4, 19, 2), (4, 23, 1), // 4ª rodada
     (5, 4, 1), (5, 6, 2), // 5ª rodada
