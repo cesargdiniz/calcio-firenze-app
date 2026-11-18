@@ -126,7 +126,7 @@ Future<Uint8List> gerarCalendarioPdf(
     return pw.Container(
       height: alturaCasa,
       alignment: pw.Alignment.topCenter,
-      padding: const pw.EdgeInsets.only(top: 1.5),
+      padding: const pw.EdgeInsets.only(top: 1),
       decoration: const pw.BoxDecoration(
         border: pw.Border(top: pw.BorderSide(color: _linha, width: 0.4)),
       ),
@@ -136,8 +136,8 @@ Future<Uint8List> gerarCalendarioPdf(
             numero
           else
             pw.Container(
-              width: 11.5,
-              height: 11.5,
+              width: 10,
+              height: 10,
               alignment: pw.Alignment.center,
               decoration: pw.BoxDecoration(
                 shape: pw.BoxShape.circle,
