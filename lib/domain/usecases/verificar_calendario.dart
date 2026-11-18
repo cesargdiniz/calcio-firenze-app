@@ -13,7 +13,10 @@ enum RegraCalendario {
   ),
   finalNoSabado('Finais de turno e grandes finais sempre aos sábados.'),
   tresNaSemana('Nenhum time joga três vezes na mesma semana.'),
-  descanso('Pelo menos 72 horas de descanso entre dois jogos do mesmo time.');
+  descanso(
+    'Entre dois jogos do mesmo time, pelo menos 4 dias: quem joga segunda volta na sexta; '
+    'quem joga terça, no sábado.',
+  );
 
   final String texto;
   const RegraCalendario(this.texto);
@@ -195,15 +198,16 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
   ];
 }
 
-const _minimo = Duration(hours: 72);
-String _hora(DateTime d) => '${_data(d)} ${_dd(d.hour)}:${_dd(d.minute)}';
-String _horas(Duration d) =>
-    '${(d.inMinutes / 60).toStringAsFixed(d.inMinutes % 60 == 0 ? 0 : 1).replaceAll('.', ',')} h';
+/// Dias de calendário entre dois jogos (segunda → sexta = 4).
+const _minimo = 4;
+int _dias(DateTime a, DateTime b) =>
+    DateTime.utc(b.year, b.month, b.day).difference(DateTime.utc(a.year, a.month, a.day)).inDays;
+String _intervalo(int dias) => dias == 1 ? '1 dia' : '$dias dias';
 
 /// Regra 7. Com os confrontos definidos, mede o intervalo entre os jogos de
 /// cada time. Com horários a definir, compara etapas seguidas da mesma
 /// categoria (a Copa junto com o Master): entre duas rodadas da
-/// classificatória, vê se dá para distribuir os times com 72 horas de folga
+/// classificatória, vê se dá para distribuir os times com 4 dias de folga
 /// (cada time joga uma vez por rodada); nas demais, vale o pior caso (quem
 /// jogou por último numa etapa pode jogar primeiro na seguinte).
 List<Inconsistencia> _descanso(
@@ -225,13 +229,13 @@ List<Inconsistencia> _descanso(
     for (final MapEntry(key: id, value: doTime) in porTime.entries) {
       for (var i = 1; i < doTime.length; i++) {
         final (a, b) = (doTime[i - 1], doTime[i]);
-        final intervalo = b.inicio.difference(a.inicio);
+        final intervalo = _dias(a.inicio, b.inicio);
         if (intervalo < _minimo) {
           final nome = (a.partida!.mandanteId == id ? a.mandante : a.visitante)?.nome ?? id;
           saida.add(
             Inconsistencia(
               RegraCalendario.descanso,
-              '$nome ($sigla): ${_hora(a.inicio)} e ${_hora(b.inicio)} (${_horas(intervalo)}).',
+              '$nome ($sigla): ${_data(a.inicio)} e ${_data(b.inicio)} (${_intervalo(intervalo)}).',
               [a, b],
             ),
           );
@@ -257,14 +261,14 @@ List<Inconsistencia> _descanso(
       DateTime? de;
       DateTime? para;
       if (rodadas) {
-        // Duas vagas por jogo; a k-ésima vaga de uma rodada precisa de 72 h
+        // Duas vagas por jogo; a k-ésima vaga de uma rodada precisa de 4 dias
         // até a k-ésima da seguinte.
         List<DateTime> vagas(List<JogoDoCalendario> l) =>
             [for (final j in l) ...[j.inicio, j.inicio]]..sort();
         final va = vagas(a);
         final vb = vagas(b);
         for (var k = 0; k < va.length && k < vb.length; k++) {
-          if (vb[k].difference(va[k]) < _minimo) {
+          if (_dias(va[k], vb[k]) < _minimo) {
             (de, para) = (va[k], vb[k]);
             break;
           }
@@ -272,15 +276,15 @@ List<Inconsistencia> _descanso(
       } else {
         final fim = a.map((j) => j.inicio).reduce((x, y) => x.isAfter(y) ? x : y);
         final inicio = b.first.inicio;
-        if (inicio.difference(fim) < _minimo) (de, para) = (fim, inicio);
+        if (_dias(fim, inicio) < _minimo) (de, para) = (fim, inicio);
       }
       if (de != null && para != null) {
-        final intervalo = para.difference(de);
+        final intervalo = _dias(de, para);
         saida.add(
           Inconsistencia(
             RegraCalendario.descanso,
-            '${antes.key} → ${depois.key}: quem joga ${_hora(de)} pode voltar a jogar '
-            '${_hora(para)} (${intervalo.isNegative ? 'etapas no mesmo período' : _horas(intervalo)}).',
+            '${antes.key} → ${depois.key}: quem joga ${_data(de)} pode voltar a jogar '
+            '${_data(para)} (${intervalo < 0 ? 'etapas no mesmo período' : _intervalo(intervalo)}).',
             [...a, ...b],
           ),
         );

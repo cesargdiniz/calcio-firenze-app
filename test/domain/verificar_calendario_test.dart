@@ -38,17 +38,17 @@ void main() {
     final problemas = verificarCalendario(montarCalendarioGeral(const {}));
     final detalhes = [for (final p in problemas) 'R${p.regra.numero} ${p.detalhe}'];
     expect(detalhes.first, 'R5 Qua 15/12: L · Grande final.');
-    expect(detalhes.where((d) => d.startsWith('R7')), hasLength(9));
+    expect(detalhes.where((d) => d.startsWith('R7')), hasLength(10));
     expect(detalhes.where((d) => !d.startsWith('R5') && !d.startsWith('R7')), isEmpty);
     expect(
       detalhes,
       containsAll([
-        'R7 L Rodada 6 do 2º turno → L Rodada 7 do 2º turno: quem joga Seg 18/10 20:30 '
-            'pode voltar a jogar Qua 20/10 20:30 (48 h).',
-        'R7 L Semifinais do 2º turno → L Final do 2º turno: quem joga Qua 17/11 21:30 '
-            'pode voltar a jogar Sáb 20/11 19:00 (69,5 h).',
-        'R7 CM Quartas de final → M Rodada 8 do 1º turno: quem joga Qua 28/04 21:30 '
-            'pode voltar a jogar Ter 27/04 20:30 (etapas no mesmo período).',
+        'R7 L Rodada 6 do 2º turno → L Rodada 7 do 2º turno: quem joga Seg 18/10 '
+            'pode voltar a jogar Qua 20/10 (2 dias).',
+        'R7 L Semifinais do 2º turno → L Final do 2º turno: quem joga Qua 17/11 '
+            'pode voltar a jogar Sáb 20/11 (3 dias).',
+        'R7 CM Quartas de final → M Rodada 8 do 1º turno: quem joga Qua 28/04 '
+            'pode voltar a jogar Ter 27/04 (etapas no mesmo período).',
       ]),
     );
   });
@@ -191,7 +191,7 @@ void main() {
     );
   });
 
-  test('regra 7: 72 horas de descanso entre jogos do mesmo time', () {
+  test('regra 7: 4 dias entre jogos do mesmo time (segunda → sexta)', () {
     JogoDoCalendario jogo(DateTime inicio, int rodada, String m, String v) => JogoDoCalendario(
       inicio: inicio,
       competicao: Competicao.livre,
@@ -211,18 +211,20 @@ void main() {
     );
     expect(
       _detalhes([
-        jogo(DateTime(2027, 3, 10, 20, 30), 2, 'A', 'B'),
-        jogo(DateTime(2027, 3, 13, 20, 30), 3, 'A', 'C'),
+        jogo(DateTime(2027, 3, 8, 21, 30), 2, 'A', 'B'),
+        jogo(DateTime(2027, 3, 12, 20, 30), 3, 'A', 'C'),
+        jogo(DateTime(2027, 3, 9, 20, 30), 2, 'D', 'E'),
+        jogo(DateTime(2027, 3, 13, 17), 3, 'D', 'F'),
       ]),
       isEmpty,
-      reason: 'exatamente 72 horas basta',
+      reason: 'segunda → sexta e terça → sábado',
     );
     expect(
       _detalhes([
-        jogo(DateTime(2027, 3, 10, 21, 30), 2, 'A', 'B'),
-        jogo(DateTime(2027, 3, 13, 20, 30), 3, 'A', 'C'),
+        jogo(DateTime(2027, 3, 9, 20, 30), 2, 'A', 'B'),
+        jogo(DateTime(2027, 3, 12, 20, 30), 3, 'A', 'C'),
       ]),
-      ['R7 A (L): Qua 10/03 21:30 e Sáb 13/03 20:30 (71 h).'],
+      ['R7 A (L): Ter 09/03 e Sex 12/03 (3 dias).'],
     );
   });
 
