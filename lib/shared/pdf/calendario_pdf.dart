@@ -190,7 +190,8 @@ Future<Uint8List> gerarCalendarioPdf(
       for (var i = 0; i < vazios; i++) null,
       for (var d = 1; d <= dias; d++) DateTime(mes.year, mes.month, d),
     ];
-    while (casas.length % 7 != 0) {
+    // Sempre seis semanas, para os quadros de uma linha terem a mesma altura.
+    while (casas.length < 42) {
       casas.add(null);
     }
     final notas = destaques(mes);
