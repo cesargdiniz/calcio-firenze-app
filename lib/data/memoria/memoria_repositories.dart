@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../../domain/usecases/calendario_geral.dart';
 import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
@@ -134,6 +135,11 @@ class MemoriaTemporadaRepository implements TemporadaRepository {
       partidas: const [],
     );
   }
+
+  @override
+  Stream<DadosCalendario> observarCalendario(String temporadaId) => observar(temporadaId).map(
+    (d) => DadosCalendario(times: d.times, partidas: d.demonstracao ? const [] : d.partidas),
+  );
 
   @override
   Stream<DadosTemporada> observar(String temporadaId) async* {

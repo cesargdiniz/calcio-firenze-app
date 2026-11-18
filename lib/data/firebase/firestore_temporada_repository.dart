@@ -8,6 +8,7 @@ import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/organizacao_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
+import '../../domain/usecases/calendario_geral.dart';
 import '../exemplo/temporada_exemplo.dart';
 import 'firestore_usuario_repository.dart';
 import 'mapeadores.dart';
@@ -151,6 +152,48 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
               emitir();
             },
           ),
+        );
+      },
+      onCancel: () async {
+        for (final s in subs) {
+          await s.cancel();
+        }
+      },
+    );
+    return saida.stream;
+  }
+
+  @override
+  Stream<DadosCalendario> observarCalendario(String temporadaId) {
+    final categoria = Categoria.deTemporada(temporadaId) ?? Categoria.master;
+    final ref = _db.collection('temporadas').doc(temporadaId);
+    late StreamController<DadosCalendario> saida;
+    final subs = <StreamSubscription<void>>[];
+    List<Time>? times;
+    List<Partida>? partidas;
+    void emitir() {
+      if (times == null || partidas == null) return;
+      final porId = {
+        if (categoria == Categoria.master)
+          for (final t in timesMaster2027) t.id: t,
+        for (final t in times!) t.id: t,
+      };
+      saida.add(DadosCalendario(times: porId.values.toList(), partidas: partidas!));
+    }
+
+    saida = StreamController<DadosCalendario>(
+      onListen: () {
+        subs.add(
+          ref.collection('times').snapshots().listen((s) {
+            times = [for (final d in s.docs) timeDeMapa(d.id, d.data())];
+            emitir();
+          }, onError: saida.addError),
+        );
+        subs.add(
+          ref.collection('partidas').snapshots().listen((s) {
+            partidas = [for (final d in s.docs) partidaDeMapa(d.id, d.data())];
+            emitir();
+          }, onError: saida.addError),
         );
       },
       onCancel: () async {
