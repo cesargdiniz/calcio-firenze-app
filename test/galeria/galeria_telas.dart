@@ -223,6 +223,19 @@ void main() {
     });
   });
 
+  group('Calendário completo', () {
+    _tela('05b calendário de todas as categorias', (t) async {
+      await _abrir(t, '/calendario');
+      await _capturar(t, '05b_calendario_completo');
+    });
+    _tela('05c calendário filtrado', (t) async {
+      await _abrir(t, '/calendario');
+      await t.tap(find.text('Livre'));
+      await t.pumpAndSettle();
+      await _capturar(t, '05c_calendario_livre');
+    });
+  });
+
   group('Compartilhar', () {
     _tela('08h compartilhar classificação', (t) async {
       await _abrir(t, '/torcedor/tabela');
