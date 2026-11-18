@@ -34,59 +34,37 @@ List<String> _detalhes(List<JogoDoCalendario> jogos) => [
 ];
 
 void main() {
-  test('calendário oficial: grande final do Livre fora do sábado e descansos curtos', () {
-    final problemas = verificarCalendario(montarCalendarioGeral(const {}));
-    final detalhes = [for (final p in problemas) 'R${p.regra.numero} ${p.detalhe}'];
-    expect(detalhes, contains('R5 Qua 15/12: L · Grande final.'));
-    expect(detalhes.where((d) => d.startsWith('R7')), hasLength(10));
-    expect(detalhes.where((d) => d.startsWith('R4')), ['R4 Sáb 24/04: L · 1º turno · Rodada 5.']);
+  test('calendário 2027 cumpre as 8 regras', () {
     expect(
-      detalhes.where((d) => !d.startsWith('R4') && !d.startsWith('R5') && !d.startsWith('R7')),
+      [for (final p in verificarCalendario(montarCalendarioGeral(const {}))) p.detalhe],
       isEmpty,
     );
-    expect(
-      detalhes,
-      containsAll([
-        'R7 L Rodada 6 do 2º turno → L Rodada 7 do 2º turno: quem joga Seg 18/10 '
-            'pode voltar a jogar Qua 20/10 (2 dias).',
-        'R7 L Semifinais do 2º turno → L Final do 2º turno: quem joga Qua 17/11 '
-            'pode voltar a jogar Sáb 20/11 (3 dias).',
-        'R7 CM Quartas de final → M Rodada 8 do 1º turno: quem joga Qua 28/04 '
-            'pode voltar a jogar Ter 27/04 (etapas no mesmo período).',
-      ]),
-    );
   });
 
-  test('SM do 2º turno: 2ª rodada em 12/08 e 23/08, 3ª em 24/08 e 26/08', () {
-    final t2 = horariosSuperMaster2027[2]!;
-    expect(t2.sublist(3, 9), [
-      DateTime(2027, 8, 12, 20, 30),
-      DateTime(2027, 8, 12, 21, 30),
-      DateTime(2027, 8, 23, 20, 30),
-      DateTime(2027, 8, 24, 20, 30),
-      DateTime(2027, 8, 26, 20, 30),
-      DateTime(2027, 8, 26, 21, 30),
-    ]);
-  });
-
-  test('quem joga em 23/08 não volta a jogar em 24/08', () {
-    for (var semente = 0; semente < 40; semente++) {
-      final partidas = const GerarCalendario()(
-        turno: 2,
-        times: const ['A', 'B', 'C', 'D', 'E', 'F'],
-        horarios: horariosSuperMaster2027[2]!,
-        sorteio: Random(semente),
-      );
-      Partida em(int dia) => partidas.singleWhere((p) => p.inicio.month == 8 && p.inicio.day == dia);
-      final dia23 = em(23);
-      final dia24 = em(24);
-      expect(dia23.rodada, 2);
-      expect(dia24.rodada, 3);
-      expect(
-        {dia23.mandanteId, dia23.visitanteId}.intersection({dia24.mandanteId, dia24.visitanteId}),
-        isEmpty,
-        reason: 'semente $semente',
-      );
+  test('sorteio respeita 4 dias de descanso em todas as categorias e turnos', () {
+    for (final c in Categoria.values) {
+      for (final turno in [1, 2]) {
+        for (var semente = 0; semente < 5; semente++) {
+          final partidas = const GerarCalendario()(
+            turno: turno,
+            times: [for (var i = 0; i < c.times; i++) 'T$i'],
+            horarios: horariosDe(c)[turno]!,
+            sorteio: Random(semente),
+          );
+          for (var i = 0; i < c.times; i++) {
+            final datas = [
+              for (final p in partidas)
+                if (p.envolve('T$i')) p.inicio,
+            ]..sort();
+            for (var k = 1; k < datas.length; k++) {
+              final dias = DateTime.utc(datas[k].year, datas[k].month, datas[k].day)
+                  .difference(DateTime.utc(datas[k - 1].year, datas[k - 1].month, datas[k - 1].day))
+                  .inDays;
+              expect(dias, greaterThanOrEqualTo(4), reason: '${c.sigla} $turnoº turno, T$i, semente $semente');
+            }
+          }
+        }
+      }
     }
   });
 

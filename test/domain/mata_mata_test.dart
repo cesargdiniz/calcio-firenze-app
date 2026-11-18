@@ -100,8 +100,8 @@ void main() {
     ]);
     expect(s.propostos.map((p) => p.id), ['t1-quartas-1', 't1-quartas-2']);
     expect(s.propostos.map((p) => p.inicio), [
-      DateTime(2027, 5, 27, 20, 30),
-      DateTime(2027, 5, 27, 21, 30),
+      DateTime(2027, 5, 28, 20, 30),
+      DateTime(2027, 5, 28, 21, 30),
     ]);
     expect(s.dataProvisoria, isFalse);
     expect(s.vantagem.keys, [t.pos(3), t.pos(4)]);
@@ -139,7 +139,7 @@ void main() {
     expect('${s.propostos.single.mandanteId} x ${s.propostos.single.visitanteId}',
         '${t.pos(1)} x ${t.pos(3)}');
     expect(s.dataProvisoria, isFalse);
-    expect(s.propostos.single.inicio, DateTime(2027, 6, 19, 19));
+    expect(s.propostos.single.inicio, DateTime(2027, 7, 3, 19));
 
     t.criar(s);
     t.resultado('t1-final', const Sumula(golsVisitante: 1));
