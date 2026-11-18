@@ -81,8 +81,8 @@ void main() {
   });
 
   test('regra 2: nenhuma partida aos domingos', () {
-    expect(_detalhes([_j(DateTime(2027, 8, 15, 10), Competicao.livre)]), [
-      'R2 Dom 15/08: L1.',
+    expect(_detalhes([_j(DateTime(2027, 8, 22, 10), Competicao.livre)]), [
+      'R2 Dom 22/08: L1.',
     ]);
   });
 
