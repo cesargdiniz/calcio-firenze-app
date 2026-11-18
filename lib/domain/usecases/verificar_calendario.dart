@@ -184,10 +184,14 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
   // 7: descanso de 72 horas.
   saida.addAll(_descanso(jogos, grupo));
 
-  // 4 e 5: por jogo.
+  // 4 e 5: por jogo (um aviso por etapa e dia).
+  final vistos = <String>{};
   for (final j in jogos) {
     final sabado = j.inicio.weekday == DateTime.saturday;
-    if (sabado && j.fase == Fase.classificatoria && j.rodada != 1) {
+    if (sabado &&
+        j.fase == Fase.classificatoria &&
+        j.rodada != 1 &&
+        vistos.add('${_data(j.inicio)} ${_jogo(j)}')) {
       saida.add(
         Inconsistencia(
           RegraCalendario.sabadoClassificatorio,

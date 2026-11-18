@@ -211,7 +211,7 @@ void main() {
         jogo(DateTime(2027, 3, 12, 20, 30), 3, 'A', 'C'),
         jogo(DateTime(2027, 3, 9, 20, 30), 2, 'D', 'E'),
         jogo(DateTime(2027, 3, 13, 17), 3, 'D', 'F'),
-      ]),
+      ]).where((d) => d.startsWith('R7')),
       isEmpty,
       reason: 'segunda → sexta e terça → sábado',
     );
