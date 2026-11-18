@@ -91,15 +91,18 @@ void main() {
     ]);
   });
 
-  test('regra 3: semana do Master sem Livre nem Super Master; a Copa não conta', () {
+  test('regra 3: semana do Master (e da Copa Master) sem Livre nem Super Master', () {
     expect(
       _detalhes([
-        _j(DateTime(2027, 9, 14, 20, 30), Competicao.master),
-        _j(DateTime(2027, 9, 16, 20, 30), Competicao.livre),
         _j(DateTime(2027, 4, 6, 20, 30), Competicao.copaMaster, fase: null),
         _j(DateTime(2027, 4, 7, 20, 30), Competicao.livre),
+        _j(DateTime(2027, 9, 14, 20, 30), Competicao.master),
+        _j(DateTime(2027, 9, 16, 20, 30), Competicao.livre),
       ]),
-      ['R3 Semana de 13/09 a 19/09: M1 com L em Qui 16/09.'],
+      [
+        'R3 Semana de 05/04 a 11/04: CM1 com L em Qua 07/04.',
+        'R3 Semana de 13/09 a 19/09: M1 com L em Qui 16/09.',
+      ],
     );
   });
 

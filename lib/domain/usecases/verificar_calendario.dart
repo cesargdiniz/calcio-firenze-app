@@ -53,8 +53,7 @@ String _jogo(JogoDoCalendario j) => [
 ].join(' · ');
 
 /// Confere o calendário (todas as categorias e a Copa) contra as cinco
-/// regras. Drafts não contam. A Copa Master não forma "semana do Master"
-/// (regra 3): as datas dela já dividem semana com o Livre e o Super Master.
+/// regras. Drafts não contam. A Copa Master conta como Master na regra 3.
 List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
   final jogos = [for (final e in eventos) if (!e.ehDraft) e]
     ..sort((a, b) => a.inicio.compareTo(b.inicio));
@@ -87,7 +86,9 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
 
   // 3: semana do Master.
   for (final MapEntry(key: segunda, value: daSemana) in porSemana.entries) {
-    final master = daSemana.where((j) => j.competicao == Competicao.master);
+    final master = daSemana.where(
+      (j) => j.competicao == Competicao.master || j.competicao == Competicao.copaMaster,
+    );
     final outros = daSemana.where(
       (j) => j.competicao == Competicao.livre || j.competicao == Competicao.superMaster,
     );

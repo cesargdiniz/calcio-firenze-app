@@ -125,10 +125,12 @@ class DiaReservado {
 /// Copa Master 2027: mata-mata exclusivo dos times do Master. Por enquanto
 /// só as datas ficam reservadas; quem joga é definido depois.
 final datasCopaMaster2027 = [
-  DiaReservado('Preliminar', _dia(4, 6, 2)),
-  DiaReservado('Quartas de final', _dia(4, 20, 2)),
-  DiaReservado('Quartas de final', _dia(4, 22, 2)),
-  DiaReservado('Semifinais', _dia(5, 18, 2)),
+  // A Copa conta como semana do Master: só em semanas sem Livre e sem
+  // Super Master, nos dias em que o Master não joga.
+  DiaReservado('Preliminar', _dia(4, 12, 2)),
+  DiaReservado('Quartas de final', _dia(4, 26, 2)),
+  DiaReservado('Quartas de final', _dia(4, 28, 2)),
+  DiaReservado('Semifinais', _dia(5, 25, 2)),
   DiaReservado('Final', _dia(6, 11, 1)),
 ];
 

@@ -128,7 +128,7 @@ void main() {
     });
   });
 
-  test('Copa Master: 9 jogos em 5 datas reservadas, de 06/04 a 11/06', () {
+  test('Copa Master: 9 jogos em 5 datas reservadas, de 12/04 a 11/06', () {
     expect(datasCopaMaster2027.map((d) => d.etapa), [
       'Preliminar',
       'Quartas de final',
@@ -138,8 +138,8 @@ void main() {
     ]);
     expect(datasCopaMaster2027.expand((d) => d.horarios), hasLength(9));
     expect(datasCopaMaster2027.first.horarios, [
-      DateTime(2027, 4, 6, 20, 30),
-      DateTime(2027, 4, 6, 21, 30),
+      DateTime(2027, 4, 12, 20, 30),
+      DateTime(2027, 4, 12, 21, 30),
     ]);
     expect(datasCopaMaster2027.last.horarios, [DateTime(2027, 6, 11, 20, 30)]);
     // Nenhuma data da Copa cai em horário do Master.
