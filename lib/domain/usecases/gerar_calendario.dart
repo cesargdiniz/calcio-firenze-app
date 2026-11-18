@@ -51,7 +51,7 @@ final horariosMaster2027 = <int, List<DateTime>>{
     (9, 21, 2), (9, 23, 2), (9, 24, 1), // 5ª rodada
     (9, 28, 2), (9, 30, 2), (10, 1, 1), // 6ª rodada
     (10, 5, 2), (10, 7, 2), (10, 8, 1), // 7ª rodada
-    (11, 1, 2), (11, 2, 2), (11, 3, 1), // 8ª rodada
+    (11, 1, 2), (11, 3, 2), (11, 4, 1), // 8ª rodada
     (11, 5, 1), (11, 8, 2), (11, 9, 2), // 9ª rodada
     (11, 13, 2), // quartas
     (11, 30, 2), // semifinais
@@ -67,7 +67,7 @@ final horariosLivre2027 = <int, List<DateTime>>{
     (3, 10, 2), (3, 12, 2), // 2ª rodada
     (3, 24, 2), (3, 25, 2), // 3ª rodada
     (4, 7, 2), (4, 9, 2), // 4ª rodada
-    (4, 21, 2), (4, 22, 2), // 5ª rodada
+    (4, 20, 2), (4, 22, 2), // 5ª rodada
     (5, 5, 2), (5, 7, 2), // 6ª rodada
     (5, 19, 2), (5, 21, 2), // 7ª rodada
     (6, 2, 2), // quartas
@@ -80,9 +80,9 @@ final horariosLivre2027 = <int, List<DateTime>>{
     (8, 25, 2), (8, 27, 2), // 3ª rodada
     (9, 8, 2), (9, 10, 2), // 4ª rodada
     (10, 14, 2), (10, 15, 2), // 5ª rodada
-    (10, 18, 2), (10, 19, 2), // 6ª rodada
-    (10, 22, 2), (10, 25, 2), // 7ª rodada
-    (10, 29, 2), // quartas
+    (10, 18, 2), (10, 20, 2), // 6ª rodada
+    (10, 22, 2), (10, 26, 2), // 7ª rodada
+    (10, 30, 2), // quartas
     (11, 16, 2), // semifinais
     (11, 20, 1), // final do 2º turno
   ]),
@@ -106,8 +106,8 @@ final horariosSuperMaster2027 = <int, List<DateTime>>{
     (8, 12, 1), (8, 13, 2), // 2ª rodada
     (8, 24, 1), (8, 26, 2), // 3ª rodada
     (9, 6, 1), (9, 9, 2), // 4ª rodada
-    (10, 11, 2), (10, 12, 1), // 5ª rodada
-    (10, 16, 2), // semifinais
+    (10, 11, 2), (10, 13, 1), // 5ª rodada
+    (10, 19, 2), // semifinais
     (10, 23, 1), // final do 2º turno
   ]),
   0: _dias(const [(10, 30, 1)]), // grande final

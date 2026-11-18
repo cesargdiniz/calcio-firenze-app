@@ -117,7 +117,7 @@ void main() {
       expect(p, hasLength(15));
       final inicios = p.map((x) => x.inicio).toList()..sort();
       expect(inicios.first, DateTime(2027, 7, 30, 20, 30));
-      expect(inicios.last, DateTime(2027, 10, 12, 20, 30));
+      expect(inicios.last, DateTime(2027, 10, 13, 20, 30));
       expect(horariosSuperMaster2027[0], [DateTime(2027, 10, 30, 19)]);
     });
 
