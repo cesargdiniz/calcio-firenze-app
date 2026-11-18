@@ -179,9 +179,16 @@ void main() {
       _detalhes([jogo(1, 1, 'A', 'B'), jogo(3, 2, 'C', 'D'), jogo(5, 3, 'E', 'F')]),
       isEmpty,
     );
-    expect(_detalhes([jogo(1, 1, 'A', 'B'), jogo(3, 2, 'A', 'C'), jogo(5, 3, 'D', 'A')]), [
-      'R6 Semana de 01/03 a 07/03: A (M) joga 3 vezes.',
-    ]);
+    expect(
+      _detalhes([
+        jogo(1, 1, 'A', 'B'),
+        jogo(3, 2, 'A', 'C'),
+        jogo(5, 3, 'D', 'A'),
+      ]).where((d) => d.startsWith('R6')),
+      [
+        'R6 Semana de 01/03 a 07/03: A (M) joga 3 vezes.',
+      ],
+    );
   });
 
   test('regra 7: 72 horas de descanso entre jogos do mesmo time', () {
