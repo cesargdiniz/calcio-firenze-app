@@ -95,9 +95,9 @@ final horariosSuperMaster2027 = <int, List<DateTime>>{
   1: _dias(const [
     (3, 13, 3), // 1ª rodada
     (3, 22, 1), (3, 23, 2), // 2ª rodada
-    (4, 5, 1), (4, 8, 2), // 3ª rodada
+    (4, 6, 1), (4, 8, 2), // 3ª rodada
     (4, 19, 2), (4, 23, 1), // 4ª rodada
-    (5, 3, 1), (5, 6, 2), // 5ª rodada
+    (5, 4, 1), (5, 6, 2), // 5ª rodada
     (5, 20, 2), // semifinais
     (6, 5, 1), // final do 1º turno
   ]),
