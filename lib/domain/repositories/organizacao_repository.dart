@@ -68,6 +68,9 @@ abstract interface class GestaoRepository {
   /// Patrocinador que dá nome à competição na súmula; nulo para tirar.
   Future<void> salvarPatrocinador(String temporadaId, String? patrocinador);
 
+  /// Datas do Draft-1 e do Draft-2 da categoria (chave 1 e 2; ausente apaga).
+  Future<void> salvarDrafts(String temporadaId, Map<int, DateTime> drafts);
+
   /// Ordem do sorteio do art. 42 na tabela do turno (0: classificação geral).
   Future<void> salvarSorteio(String temporadaId, int turno, List<String> ordem);
 

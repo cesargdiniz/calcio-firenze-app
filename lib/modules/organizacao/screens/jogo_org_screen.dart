@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/etapa.dart';
+import '../../../domain/repositories/temporada_repository.dart';
+import '../../calendario/calendario_controller.dart';
+import '../../calendario/consistencia_calendario.dart';
 import '../../../shared/format.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
@@ -22,12 +25,16 @@ class JogoOrgScreen extends StatelessWidget {
 
   Future<void> _editarAgenda(BuildContext context, Partida p) async {
     final c = context.read<OrganizacaoController>();
+    // Calendário de todas as categorias, para avisar se a nova data fere
+    // alguma regra.
+    final calendario = CalendarioController(context.read<TemporadaRepository>())..iniciar();
     final nova = await showModalBottomSheet<Partida>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (_) => _FormAgenda(partida: p),
+      builder: (_) => BlocProvider.value(value: calendario, child: _FormAgenda(partida: p)),
     );
+    await calendario.close();
     if (nova == null || !context.mounted) return;
     await c.salvarPartida(nova);
     if (context.mounted) {
@@ -235,6 +242,7 @@ class _FormAgendaState extends State<_FormAgenda> {
               ),
             ],
           ),
+          AvisoNovaData(partidaId: widget.partida.id, inicio: _inicio),
           const SizedBox(height: AppSpacing.md),
           TextField(
             controller: _local,

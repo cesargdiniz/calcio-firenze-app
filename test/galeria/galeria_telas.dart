@@ -16,7 +16,10 @@ import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
 import 'package:calcio_firenze/domain/usecases/montar_situacao.dart';
 import 'package:calcio_firenze/domain/usecases/montar_sumula_impressa.dart';
+import 'package:calcio_firenze/domain/usecases/calendario_geral.dart';
+import 'package:calcio_firenze/shared/pdf/calendario_pdf.dart';
 import 'package:calcio_firenze/shared/pdf/sumula_pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -206,6 +209,29 @@ void main() {
     });
   });
 
+  testWidgets('calendário anual em PDF', (t) async {
+    await t.runAsync(() async {
+      pw.Font fonte(String nome) =>
+          pw.Font.ttf(ByteData.sublistView(File('assets/fonts/$nome.ttf').readAsBytesSync()));
+      final eventos = montarCalendarioGeral({
+        // Draft-1 da arte oficial; o Draft-2 ainda não tem data.
+        Categoria.master: DadosCalendario(drafts: {1: DateTime(2026, 12, 3)}),
+      });
+      final bytes = await gerarCalendarioPdf(
+        eventos,
+        RecursosCalendarioPdf(
+          titulo: fonte('Montserrat-ExtraBold'),
+          texto: fonte('OpenSans-Regular'),
+          textoNegrito: fonte('OpenSans-SemiBold'),
+          logo: pw.MemoryImage(File('assets/images/logo.png').readAsBytesSync()),
+        ),
+      );
+      File('test/galeria/telas/calendario_anual.pdf')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(bytes);
+    });
+  });
+
   group('Entrada', () {
     _tela('01 splash', (t) async {
       await _abrir(t, '/', assentar: false);
@@ -220,6 +246,19 @@ void main() {
     _tela('02 como você quer entrar', (t) async {
       await _abrir(t, '/entrar');
       await _capturar(t, '02_entrar');
+    });
+  });
+
+  group('Calendário completo', () {
+    _tela('05b calendário de todas as categorias', (t) async {
+      await _abrir(t, '/calendario');
+      await _capturar(t, '05b_calendario_completo');
+    });
+    _tela('05c calendário filtrado', (t) async {
+      await _abrir(t, '/calendario');
+      await t.tap(find.text('Livre'));
+      await t.pumpAndSettle();
+      await _capturar(t, '05c_calendario_livre');
     });
   });
 

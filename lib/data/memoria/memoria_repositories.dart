@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../../domain/usecases/calendario_geral.dart';
 import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
@@ -134,6 +135,15 @@ class MemoriaTemporadaRepository implements TemporadaRepository {
       partidas: const [],
     );
   }
+
+  @override
+  Stream<DadosCalendario> observarCalendario(String temporadaId) => observar(temporadaId).map(
+    (d) => DadosCalendario(
+      times: d.times,
+      partidas: d.demonstracao ? const [] : d.partidas,
+      drafts: d.drafts,
+    ),
+  );
 
   @override
   Stream<DadosTemporada> observar(String temporadaId) async* {
@@ -301,6 +311,10 @@ class MemoriaGestaoRepository implements GestaoRepository {
       );
 
   @override
+  Future<void> salvarDrafts(String temporadaId, Map<int, DateTime> drafts) async =>
+      temporada.substituir(_copiar(temporada.daTemporada(temporadaId), drafts: drafts));
+
+  @override
   Future<void> salvarSorteio(String temporadaId, int turno, List<String> ordem) async {
     final d = temporada.daTemporada(temporadaId);
     temporada.substituir(_copiar(d, sorteios: {...d.sorteios, turno: ordem}));
@@ -360,6 +374,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
     List<Pagamento>? pagamentos,
     List<DecisaoDisciplinar>? decisoes,
     Map<int, List<String>>? sorteios,
+    Map<int, DateTime>? drafts,
     bool? demonstracao,
   }) {
     final demo = demonstracao ?? d.demonstracao;
@@ -378,6 +393,7 @@ class MemoriaGestaoRepository implements GestaoRepository {
       patrocinador: patrocinador == null ? d.patrocinador : patrocinador(),
       ajustes: d.ajustes,
       sorteios: sorteios ?? d.sorteios,
+      drafts: drafts ?? d.drafts,
       demonstracao: demo,
       relogio: demo ? d.relogio : null,
     );

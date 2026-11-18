@@ -6,6 +6,7 @@ import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/compartilhar/compartilhar_imagem.dart';
+import '../../calendario/calendario_screen.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/card_jogo.dart';
@@ -106,6 +107,8 @@ class _JogosState extends State<_Jogos> {
               ? BotaoCompartilhar(onPressed: () => _compartilhar(painel, etapa, jogos))
               : null,
         ),
+        const SizedBox(height: AppSpacing.md),
+        const AtalhoCalendario(),
         const SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.sm,

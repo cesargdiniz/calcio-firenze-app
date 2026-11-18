@@ -1,5 +1,6 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../../domain/usecases/calendario_geral.dart';
 import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/repositories/temporada_repository.dart';
@@ -13,6 +14,15 @@ class TemporadaExemploRepository implements TemporadaRepository {
   static final agora = DateTime(2027, 2, 26, 10);
 
   /// Só o Master tem exemplo; as outras categorias aparecem vazias.
+  @override
+  Stream<DadosCalendario> observarCalendario(String temporadaId) => observar(temporadaId).map(
+    (d) => DadosCalendario(
+      times: d.times,
+      partidas: d.demonstracao ? const [] : d.partidas,
+      drafts: d.drafts,
+    ),
+  );
+
   @override
   Stream<DadosTemporada> observar(String temporadaId) {
     final exemplo = montarTemporadaExemplo();

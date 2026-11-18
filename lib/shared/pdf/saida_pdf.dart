@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:printing/printing.dart';
 
 import '../../domain/entities/temporada.dart';
+import '../../domain/usecases/calendario_geral.dart';
 import '../../domain/usecases/montar_sumula_impressa.dart';
+import 'calendario_pdf.dart';
 import 'sumula_pdf.dart';
 
 /// Entrega um PDF pronto a quem está usando o app (trocada por uma versão
@@ -37,5 +39,18 @@ Future<void> abrirSumulaPdf(BuildContext context, DadosTemporada dados, String p
     await saida.abrir(bytes, sumula.nomeArquivo);
   } catch (_) {
     avisos.showSnackBar(const SnackBar(content: Text('Não foi possível gerar o PDF da súmula.')));
+  }
+}
+
+/// Gera o calendário anual (todas as categorias, no padrão visual do app) a
+/// partir dos [eventos] e entrega o PDF.
+Future<void> abrirCalendarioPdf(BuildContext context, List<JogoDoCalendario> eventos) async {
+  final saida = context.read<SaidaPdf>();
+  final avisos = ScaffoldMessenger.of(context);
+  try {
+    final bytes = await gerarCalendarioPdf(eventos, await RecursosCalendarioPdf.carregar());
+    await saida.abrir(bytes, 'Calcio_Firenze_2027_Calendario.pdf');
+  } catch (_) {
+    avisos.showSnackBar(const SnackBar(content: Text('Não foi possível gerar o PDF do calendário.')));
   }
 }

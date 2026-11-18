@@ -1,6 +1,7 @@
 import 'package:calcio_regras/calcio_regras.dart';
 import 'package:go_router/go_router.dart';
 
+import '../modules/calendario/calendario_screen.dart';
 import '../modules/entrada/entrada_screen.dart';
 import '../modules/entrada/splash_screen.dart';
 import '../modules/organizacao/organizacao_shell.dart';
@@ -45,6 +46,8 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
   routes: [
     GoRoute(path: '/', builder: (_, _) => const SplashScreen()),
     GoRoute(path: '/entrar', builder: (_, _) => const EntradaScreen()),
+    // Calendário de todas as categorias: aberto de qualquer perfil, por cima.
+    GoRoute(path: '/calendario', builder: (_, _) => const CalendarioScreen()),
 
     // Torcedor: sem login.
     StatefulShellRoute.indexedStack(

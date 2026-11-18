@@ -144,7 +144,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Copa Master · datas reservadas'), findsOneWidget);
     expect(find.text('Preliminar'), findsOneWidget);
-    expect(find.text('Ter 06/04 · 20:30 e 21:30 · 2 jogos'), findsOneWidget);
+    expect(find.text('Seg 24/05 · 20:30 e 21:30 · 2 jogos'), findsOneWidget);
 
     await _trocarPara(tester, 'Livre');
     expect(find.text('Copa'), findsNothing);

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../calendario/consistencia_calendario.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
@@ -44,6 +45,8 @@ class GestaoScreen extends StatelessWidget {
                 : 'Esta conta organiza: ${o.categorias.map((c) => c.nome).join(', ')}.',
             style: AppTextStyles.pequeno,
           ),
+          const SizedBox(height: AppSpacing.md),
+          const ConsistenciaCalendario(),
           grupo('Temporada', [
             item('Times da temporada', rota: '/organizacao/gestao/times'),
             item('Regulamento e parâmetros', rota: '/organizacao/gestao/parametros'),

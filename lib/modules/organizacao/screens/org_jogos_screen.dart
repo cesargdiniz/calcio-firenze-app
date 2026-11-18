@@ -7,6 +7,7 @@ import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/mata_mata.dart';
 import '../../../shared/format.dart';
+import '../../calendario/calendario_screen.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
@@ -107,6 +108,8 @@ class _JogosState extends State<_Jogos> {
       padding: AppSpacing.tela,
       children: [
         const CabecalhoTela('Jogos', subtitulo: 'Calendário e súmulas'),
+        const SizedBox(height: AppSpacing.md),
+        const AtalhoCalendario(),
         const SizedBox(height: AppSpacing.md),
         Row(
           children: [
