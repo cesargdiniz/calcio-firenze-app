@@ -21,6 +21,7 @@ JogoDoCalendario _j(
     Fase.classificatoria => 'Rodada $rodada',
     Fase.finalTurno => 'Final do $turnoº turno',
     Fase.grandeFinal => 'Grande final',
+    Fase.quartas => 'Quartas de final',
     _ => 'Semifinais',
   },
   turno: turno,
