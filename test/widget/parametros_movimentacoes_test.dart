@@ -112,7 +112,9 @@ void main() {
         sessao: _org,
         organizacao: {'org1'},
       );
-      await tester.enterText(find.widgetWithText(TextField, 'Pontos por vitória'), 'x');
+      final pontos = find.widgetWithText(TextField, 'Pontos por vitória');
+      await tester.scrollUntilVisible(pontos, 200, scrollable: find.byType(Scrollable).first);
+      await tester.enterText(pontos, 'x');
       await tester.pumpAndSettle();
       expect(find.text('Informe um número válido.'), findsOneWidget);
 
