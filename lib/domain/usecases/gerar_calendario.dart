@@ -192,11 +192,11 @@ class GerarCalendario {
 /// Confrontos de cada horário (índices dos times), todos contra todos: cada
 /// par uma vez, cada time uma vez por rodada e, quando o calendário permite,
 /// 4 dias entre dois jogos do mesmo time (regra 7). Busca com retrocesso, na
-/// ordem do sorteio; se o calendário não permitir o descanso em algum ponto,
-/// aceita o melhor possível ali.
+/// ordem do sorteio, recomeçando com outra ordem quando uma tentativa demora;
+/// se o calendário não permitir o descanso, monta a tabela sem ele.
 List<(int, int)> _sortearConfrontos(int n, List<DateTime> horarios, Random rng) {
   final porRodada = n ~/ 2;
-  for (final exigirDescanso in [true, false]) {
+  for (final exigirDescanso in [for (var i = 0; i < 150; i++) true, false]) {
     final jogou = <int>{};
     final ultimo = <int, DateTime>{};
     final saida = <(int, int)>[];
@@ -204,7 +204,7 @@ List<(int, int)> _sortearConfrontos(int n, List<DateTime> horarios, Random rng) 
 
     bool buscar(int k, Set<int> naRodada) {
       if (k == horarios.length) return true;
-      if (++passos > 200000) return false;
+      if (exigirDescanso && ++passos > 20000) return false;
       if (k % porRodada == 0) naRodada = {};
       final h = horarios[k];
       final livres = [for (var t = 0; t < n; t++) if (!naRodada.contains(t)) t];
