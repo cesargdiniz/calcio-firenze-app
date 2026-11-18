@@ -104,7 +104,7 @@ void main() {
 
     final tabela = [
       linha('FIO', 8, 2),
-      linha('MON', 8, 5),
+      linha('COM', 8, 5),
       linha('INT', 5, 2),
       linha('SAM', 1, 9),
       linha('NOV', 0, 0, jogos: 0),
@@ -113,7 +113,7 @@ void main() {
     test('ataque: mais gols marcados primeiro; empate divide a posição', () {
       expect([for (final g in melhorAtaque(tabela)) (g.timeId, g.gols, g.posicao)], [
         ('FIO', 8, 1),
-        ('MON', 8, 1),
+        ('COM', 8, 1),
         ('INT', 5, 3),
         ('SAM', 1, 4),
       ]);
@@ -123,7 +123,7 @@ void main() {
       expect([for (final g in melhorDefesa(tabela)) (g.timeId, g.gols, g.posicao)], [
         ('FIO', 2, 1),
         ('INT', 2, 1),
-        ('MON', 5, 3),
+        ('COM', 5, 3),
         ('SAM', 9, 4),
       ]);
     });

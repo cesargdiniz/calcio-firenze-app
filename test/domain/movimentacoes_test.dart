@@ -48,7 +48,7 @@ void main() {
               turno: 1,
               fase: Fase.classificatoria,
               mandanteId: 'SAM',
-              visitanteId: 'MON',
+              visitanteId: 'COM',
               inicio: DateTime(2027, 2, 1),
               sumula: sumula,
             ),

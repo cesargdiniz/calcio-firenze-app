@@ -5,7 +5,7 @@ import 'package:calcio_firenze/domain/usecases/gerar_calendario.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final times = ['INT', 'FIO', 'SAM', 'FOG', 'NAP', 'ROM', 'UDI', 'MON', 'CAS', 'SAS'];
+  final times = ['INT', 'FIO', 'SAM', 'FOG', 'BEN', 'MIL', 'UDI', 'COM', 'JUV', 'SAS'];
   const gerar = GerarCalendario();
   final turno1 = horariosMaster2027[1]!;
 

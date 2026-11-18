@@ -45,7 +45,7 @@ void main() {
     await tester.tap(find.text('Tabela'));
     await tester.pumpAndSettle();
     expect(find.text('Classificação'), findsWidgets);
-    for (final nome in ['Inter', 'Sassuolo', 'Casale']) {
+    for (final nome in ['Inter', 'Sassuolo', 'Juventus']) {
       expect(find.textContaining(nome), findsWidgets);
     }
   });

@@ -189,9 +189,9 @@ void main() {
       ByteData fonte(String nome) =>
           ByteData.sublistView(File('assets/fonts/$nome.ttf').readAsBytesSync());
       final montar = MontarSumulaImpressa(agora: () => TemporadaExemploRepository.agora);
-      final proximoDoMonza = exemplo.partidas.firstWhere((p) => !p.encerrada && p.envolve('MON'));
+      final proximoDoComo = exemplo.partidas.firstWhere((p) => !p.encerrada && p.envolve('COM'));
       for (final (nome, partida) in [
-        ('sumula_em_branco', proximoDoMonza),
+        ('sumula_em_branco', proximoDoComo),
         ('sumula_encerrada', comCartoes),
       ]) {
         final bytes = await gerarSumulaPdf(
@@ -463,7 +463,7 @@ void main() {
     });
     _tela('36 nova decisão', (t) async {
       await org(t, '/organizacao/gestao/decisoes/nova');
-      await _tocar(t, 'MON');
+      await _tocar(t, 'COM');
       await _capturar(t, '36_org_nova_decisao');
       await _rolar(t);
       await _capturar(t, '37_org_nova_decisao_continuacao');

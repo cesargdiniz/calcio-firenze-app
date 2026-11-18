@@ -31,27 +31,28 @@ class TemporadaExemploRepository implements TemporadaRepository {
   }
 }
 
-/// Os 10 clubes do Master 2027, com as cores do Figma.
+/// Os 10 clubes do Master 2027 (cores aproximadas das camisas; a Organização
+/// ajusta cor e escudo em Gestão › Times da temporada).
 const timesMaster2027 = [
   Time(id: 'INT', nome: 'Inter', sigla: 'INT', cor: 0xFF0A3D91),
-  Time(id: 'FIO', nome: 'Fiorentina', sigla: 'FIO', cor: 0xFF5B2A86),
+  Time(id: 'FIO', nome: 'Fiori', sigla: 'FIO', cor: 0xFF5B2A86),
   Time(id: 'SAM', nome: 'Sampdoria', sigla: 'SAM', cor: 0xFF1B5CC1),
-  Time(id: 'FOG', nome: 'AC Foggia', sigla: 'FOG', cor: 0xFFC8102E),
-  Time(id: 'NAP', nome: 'Napoli', sigla: 'NAP', cor: 0xFF12A0D7),
-  Time(id: 'ROM', nome: 'Roma', sigla: 'ROM', cor: 0xFF8E1F2F),
-  Time(id: 'UDI', nome: 'Udinese', sigla: 'UDI', cor: 0xFF2B2B2B),
-  Time(id: 'MON', nome: 'Monza', sigla: 'MON', cor: 0xFFD7263D),
-  Time(id: 'CAS', nome: 'Casale', sigla: 'CAS', cor: 0xFF6E6E6E),
+  Time(id: 'FOG', nome: 'Foggia', sigla: 'FOG', cor: 0xFFC8102E),
+  Time(id: 'BEN', nome: 'Benevento', sigla: 'BEN', cor: 0xFFD9A400),
+  Time(id: 'MIL', nome: 'Milan', sigla: 'MIL', cor: 0xFF9E1B22),
+  Time(id: 'UDI', nome: 'Udinese', sigla: 'UDI', cor: 0xFF5A5A5A),
+  Time(id: 'COM', nome: 'Como 1907', sigla: 'COM', cor: 0xFF2E6DB4),
+  Time(id: 'JUV', nome: 'Juventus', sigla: 'JUV', cor: 0xFF111111),
   Time(id: 'SAS', nome: 'Sassuolo', sigla: 'SAS', cor: 0xFF00A752),
 ];
 
 /// Atletas com papel na história de exemplo (cartões e suspensões).
 const _destaques = [
   Pessoa(id: 'marcos-lima', nome: 'Marcos Lima', timeId: 'UDI', numero: 5),
-  Pessoa(id: 'paulo-ribeiro', nome: 'Paulo Ribeiro', timeId: 'CAS', numero: 8),
-  Pessoa(id: 'ricardo-alves', nome: 'Ricardo Alves', timeId: 'MON', numero: 6),
-  Pessoa(id: 'fabio-costa', nome: 'Fábio Costa', timeId: 'ROM', numero: 4),
-  Pessoa(id: 'tiago-moura', nome: 'Tiago Moura', timeId: 'NAP', numero: 10),
+  Pessoa(id: 'paulo-ribeiro', nome: 'Paulo Ribeiro', timeId: 'JUV', numero: 8),
+  Pessoa(id: 'ricardo-alves', nome: 'Ricardo Alves', timeId: 'COM', numero: 6),
+  Pessoa(id: 'fabio-costa', nome: 'Fábio Costa', timeId: 'MIL', numero: 4),
+  Pessoa(id: 'tiago-moura', nome: 'Tiago Moura', timeId: 'BEN', numero: 10),
   Pessoa(id: 'rafael-souza', nome: 'Rafael Souza', timeId: 'SAM', numero: 7),
   Pessoa(id: 'leandro-paiva', nome: 'Leandro Paiva', timeId: 'INT', numero: 3),
   Pessoa(id: 'helio-ramos', nome: 'Hélio Ramos', timeId: 'SAM', funcao: Funcao.tecnico),
@@ -213,13 +214,13 @@ DadosTemporada montarTemporadaExemplo({bool demonstracao = true}) {
         .add(CartaoAplicado(pessoaId: pessoa, timeId: time, tipo: tipo, funcao: funcao));
   }
 
-  cartao(1, 'paulo-ribeiro', 'CAS', TipoCartao.amarelo);
-  cartao(2, 'paulo-ribeiro', 'CAS', TipoCartao.amarelo);
-  cartao(3, 'paulo-ribeiro', 'CAS', TipoCartao.amarelo);
-  cartao(1, 'fabio-costa', 'ROM', TipoCartao.amarelo);
-  cartao(2, 'fabio-costa', 'ROM', TipoCartao.amarelo);
-  cartao(2, 'tiago-moura', 'NAP', TipoCartao.amarelo);
-  cartao(3, 'tiago-moura', 'NAP', TipoCartao.amarelo);
+  cartao(1, 'paulo-ribeiro', 'JUV', TipoCartao.amarelo);
+  cartao(2, 'paulo-ribeiro', 'JUV', TipoCartao.amarelo);
+  cartao(3, 'paulo-ribeiro', 'JUV', TipoCartao.amarelo);
+  cartao(1, 'fabio-costa', 'MIL', TipoCartao.amarelo);
+  cartao(2, 'fabio-costa', 'MIL', TipoCartao.amarelo);
+  cartao(2, 'tiago-moura', 'BEN', TipoCartao.amarelo);
+  cartao(3, 'tiago-moura', 'BEN', TipoCartao.amarelo);
   cartao(3, 'marcos-lima', 'UDI', TipoCartao.vermelho);
   cartao(3, 'rafael-souza', 'SAM', TipoCartao.amarelo);
   cartao(3, 'leandro-paiva', 'INT', TipoCartao.amarelo);
@@ -271,7 +272,7 @@ DadosTemporada montarTemporadaExemplo({bool demonstracao = true}) {
     );
   }
 
-  final jogoMonzaR3 = partidas.firstWhere((p) => p.rodada == 3 && p.envolve('MON'));
+  final jogoComoR3 = partidas.firstWhere((p) => p.rodada == 3 && p.envolve('COM'));
 
   return DadosTemporada(
     id: 'master-2027',
@@ -286,8 +287,8 @@ DadosTemporada montarTemporadaExemplo({bool demonstracao = true}) {
       DecisaoDisciplinar(
         id: 'dec-1',
         pessoaId: 'ricardo-alves',
-        timeId: 'MON',
-        partidaOrigemId: jogoMonzaR3.id,
+        timeId: 'COM',
+        partidaOrigemId: jogoComoR3.id,
         motivo: 'Análise de vídeo · art. 87 · grau médio',
         jogosSuspensao: 2,
       ),
