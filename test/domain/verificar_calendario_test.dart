@@ -37,9 +37,13 @@ void main() {
   test('calendário oficial: grande final do Livre fora do sábado e descansos curtos', () {
     final problemas = verificarCalendario(montarCalendarioGeral(const {}));
     final detalhes = [for (final p in problemas) 'R${p.regra.numero} ${p.detalhe}'];
-    expect(detalhes.first, 'R5 Qua 15/12: L · Grande final.');
+    expect(detalhes, contains('R5 Qua 15/12: L · Grande final.'));
     expect(detalhes.where((d) => d.startsWith('R7')), hasLength(10));
-    expect(detalhes.where((d) => !d.startsWith('R5') && !d.startsWith('R7')), isEmpty);
+    expect(detalhes.where((d) => d.startsWith('R4')), ['R4 Sáb 24/04: L · 1º turno · Rodada 5.']);
+    expect(
+      detalhes.where((d) => !d.startsWith('R4') && !d.startsWith('R5') && !d.startsWith('R7')),
+      isEmpty,
+    );
     expect(
       detalhes,
       containsAll([
@@ -92,7 +96,7 @@ void main() {
         _j(DateTime(2027, 8, 25, 20, 30), Competicao.livre),
         _j(DateTime(2027, 8, 25, 21, 30), Competicao.livre),
         _j(DateTime(2027, 8, 25, 22, 30), Competicao.superMaster),
-        for (var h = 17; h < 20; h++) _j(DateTime(2027, 8, 28, h), Competicao.livre),
+        for (var h = 17; h < 20; h++) _j(DateTime(2027, 8, 28, h), Competicao.livre, rodada: 1),
       ]),
       ['R1 Qua 25/08: 3 partidas (SM1, L2).'],
     );
@@ -119,15 +123,29 @@ void main() {
     );
   });
 
-  test('regra 4: classificatória do M e do SM no sábado só na abertura do turno', () {
+  test('regra 4: sábado só para aberturas de turno e mata-mata, em todas as categorias', () {
     expect(
       _detalhes([
         _j(DateTime(2027, 8, 14, 19), Competicao.superMaster, turno: 2),
         _j(DateTime(2027, 3, 13, 17), Competicao.superMaster, rodada: 1),
-        _j(DateTime(2027, 4, 24, 17), Competicao.livre, rodada: 4),
+        _j(DateTime(2027, 4, 24, 17), Competicao.livre, rodada: 5),
         _j(DateTime(2027, 5, 29, 17), Competicao.master, fase: Fase.semifinal),
-      ]),
-      ['R4 Sáb 14/08: SM · 2º turno · Rodada 2.'],
+      ]).where((d) => d.startsWith('R4')),
+      ['R4 Sáb 24/04: L · 1º turno · Rodada 5.', 'R4 Sáb 14/08: SM · 2º turno · Rodada 2.'],
+    );
+  });
+
+  test('regra 8: sábado com até 4 jogos, a partir das 17:00', () {
+    expect(
+      _detalhes([
+        for (var h = 16; h < 21; h++)
+          _j(DateTime(2027, 2, 27, h), Competicao.livre, rodada: 1),
+      ]).where((d) => d.startsWith('R8')),
+      ['R8 Sáb 27/02: 5 partidas (L5).'],
+    );
+    expect(
+      _detalhes([_j(DateTime(2027, 6, 19, 16), Competicao.master, fase: Fase.finalTurno)]),
+      ['R8 Sáb 19/06: jogo antes das 17:00.'],
     );
   });
 

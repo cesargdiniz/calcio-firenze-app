@@ -8,15 +8,16 @@ enum RegraCalendario {
   semDomingo('Nenhuma partida aos domingos.'),
   semanaDoMaster('Nenhuma semana do Master com partidas do Livre ou do Super Master.'),
   sabadoClassificatorio(
-    'Nenhum jogo classificatório do Master ou do Super Master aos sábados, exceto as '
-    'aberturas dos turnos, finais e grandes finais.',
+    'Aos sábados, só aberturas de turno e mata-mata: nenhuma rodada classificatória, '
+    'em nenhuma categoria, fora a 1ª de cada turno.',
   ),
   finalNoSabado('Finais de turno e grandes finais sempre aos sábados.'),
   tresNaSemana('Nenhum time joga três vezes na mesma semana.'),
   descanso(
     'Entre dois jogos do mesmo time, pelo menos 4 dias: quem joga segunda volta na sexta; '
     'quem joga terça, no sábado.',
-  );
+  ),
+  sabado('No sábado, no máximo 4 jogos, a partir das 17:00.');
 
   final String texto;
   const RegraCalendario(this.texto);
@@ -89,6 +90,18 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
         Inconsistencia(
           RegraCalendario.duasPorDia,
           '${_data(dia)}: ${doDia.length} partidas (${_contagem(doDia)}).',
+          doDia,
+        ),
+      );
+    }
+    if (dia.weekday == DateTime.saturday &&
+        (doDia.length > 4 || doDia.any((j) => j.inicio.hour < 17))) {
+      saida.add(
+        Inconsistencia(
+          RegraCalendario.sabado,
+          doDia.length > 4
+              ? '${_data(dia)}: ${doDia.length} partidas (${_contagem(doDia)}).'
+              : '${_data(dia)}: jogo antes das 17:00.',
           doDia,
         ),
       );
@@ -174,9 +187,7 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
   // 4 e 5: por jogo.
   for (final j in jogos) {
     final sabado = j.inicio.weekday == DateTime.saturday;
-    final masterOuSm =
-        j.competicao == Competicao.master || j.competicao == Competicao.superMaster;
-    if (masterOuSm && sabado && j.fase == Fase.classificatoria && j.rodada != 1) {
+    if (sabado && j.fase == Fase.classificatoria && j.rodada != 1) {
       saida.add(
         Inconsistencia(
           RegraCalendario.sabadoClassificatorio,
