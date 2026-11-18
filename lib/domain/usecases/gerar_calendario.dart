@@ -189,15 +189,25 @@ class GerarCalendario {
       ];
       for (var i = 0; i < jogosPorRodada; i++) {
         final horario = slots[k++];
-        // Quem jogou na véspera não entra de novo: dentro da rodada, o jogo
-        // do dia seguinte fica com times descansados, quando possível.
-        final vespera = {
-          for (final p in partidas)
-            if (_diasEntre(p.inicio, horario) == 1) ...[p.mandanteId, p.visitanteId],
-        };
+        // Descanso de 72 horas: dentro da rodada, cada horário fica com o
+        // jogo cujos times descansaram mais (o primeiro que já cumpre as 72
+        // horas, na ordem do sorteio).
+        Duration descanso(String time) {
+          final ultimo = partidas
+              .where((p) => p.mandanteId == time || p.visitanteId == time)
+              .map((p) => p.inicio)
+              .fold<DateTime?>(null, (a, b) => a == null || b.isAfter(a) ? b : a);
+          return ultimo == null ? const Duration(days: 365) : horario.difference(ultimo);
+        }
+
+        Duration folga((String, String) j) {
+          final (a, b) = (descanso(j.$1), descanso(j.$2));
+          return a < b ? a : b;
+        }
+
         final escolhido = jogos.firstWhere(
-          (j) => !vespera.contains(j.$1) && !vespera.contains(j.$2),
-          orElse: () => jogos.first,
+          (j) => folga(j) >= const Duration(hours: 72),
+          orElse: () => jogos.reduce((x, y) => folga(y) > folga(x) ? y : x),
         );
         jogos.remove(escolhido);
         partidas.add(
@@ -218,5 +228,3 @@ class GerarCalendario {
   }
 }
 
-int _diasEntre(DateTime a, DateTime b) =>
-    DateTime.utc(b.year, b.month, b.day).difference(DateTime.utc(a.year, a.month, a.day)).inDays;

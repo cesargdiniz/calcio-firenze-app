@@ -11,7 +11,7 @@ void main() {
       sessao: const Sessao(uid: 'org1', email: 'cesar@exemplo.com'),
       organizacao: {'org1'},
     );
-    expect(find.text('Inconsistência no calendário'), findsOneWidget);
+    expect(find.textContaining('inconsistências no calendário'), findsOneWidget);
     expect(
       find.text('Regra 5 · Finais de turno e grandes finais sempre aos sábados.'),
       findsOneWidget,

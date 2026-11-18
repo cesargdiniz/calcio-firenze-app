@@ -34,11 +34,23 @@ List<String> _detalhes(List<JogoDoCalendario> jogos) => [
 ];
 
 void main() {
-  test('calendário oficial: só a grande final do Livre (quarta, 15/12) fere as regras', () {
+  test('calendário oficial: grande final do Livre fora do sábado e descansos curtos', () {
     final problemas = verificarCalendario(montarCalendarioGeral(const {}));
-    expect([for (final p in problemas) (p.regra, p.detalhe)], [
-      (RegraCalendario.finalNoSabado, 'Qua 15/12: L · Grande final.'),
-    ]);
+    final detalhes = [for (final p in problemas) 'R${p.regra.numero} ${p.detalhe}'];
+    expect(detalhes.first, 'R5 Qua 15/12: L · Grande final.');
+    expect(detalhes.where((d) => d.startsWith('R7')), hasLength(9));
+    expect(detalhes.where((d) => !d.startsWith('R5') && !d.startsWith('R7')), isEmpty);
+    expect(
+      detalhes,
+      containsAll([
+        'R7 L Rodada 6 do 2º turno → L Rodada 7 do 2º turno: quem joga Seg 18/10 20:30 '
+            'pode voltar a jogar Qua 20/10 20:30 (48 h).',
+        'R7 L Semifinais do 2º turno → L Final do 2º turno: quem joga Qua 17/11 21:30 '
+            'pode voltar a jogar Sáb 20/11 19:00 (69,5 h).',
+        'R7 CM Quartas de final → M Rodada 8 do 1º turno: quem joga Qua 28/04 21:30 '
+            'pode voltar a jogar Ter 27/04 20:30 (etapas no mesmo período).',
+      ]),
+    );
   });
 
   test('SM do 2º turno: 2ª rodada em 12/08 e 23/08, 3ª em 24/08 e 26/08', () {
@@ -170,6 +182,41 @@ void main() {
     expect(_detalhes([jogo(1, 1, 'A', 'B'), jogo(3, 2, 'A', 'C'), jogo(5, 3, 'D', 'A')]), [
       'R6 Semana de 01/03 a 07/03: A (M) joga 3 vezes.',
     ]);
+  });
+
+  test('regra 7: 72 horas de descanso entre jogos do mesmo time', () {
+    JogoDoCalendario jogo(DateTime inicio, int rodada, String m, String v) => JogoDoCalendario(
+      inicio: inicio,
+      competicao: Competicao.livre,
+      etapa: 'Rodada $rodada',
+      partida: Partida(
+        id: 'r$rodada-$m',
+        turno: 1,
+        fase: Fase.classificatoria,
+        rodada: rodada,
+        mandanteId: m,
+        visitanteId: v,
+        inicio: inicio,
+      ),
+      turno: 1,
+      fase: Fase.classificatoria,
+      rodada: rodada,
+    );
+    expect(
+      _detalhes([
+        jogo(DateTime(2027, 3, 10, 20, 30), 2, 'A', 'B'),
+        jogo(DateTime(2027, 3, 13, 20, 30), 3, 'A', 'C'),
+      ]),
+      isEmpty,
+      reason: 'exatamente 72 horas basta',
+    );
+    expect(
+      _detalhes([
+        jogo(DateTime(2027, 3, 10, 21, 30), 2, 'A', 'B'),
+        jogo(DateTime(2027, 3, 13, 20, 30), 3, 'A', 'C'),
+      ]),
+      ['R7 A (L): Qua 10/03 21:30 e Sáb 13/03 20:30 (71 h).'],
+    );
   });
 
   test('nova data de uma partida: só os avisos que a envolvem', () {

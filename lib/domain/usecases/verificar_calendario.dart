@@ -12,7 +12,8 @@ enum RegraCalendario {
     'aberturas dos turnos, finais e grandes finais.',
   ),
   finalNoSabado('Finais de turno e grandes finais sempre aos sábados.'),
-  tresNaSemana('Nenhum time joga três vezes na mesma semana.');
+  tresNaSemana('Nenhum time joga três vezes na mesma semana.'),
+  descanso('Pelo menos 72 horas de descanso entre dois jogos do mesmo time.');
 
   final String texto;
   const RegraCalendario(this.texto);
@@ -164,6 +165,9 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
     }
   }
 
+  // 7: descanso de 72 horas.
+  saida.addAll(_descanso(jogos, grupo));
+
   // 4 e 5: por jogo.
   for (final j in jogos) {
     final sabado = j.inicio.weekday == DateTime.saturday;
@@ -189,4 +193,99 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
   return [
     for (final r in RegraCalendario.values) ...saida.where((i) => i.regra == r),
   ];
+}
+
+const _minimo = Duration(hours: 72);
+String _hora(DateTime d) => '${_data(d)} ${_dd(d.hour)}:${_dd(d.minute)}';
+String _horas(Duration d) =>
+    '${(d.inMinutes / 60).toStringAsFixed(d.inMinutes % 60 == 0 ? 0 : 1).replaceAll('.', ',')} h';
+
+/// Regra 7. Com os confrontos definidos, mede o intervalo entre os jogos de
+/// cada time. Com horários a definir, compara etapas seguidas da mesma
+/// categoria (a Copa junto com o Master): entre duas rodadas da
+/// classificatória, vê se dá para distribuir os times com 72 horas de folga
+/// (cada time joga uma vez por rodada); nas demais, vale o pior caso (quem
+/// jogou por último numa etapa pode jogar primeiro na seguinte).
+List<Inconsistencia> _descanso(
+  List<JogoDoCalendario> jogos,
+  String Function(Competicao) grupo,
+) {
+  final saida = <Inconsistencia>[];
+  final porGrupo = <String, List<JogoDoCalendario>>{};
+  for (final j in jogos) {
+    porGrupo.putIfAbsent(grupo(j.competicao), () => []).add(j);
+  }
+  for (final MapEntry(key: sigla, value: doGrupo) in porGrupo.entries) {
+    // Times conhecidos.
+    final porTime = <String, List<JogoDoCalendario>>{};
+    for (final j in doGrupo.where((j) => !j.aDefinir)) {
+      porTime.putIfAbsent(j.partida!.mandanteId, () => []).add(j);
+      porTime.putIfAbsent(j.partida!.visitanteId, () => []).add(j);
+    }
+    for (final MapEntry(key: id, value: doTime) in porTime.entries) {
+      for (var i = 1; i < doTime.length; i++) {
+        final (a, b) = (doTime[i - 1], doTime[i]);
+        final intervalo = b.inicio.difference(a.inicio);
+        if (intervalo < _minimo) {
+          final nome = (a.partida!.mandanteId == id ? a.mandante : a.visitante)?.nome ?? id;
+          saida.add(
+            Inconsistencia(
+              RegraCalendario.descanso,
+              '$nome ($sigla): ${_hora(a.inicio)} e ${_hora(b.inicio)} (${_horas(intervalo)}).',
+              [a, b],
+            ),
+          );
+        }
+      }
+    }
+
+    // Etapas com horários a definir.
+    final etapas = <String, List<JogoDoCalendario>>{};
+    for (final j in doGrupo) {
+      etapas.putIfAbsent('${j.competicao.sigla} ${_etapa(j)}', () => []).add(j);
+    }
+    final ordem = etapas.entries.toList()
+      ..sort((a, b) => a.value.first.inicio.compareTo(b.value.first.inicio));
+    for (var i = 1; i < ordem.length; i++) {
+      final (antes, depois) = (ordem[i - 1], ordem[i]);
+      final a = antes.value;
+      final b = depois.value;
+      if (a.every((j) => !j.aDefinir) && b.every((j) => !j.aDefinir)) continue;
+      final rodadas = a.first.fase == Fase.classificatoria &&
+          b.first.fase == Fase.classificatoria &&
+          a.first.competicao == b.first.competicao;
+      DateTime? de;
+      DateTime? para;
+      if (rodadas) {
+        // Duas vagas por jogo; a k-ésima vaga de uma rodada precisa de 72 h
+        // até a k-ésima da seguinte.
+        List<DateTime> vagas(List<JogoDoCalendario> l) =>
+            [for (final j in l) ...[j.inicio, j.inicio]]..sort();
+        final va = vagas(a);
+        final vb = vagas(b);
+        for (var k = 0; k < va.length && k < vb.length; k++) {
+          if (vb[k].difference(va[k]) < _minimo) {
+            (de, para) = (va[k], vb[k]);
+            break;
+          }
+        }
+      } else {
+        final fim = a.map((j) => j.inicio).reduce((x, y) => x.isAfter(y) ? x : y);
+        final inicio = b.first.inicio;
+        if (inicio.difference(fim) < _minimo) (de, para) = (fim, inicio);
+      }
+      if (de != null && para != null) {
+        final intervalo = para.difference(de);
+        saida.add(
+          Inconsistencia(
+            RegraCalendario.descanso,
+            '${antes.key} → ${depois.key}: quem joga ${_hora(de)} pode voltar a jogar '
+            '${_hora(para)} (${intervalo.isNegative ? 'etapas no mesmo período' : _horas(intervalo)}).',
+            [...a, ...b],
+          ),
+        );
+      }
+    }
+  }
+  return saida;
 }
