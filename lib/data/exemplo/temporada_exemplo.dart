@@ -272,7 +272,7 @@ DadosTemporada montarTemporadaExemplo({bool demonstracao = true}) {
     );
   }
 
-  final jogoComo 1907R3 = partidas.firstWhere((p) => p.rodada == 3 && p.envolve('COM'));
+  final jogoComoR3 = partidas.firstWhere((p) => p.rodada == 3 && p.envolve('COM'));
 
   return DadosTemporada(
     id: 'master-2027',
@@ -288,7 +288,7 @@ DadosTemporada montarTemporadaExemplo({bool demonstracao = true}) {
         id: 'dec-1',
         pessoaId: 'ricardo-alves',
         timeId: 'COM',
-        partidaOrigemId: jogoComo 1907R3.id,
+        partidaOrigemId: jogoComoR3.id,
         motivo: 'Análise de vídeo · art. 87 · grau médio',
         jogosSuspensao: 2,
       ),

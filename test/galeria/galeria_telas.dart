@@ -189,9 +189,9 @@ void main() {
       ByteData fonte(String nome) =>
           ByteData.sublistView(File('assets/fonts/$nome.ttf').readAsBytesSync());
       final montar = MontarSumulaImpressa(agora: () => TemporadaExemploRepository.agora);
-      final proximoDoComo 1907 = exemplo.partidas.firstWhere((p) => !p.encerrada && p.envolve('COM'));
+      final proximoDoComo = exemplo.partidas.firstWhere((p) => !p.encerrada && p.envolve('COM'));
       for (final (nome, partida) in [
-        ('sumula_em_branco', proximoDoComo 1907),
+        ('sumula_em_branco', proximoDoComo),
         ('sumula_encerrada', comCartoes),
       ]) {
         final bytes = await gerarSumulaPdf(
