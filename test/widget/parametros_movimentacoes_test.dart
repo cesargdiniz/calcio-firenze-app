@@ -85,6 +85,26 @@ void main() {
       expect(gestao.temporada.dados.patrocinador, 'CASA ASSIS');
     });
 
+    testWidgets('datas do Draft-1 e do Draft-2', (tester) async {
+      final gestao = await abrirApp(
+        tester,
+        inicio: '/organizacao/gestao/parametros',
+        sessao: _org,
+        organizacao: {'org1'},
+      );
+      expect(find.text('Sem data'), findsNWidgets(2));
+      await tester.tap(find.text('Definir').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(gestao.temporada.dados.drafts, {1: DateTime(2027, 1, 1)});
+      expect(find.text('01/01/2027'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Apagar a data do Draft-1'));
+      await tester.pumpAndSettle();
+      expect(gestao.temporada.dados.drafts, isEmpty);
+    });
+
     testWidgets('valor inválido bloqueia o salvamento', (tester) async {
       await abrirApp(
         tester,

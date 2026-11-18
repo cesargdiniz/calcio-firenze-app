@@ -160,6 +160,10 @@ class DadosTemporada {
   /// Patrocinador que dá nome à competição na súmula ("CF Casa Assis 2027").
   final String? patrocinador;
 
+  /// Datas do Draft-1 e do Draft-2 (escolha dos elencos) da categoria: chave
+  /// 1 e 2. A Organização informa em Regulamento e parâmetros.
+  final Map<int, DateTime> drafts;
+
   /// Verdadeiro enquanto o app mostra a temporada de exemplo (antes de a
   /// Organização importar os elencos reais).
   final bool demonstracao;
@@ -180,6 +184,7 @@ class DadosTemporada {
     this.sorteios = const {},
     this.parametros = Parametros.master2027,
     this.patrocinador,
+    this.drafts = const {},
     this.demonstracao = false,
     this.relogio,
   });

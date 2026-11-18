@@ -99,6 +99,7 @@ class ParametrosScreen extends StatelessWidget {
           titulo: o.dados.nome,
           atuais: o.dados.parametros,
           patrocinador: o.dados.patrocinador,
+          drafts: o.dados.drafts,
         ),
       );
 }
@@ -107,11 +108,13 @@ class _Formulario extends StatefulWidget {
   final String titulo;
   final Parametros atuais;
   final String? patrocinador;
+  final Map<int, DateTime> drafts;
   const _Formulario({
     super.key,
     required this.titulo,
     required this.atuais,
     required this.patrocinador,
+    required this.drafts,
   });
 
   @override
@@ -224,6 +227,20 @@ class _FormularioState extends State<_Formulario> {
           border: const OutlineInputBorder(borderRadius: AppRadius.botao),
         ),
       ),
+      const TituloSecao('Drafts'),
+      const Text(
+        'Datas da escolha dos elencos. Aparecem no calendário completo e no PDF do '
+        'calendário anual.',
+        style: AppTextStyles.pequeno,
+      ),
+      const SizedBox(height: AppSpacing.sm),
+      Cartao(
+        child: Column(
+          children: [
+            for (final n in [1, 2]) _LinhaDraft(numero: n, drafts: widget.drafts),
+          ],
+        ),
+      ),
       for (final s in _secoes) ...[
         TituloSecao(s.titulo),
         for (final c in s.campos)
@@ -262,4 +279,66 @@ class _FormularioState extends State<_Formulario> {
       ),
     ],
   );
+}
+
+/// Data de um draft, gravada assim que é escolhida (ou apagada).
+class _LinhaDraft extends StatelessWidget {
+  final int numero;
+  final Map<int, DateTime> drafts;
+  const _LinhaDraft({required this.numero, required this.drafts});
+
+  Future<void> _gravar(BuildContext context, DateTime? data) async {
+    final controller = context.read<OrganizacaoController>();
+    final avisos = ScaffoldMessenger.of(context);
+    final novos = {...drafts}..remove(numero);
+    if (data != null) novos[numero] = data;
+    try {
+      await controller.salvarDrafts(novos);
+      avisos.showSnackBar(
+        SnackBar(content: Text(data == null ? 'Data do Draft-$numero apagada.' : 'Draft-$numero salvo.')),
+      );
+    } catch (_) {
+      avisos.showSnackBar(const SnackBar(content: Text('Não foi possível gravar. Tente de novo.')));
+    }
+  }
+
+  Future<void> _escolher(BuildContext context) async {
+    final atual = drafts[numero];
+    final data = await showDatePicker(
+      context: context,
+      initialDate: atual ?? DateTime(2027, 1, 1),
+      firstDate: DateTime(2026, 1, 1),
+      lastDate: DateTime(2027, 12, 31),
+      helpText: 'Data do Draft-$numero',
+    );
+    if (data != null && context.mounted) await _gravar(context, data);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = drafts[numero];
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text('Draft-$numero', style: AppTextStyles.nome),
+      subtitle: Text(
+        data == null ? 'Sem data' : dataCompleta(data),
+        style: AppTextStyles.pequeno,
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (data != null)
+            IconButton(
+              tooltip: 'Apagar a data do Draft-$numero',
+              onPressed: () => _gravar(context, null),
+              icon: const Icon(Icons.close_rounded, color: AppColors.dica),
+            ),
+          TextButton(
+            onPressed: () => _escolher(context),
+            child: Text(data == null ? 'Definir' : 'Alterar'),
+          ),
+        ],
+      ),
+    );
+  }
 }

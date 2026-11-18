@@ -68,4 +68,19 @@ void main() {
     expect(primeiro.mandante, isNotNull);
     expect(master.where((j) => !j.aDefinir), hasLength(45));
   });
+
+  test('drafts de cada categoria entram no calendário, em ordem de data', () {
+    final jogos = montarCalendarioGeral({
+      Categoria.master: DadosCalendario(drafts: {1: DateTime(2026, 12, 8), 2: DateTime(2027, 6, 26)}),
+      Categoria.livre: DadosCalendario(drafts: {1: DateTime(2027, 1, 16)}),
+    });
+    final drafts = jogos.where((j) => j.ehDraft).toList();
+    expect([for (final d in drafts) (d.competicao, d.draft)], [
+      (Competicao.master, 1),
+      (Competicao.livre, 1),
+      (Competicao.master, 2),
+    ]);
+    expect(jogos.first.etapa, 'Draft-1');
+    expect(drafts.every((d) => d.aDefinir), isTrue);
+  });
 }

@@ -113,7 +113,7 @@ class _CalendarioState extends State<_Calendario> {
               ),
               const SizedBox(height: AppSpacing.sm),
               OutlinedButton.icon(
-                onPressed: () => abrirCalendarioPdf(context),
+                onPressed: () => abrirCalendarioPdf(context, widget.jogos),
                 icon: const Icon(Icons.download_rounded),
                 label: const Text('Baixar calendário anual (PDF)'),
               ),
@@ -129,7 +129,8 @@ class _CalendarioState extends State<_Calendario> {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                '${jogos.length} jogos${_anteriores ? '' : ' a partir de hoje'}',
+                '${jogos.where((j) => !j.ehDraft).length} jogos'
+                '${_anteriores ? '' : ' a partir de hoje'}',
                 style: AppTextStyles.pequeno,
               ),
               if (passados > 0)
@@ -188,7 +189,9 @@ class _LinhaJogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hora = dataHoraJogo(jogo.inicio).split(' · ').last;
+    final hora = jogo.ehDraft && jogo.inicio.hour == 0 && jogo.inicio.minute == 0
+        ? '—'
+        : dataHoraJogo(jogo.inicio).split(' · ').last;
     final cor = corDa(jogo.competicao);
     final s = jogo.partida?.sumula;
     return Padding(
@@ -225,7 +228,9 @@ class _LinhaJogo extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.xs),
-                  if (jogo.aDefinir || jogo.mandante == null || jogo.visitante == null)
+                  if (jogo.ehDraft)
+                    Text('Escolha dos elencos', style: AppTextStyles.nome)
+                  else if (jogo.aDefinir || jogo.mandante == null || jogo.visitante == null)
                     Text('Confronto a definir', style: AppTextStyles.corpo.copyWith(color: AppColors.dica))
                   else
                     Row(

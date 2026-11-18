@@ -34,7 +34,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/calendario/
     - assets/splash/
   fonts:
     - family: Montserrat

@@ -16,7 +16,11 @@ class TemporadaExemploRepository implements TemporadaRepository {
   /// Só o Master tem exemplo; as outras categorias aparecem vazias.
   @override
   Stream<DadosCalendario> observarCalendario(String temporadaId) => observar(temporadaId).map(
-    (d) => DadosCalendario(times: d.times, partidas: d.demonstracao ? const [] : d.partidas),
+    (d) => DadosCalendario(
+      times: d.times,
+      partidas: d.demonstracao ? const [] : d.partidas,
+      drafts: d.drafts,
+    ),
   );
 
   @override

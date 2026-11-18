@@ -9,7 +9,10 @@ import 'gerar_calendario.dart';
 class DadosCalendario {
   final List<Time> times;
   final List<Partida> partidas;
-  const DadosCalendario({this.times = const [], this.partidas = const []});
+
+  /// Draft-1 e Draft-2 da categoria (chave 1 e 2).
+  final Map<int, DateTime> drafts;
+  const DadosCalendario({this.times = const [], this.partidas = const [], this.drafts = const {}});
 }
 
 /// Competições do calendário geral: as categorias e a Copa Master.
@@ -43,6 +46,12 @@ class JogoDoCalendario {
   final Time? mandante;
   final Time? visitante;
 
+  /// Turno do jogo (0: grande final). Nulo na Copa e nos drafts.
+  final int? turno;
+
+  /// 1 ou 2 quando não é jogo, e sim o Draft-1 ou o Draft-2 da categoria.
+  final int? draft;
+
   const JogoDoCalendario({
     required this.inicio,
     required this.competicao,
@@ -50,10 +59,37 @@ class JogoDoCalendario {
     this.partida,
     this.mandante,
     this.visitante,
+    this.turno,
+    this.draft,
   });
 
+  bool get ehDraft => draft != null;
   bool get aDefinir => partida == null;
 }
+
+/// Feriados do calendário anual (do modelo da Organização). [oficial] falso:
+/// facultativo ou data local a confirmar.
+typedef Feriado = ({DateTime data, String nome, bool oficial});
+
+final feriados2027 = <Feriado>[
+  (data: DateTime(2026, 12, 25), nome: 'Natal', oficial: true),
+  (data: DateTime(2027, 1, 1), nome: 'Confraternização Universal', oficial: true),
+  (data: DateTime(2027, 1, 12), nome: 'Data local a confirmar', oficial: false),
+  (data: DateTime(2027, 2, 8), nome: 'Carnaval (segunda-feira)', oficial: false),
+  (data: DateTime(2027, 2, 9), nome: 'Carnaval (terça-feira)', oficial: false),
+  (data: DateTime(2027, 2, 10), nome: 'Quarta-feira de Cinzas', oficial: false),
+  (data: DateTime(2027, 3, 26), nome: 'Paixão de Cristo', oficial: true),
+  (data: DateTime(2027, 4, 21), nome: 'Tiradentes', oficial: true),
+  (data: DateTime(2027, 5, 1), nome: 'Dia do Trabalho', oficial: true),
+  (data: DateTime(2027, 8, 15), nome: 'Data local', oficial: true),
+  (data: DateTime(2027, 9, 7), nome: 'Independência do Brasil', oficial: true),
+  (data: DateTime(2027, 10, 12), nome: 'Nossa Senhora Aparecida', oficial: true),
+  (data: DateTime(2027, 10, 25), nome: 'Data local a confirmar', oficial: false),
+  (data: DateTime(2027, 11, 2), nome: 'Finados', oficial: true),
+  (data: DateTime(2027, 11, 15), nome: 'Proclamação da República', oficial: true),
+  (data: DateTime(2027, 12, 8), nome: 'N. Sra. da Conceição (Belém)', oficial: true),
+  (data: DateTime(2027, 12, 25), nome: 'Natal', oficial: true),
+];
 
 /// Junta os jogos de todas as categorias e da Copa num calendário só, em
 /// ordem de data. Onde o calendário de um turno ainda não foi sorteado (ou
@@ -62,6 +98,9 @@ class JogoDoCalendario {
 List<JogoDoCalendario> montarCalendarioGeral(Map<Categoria, DadosCalendario> dados) {
   final jogos = <JogoDoCalendario>[
     for (final c in Categoria.values) ..._daCategoria(c, dados[c] ?? const DadosCalendario()),
+    for (final c in Categoria.values)
+      for (final MapEntry(key: n, value: data) in (dados[c]?.drafts ?? const {}).entries)
+        JogoDoCalendario(inicio: data, competicao: Competicao.de(c), etapa: 'Draft-$n', draft: n),
     for (final d in datasCopaMaster2027)
       for (final h in d.horarios)
         JogoDoCalendario(inicio: h, competicao: Competicao.copaMaster, etapa: d.etapa),
@@ -83,9 +122,10 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
     partida: p,
     mandante: times[p.mandanteId],
     visitante: times[p.visitanteId],
+    turno: p.turno,
   );
-  JogoDoCalendario vago(DateTime h, String etapa) =>
-      JogoDoCalendario(inicio: h, competicao: competicao, etapa: etapa);
+  JogoDoCalendario vago(DateTime h, String etapa, int turno) =>
+      JogoDoCalendario(inicio: h, competicao: competicao, etapa: etapa, turno: turno);
 
   final etapasMataMata = [
     if (c.temQuartas) (Fase.quartas, 2),
@@ -102,7 +142,7 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
       saida.addAll(sorteados.map(real));
     } else {
       for (final (i, h) in slots.take(classificatoria).indexed) {
-        saida.add(vago(h, 'Rodada ${i ~/ porRodada + 1}'));
+        saida.add(vago(h, 'Rodada ${i ~/ porRodada + 1}', turno));
       }
     }
     var i = classificatoria;
@@ -112,7 +152,7 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
         saida.addAll(criados.map(real));
       } else {
         for (final h in slots.skip(i).take(quantos)) {
-          saida.add(vago(h, Etapa(turno, fase).rotulo));
+          saida.add(vago(h, Etapa(turno, fase).rotulo, turno));
         }
       }
       i += quantos;
@@ -123,7 +163,7 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
     saida.addAll(grandeFinal.map(real));
   } else {
     for (final h in horarios[0] ?? const <DateTime>[]) {
-      saida.add(vago(h, 'Grande final'));
+      saida.add(vago(h, 'Grande final', 0));
     }
   }
   return saida;

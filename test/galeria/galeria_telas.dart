@@ -16,7 +16,10 @@ import 'package:calcio_firenze/domain/entities/usuario.dart';
 import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
 import 'package:calcio_firenze/domain/usecases/montar_situacao.dart';
 import 'package:calcio_firenze/domain/usecases/montar_sumula_impressa.dart';
+import 'package:calcio_firenze/domain/usecases/calendario_geral.dart';
+import 'package:calcio_firenze/shared/pdf/calendario_pdf.dart';
 import 'package:calcio_firenze/shared/pdf/sumula_pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -203,6 +206,29 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
       }
+    });
+  });
+
+  testWidgets('calendário anual em PDF', (t) async {
+    await t.runAsync(() async {
+      pw.Font fonte(String nome) =>
+          pw.Font.ttf(ByteData.sublistView(File('assets/fonts/$nome.ttf').readAsBytesSync()));
+      final eventos = montarCalendarioGeral({
+        Categoria.master: DadosCalendario(drafts: {1: DateTime(2026, 12, 8), 2: DateTime(2027, 6, 26)}),
+        Categoria.livre: DadosCalendario(drafts: {1: DateTime(2027, 1, 16)}),
+      });
+      final bytes = await gerarCalendarioPdf(
+        eventos,
+        RecursosCalendarioPdf(
+          titulo: fonte('Montserrat-ExtraBold'),
+          texto: fonte('OpenSans-Regular'),
+          textoNegrito: fonte('OpenSans-SemiBold'),
+          logo: pw.MemoryImage(File('assets/images/logo.png').readAsBytesSync()),
+        ),
+      );
+      File('test/galeria/telas/calendario_anual.pdf')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(bytes);
     });
   });
 

@@ -40,6 +40,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
     Parametros? parametros;
     String? patrocinador;
     var sorteios = const <int, List<String>>{};
+    var drafts = const <int, DateTime>{};
 
     void emitir() {
       if (times == null ||
@@ -88,6 +89,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             parametros: parametros!,
             patrocinador: patrocinador,
             sorteios: sorteios,
+            drafts: drafts,
             // Decisão cujo jogo de origem saiu do calendário não tem como ser
             // calculada; fica de fora em vez de derrubar as telas.
             decisoes: [
@@ -145,6 +147,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
               parametros = parametrosDeMapa(s.data()?['parametros'] as Map<String, dynamic>?);
               patrocinador = s.data()?['patrocinador'] as String?;
               sorteios = sorteiosDeMapa(s.data()?['sorteios']);
+              drafts = draftsDeMapa(s.data());
               emitir();
             },
             onError: (Object _) {
@@ -171,6 +174,7 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
     final subs = <StreamSubscription<void>>[];
     List<Time>? times;
     List<Partida>? partidas;
+    var drafts = const <int, DateTime>{};
     void emitir() {
       if (times == null || partidas == null) return;
       final porId = {
@@ -178,7 +182,9 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
           for (final t in timesMaster2027) t.id: t,
         for (final t in times!) t.id: t,
       };
-      saida.add(DadosCalendario(times: porId.values.toList(), partidas: partidas!));
+      saida.add(
+        DadosCalendario(times: porId.values.toList(), partidas: partidas!, drafts: drafts),
+      );
     }
 
     saida = StreamController<DadosCalendario>(
@@ -194,6 +200,12 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             partidas = [for (final d in s.docs) partidaDeMapa(d.id, d.data())];
             emitir();
           }, onError: saida.addError),
+        );
+        subs.add(
+          ref.snapshots().listen((s) {
+            drafts = draftsDeMapa(s.data());
+            emitir();
+          }, onError: (Object _) {}),
         );
       },
       onCancel: () async {
@@ -352,6 +364,15 @@ class FirestoreGestaoRepository implements GestaoRepository {
       .set({'parametros': parametrosParaMapa(parametros)}, SetOptions(merge: true));
 
   @override
+  Future<void> salvarDrafts(String temporadaId, Map<int, DateTime> drafts) => _db
+      .collection('temporadas')
+      .doc(temporadaId)
+      .set({
+        for (final n in [1, 2])
+          'draft$n': drafts[n] == null ? FieldValue.delete() : Timestamp.fromDate(drafts[n]!),
+      }, SetOptions(merge: true));
+
+  @override
   Future<void> salvarSorteio(String temporadaId, int turno, List<String> ordem) => _db
       .collection('temporadas')
       .doc(temporadaId)
@@ -413,3 +434,9 @@ Map<int, List<String>> sorteiosDeMapa(Object? m) {
         turno: [for (final id in e.value as List) '$id'],
   };
 }
+
+/// `draft1` e `draft2` do documento da temporada.
+Map<int, DateTime> draftsDeMapa(Map<String, dynamic>? m) => {
+  for (final n in [1, 2])
+    if (m?['draft$n'] case final Timestamp t) n: t.toDate(),
+};

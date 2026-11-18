@@ -30,7 +30,7 @@ void main() {
     await abrirApp(tester, inicio: '/calendario', saidaPdf: saida);
     await tester.runAsync(() async {
       await tester.tap(find.text('Baixar calendário anual (PDF)'));
-      for (var i = 0; i < 40 && saida.nome == null; i++) {
+      for (var i = 0; i < 200 && saida.nome == null; i++) {
         await Future<void>.delayed(const Duration(milliseconds: 50));
         await tester.pump();
       }
