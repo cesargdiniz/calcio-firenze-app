@@ -103,8 +103,9 @@ final horariosSuperMaster2027 = <int, List<DateTime>>{
   ]),
   2: _dias(const [
     (8, 9, 1), (8, 10, 2), // 1ª rodada
-    (8, 12, 2), (8, 14, 1),
-    (8, 23, 1), (8, 26, 2),
+    // 2ª rodada sem o sábado 14/08 (classificatória do SM não joga sábado).
+    (8, 12, 2), (8, 23, 1),
+    (8, 24, 1), (8, 26, 2),
     (9, 6, 1), (9, 9, 2),
     (10, 11, 2), (10, 13, 1), // 5ª rodada
     (10, 16, 2), // semifinais
@@ -176,21 +177,36 @@ class GerarCalendario {
     for (var r = 0; r < rodadas; r++) {
       final girado = [...roda.sublist(r), ...roda.sublist(0, r)];
       final lista = [fixo, ...girado];
+      final jogos = [
+        for (var i = 0; i < jogosPorRodada; i++)
+          // Mando equilibrado (4 ou 5 por time): o time fixo alterna a cada
+          // rodada; os demais pares invertem conforme a posição.
+          (i == 0 ? r.isEven : i.isOdd)
+              ? (lista[i], lista[lista.length - 1 - i])
+              : (lista[lista.length - 1 - i], lista[i]),
+      ];
       for (var i = 0; i < jogosPorRodada; i++) {
-        // Mando equilibrado (4 ou 5 por time): o time fixo alterna a cada
-        // rodada; os demais pares invertem conforme a posição.
-        final (mandante, visitante) = (i == 0 ? r.isEven : i.isOdd)
-            ? (lista[i], lista[lista.length - 1 - i])
-            : (lista[lista.length - 1 - i], lista[i]);
+        final horario = slots[k++];
+        // Quem jogou na véspera não entra de novo: dentro da rodada, o jogo
+        // do dia seguinte fica com times descansados, quando possível.
+        final vespera = {
+          for (final p in partidas)
+            if (_diasEntre(p.inicio, horario) == 1) ...[p.mandanteId, p.visitanteId],
+        };
+        final escolhido = jogos.firstWhere(
+          (j) => !vespera.contains(j.$1) && !vespera.contains(j.$2),
+          orElse: () => jogos.first,
+        );
+        jogos.remove(escolhido);
         partidas.add(
           Partida(
             id: 't$turno-r${r + 1}-j${i + 1}',
             turno: turno,
             fase: Fase.classificatoria,
             rodada: r + 1,
-            mandanteId: mandante,
-            visitanteId: visitante,
-            inicio: slots[k++],
+            mandanteId: escolhido.$1,
+            visitanteId: escolhido.$2,
+            inicio: horario,
             local: local,
           ),
         );
@@ -199,3 +215,6 @@ class GerarCalendario {
     return partidas;
   }
 }
+
+int _diasEntre(DateTime a, DateTime b) =>
+    DateTime.utc(b.year, b.month, b.day).difference(DateTime.utc(a.year, a.month, a.day)).inDays;

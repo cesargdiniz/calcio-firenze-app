@@ -3,13 +3,16 @@
 ///
 /// A Copa Master entra quando o formato dela estiver definido.
 enum Categoria {
-  master('master-2027', 'Master', times: 10, classificados: 6),
-  superMaster('super-master-2027', 'Super Master', times: 6, classificados: 4),
-  livre('livre-2027', 'Livre', times: 8, classificados: 6);
+  master('master-2027', 'Master', 'M', times: 10, classificados: 6),
+  superMaster('super-master-2027', 'Super Master', 'SM', times: 6, classificados: 4),
+  livre('livre-2027', 'Livre', 'L', times: 8, classificados: 6);
 
   /// Documento da temporada no Firestore.
   final String temporadaId;
   final String nome;
+
+  /// M (Master), SM (Super Master) e L (Livre).
+  final String sigla;
 
   /// Times da fase classificatória (todos contra todos, só ida).
   final int times;
@@ -20,7 +23,8 @@ enum Categoria {
 
   const Categoria(
     this.temporadaId,
-    this.nome, {
+    this.nome,
+    this.sigla, {
     required this.times,
     required this.classificados,
   });

@@ -26,13 +26,6 @@ PdfColor _cor(Competicao c) => switch (c) {
   Competicao.copaMaster => const PdfColor.fromInt(0xFF6A3FA0),
 };
 
-String _sigla(Competicao c) => switch (c) {
-  Competicao.master => 'M',
-  Competicao.superMaster => 'SM',
-  Competicao.livre => 'L',
-  Competicao.copaMaster => 'CM',
-};
-
 int _equipes(Competicao c) => switch (c) {
   Competicao.master => Categoria.master.times,
   Competicao.superMaster => Categoria.superMaster.times,
@@ -154,9 +147,9 @@ Future<Uint8List> gerarCalendarioPdf(
               child: numero,
             ),
           for (final c in Competicao.values)
-            if (contagem[c] case final n?) selo('${_sigla(c)}$n', _cor(c)),
+            if (contagem[c] case final n?) selo('${c.sigla}$n', _cor(c)),
           for (final e in doDia)
-            if (e.ehDraft) selo('D${e.draft} ${_sigla(e.competicao)}', _draft),
+            if (e.ehDraft) selo('D${e.draft} ${e.competicao.sigla}', _draft),
         ],
       ),
     );
@@ -423,7 +416,7 @@ Future<Uint8List> gerarCalendarioPdf(
             ),
             child: pw.Row(
               children: [
-                for (final c in Competicao.values) legenda(_sigla(c), c.nome.toUpperCase(), _cor(c)),
+                for (final c in Competicao.values) legenda(c.sigla, c.nome.toUpperCase(), _cor(c)),
                 legenda('D', 'DRAFT', _draft),
                 pw.Spacer(),
                 pw.Text('Número no selo = partidas no dia', style: t(7, cor: _dica)),

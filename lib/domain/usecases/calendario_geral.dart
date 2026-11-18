@@ -17,13 +17,16 @@ class DadosCalendario {
 
 /// Competições do calendário geral: as categorias e a Copa Master.
 enum Competicao {
-  master('Master'),
-  superMaster('Super Master'),
-  livre('Livre'),
-  copaMaster('Copa Master');
+  master('Master', 'M'),
+  superMaster('Super Master', 'SM'),
+  livre('Livre', 'L'),
+  copaMaster('Copa Master', 'CM');
 
   final String nome;
-  const Competicao(this.nome);
+
+  /// M, SM, L e CM (Copa Master).
+  final String sigla;
+  const Competicao(this.nome, this.sigla);
 
   static Competicao de(Categoria c) => switch (c) {
     Categoria.master => Competicao.master,
@@ -49,6 +52,12 @@ class JogoDoCalendario {
   /// Turno do jogo (0: grande final). Nulo na Copa e nos drafts.
   final int? turno;
 
+  /// Fase do jogo no campeonato da categoria. Nula na Copa e nos drafts.
+  final Fase? fase;
+
+  /// Rodada, na fase classificatória.
+  final int? rodada;
+
   /// 1 ou 2 quando não é jogo, e sim o Draft-1 ou o Draft-2 da categoria.
   final int? draft;
 
@@ -60,8 +69,24 @@ class JogoDoCalendario {
     this.mandante,
     this.visitante,
     this.turno,
+    this.fase,
+    this.rodada,
     this.draft,
   });
+
+  /// O mesmo evento em outro horário (para simular uma mudança de data).
+  JogoDoCalendario em(DateTime novo) => JogoDoCalendario(
+    inicio: novo,
+    competicao: competicao,
+    etapa: etapa,
+    partida: partida,
+    mandante: mandante,
+    visitante: visitante,
+    turno: turno,
+    fase: fase,
+    rodada: rodada,
+    draft: draft,
+  );
 
   bool get ehDraft => draft != null;
   bool get aDefinir => partida == null;
@@ -123,9 +148,18 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
     mandante: times[p.mandanteId],
     visitante: times[p.visitanteId],
     turno: p.turno,
+    fase: p.fase,
+    rodada: p.fase == Fase.classificatoria ? p.rodada : null,
   );
-  JogoDoCalendario vago(DateTime h, String etapa, int turno) =>
-      JogoDoCalendario(inicio: h, competicao: competicao, etapa: etapa, turno: turno);
+  JogoDoCalendario vago(DateTime h, String etapa, int turno, Fase fase, [int? rodada]) =>
+      JogoDoCalendario(
+        inicio: h,
+        competicao: competicao,
+        etapa: etapa,
+        turno: turno,
+        fase: fase,
+        rodada: rodada,
+      );
 
   final etapasMataMata = [
     if (c.temQuartas) (Fase.quartas, 2),
@@ -142,7 +176,8 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
       saida.addAll(sorteados.map(real));
     } else {
       for (final (i, h) in slots.take(classificatoria).indexed) {
-        saida.add(vago(h, 'Rodada ${i ~/ porRodada + 1}', turno));
+        final rodada = i ~/ porRodada + 1;
+        saida.add(vago(h, 'Rodada $rodada', turno, Fase.classificatoria, rodada));
       }
     }
     var i = classificatoria;
@@ -152,7 +187,7 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
         saida.addAll(criados.map(real));
       } else {
         for (final h in slots.skip(i).take(quantos)) {
-          saida.add(vago(h, Etapa(turno, fase).rotulo, turno));
+          saida.add(vago(h, Etapa(turno, fase).rotulo, turno, fase));
         }
       }
       i += quantos;
@@ -163,7 +198,7 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
     saida.addAll(grandeFinal.map(real));
   } else {
     for (final h in horarios[0] ?? const <DateTime>[]) {
-      saida.add(vago(h, 'Grande final', 0));
+      saida.add(vago(h, 'Grande final', 0, Fase.grandeFinal));
     }
   }
   return saida;
