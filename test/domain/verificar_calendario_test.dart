@@ -128,6 +128,49 @@ void main() {
     );
   });
 
+  test('regra 6: o mesmo time não joga três vezes na semana', () {
+    // Horários a definir: quartas, semifinais e final na mesma semana.
+    expect(
+      _detalhes([
+        _j(DateTime(2027, 11, 1, 20, 30), Competicao.livre, fase: Fase.quartas, turno: 2),
+        _j(DateTime(2027, 11, 4, 20, 30), Competicao.livre, fase: Fase.semifinal, turno: 2),
+        _j(DateTime(2027, 11, 6, 17), Competicao.livre, fase: Fase.finalTurno, turno: 2),
+        // Outra categoria na mesma semana não soma para os times do Livre.
+        _j(DateTime(2027, 11, 6, 19), Competicao.superMaster, fase: Fase.grandeFinal, turno: 0),
+      ]),
+      [
+        'R6 Semana de 01/11 a 07/11: L Quartas de final do 2º turno, '
+            'L Semifinais do 2º turno, L Final do 2º turno (o mesmo time pode jogar 3 vezes).',
+      ],
+    );
+
+    // Confrontos definidos: conta os jogos de cada time.
+    JogoDoCalendario jogo(int dia, int rodada, String m, String v) => JogoDoCalendario(
+      inicio: DateTime(2027, 3, dia, 20, 30),
+      competicao: Competicao.master,
+      etapa: 'Rodada $rodada',
+      partida: Partida(
+        id: 'r$rodada-$m',
+        turno: 1,
+        fase: Fase.classificatoria,
+        rodada: rodada,
+        mandanteId: m,
+        visitanteId: v,
+        inicio: DateTime(2027, 3, dia, 20, 30),
+      ),
+      turno: 1,
+      fase: Fase.classificatoria,
+      rodada: rodada,
+    );
+    expect(
+      _detalhes([jogo(1, 1, 'A', 'B'), jogo(3, 2, 'C', 'D'), jogo(5, 3, 'E', 'F')]),
+      isEmpty,
+    );
+    expect(_detalhes([jogo(1, 1, 'A', 'B'), jogo(3, 2, 'A', 'C'), jogo(5, 3, 'D', 'A')]), [
+      'R6 Semana de 01/03 a 07/03: A (M) joga 3 vezes.',
+    ]);
+  });
+
   test('nova data de uma partida: só os avisos que a envolvem', () {
     final p = Partida(
       id: 't2-r2-j3',

@@ -11,7 +11,8 @@ enum RegraCalendario {
     'Nenhum jogo classificatório do Master ou do Super Master aos sábados, exceto as '
     'aberturas dos turnos, finais e grandes finais.',
   ),
-  finalNoSabado('Finais de turno e grandes finais sempre aos sábados.');
+  finalNoSabado('Finais de turno e grandes finais sempre aos sábados.'),
+  tresNaSemana('Nenhum time joga três vezes na mesma semana.');
 
   final String texto;
   const RegraCalendario(this.texto);
@@ -52,8 +53,19 @@ String _jogo(JogoDoCalendario j) => [
   j.etapa,
 ].join(' · ');
 
+/// "Rodada 2 do 2º turno", "Semifinais do 1º turno", "Grande final".
+String _etapa(JogoDoCalendario j) => switch (j.turno) {
+  final t? when t > 0 && j.fase != Fase.finalTurno => '${j.etapa} do $tº turno',
+  _ => j.etapa,
+};
+
 /// Confere o calendário (todas as categorias e a Copa) contra as cinco
-/// regras. Drafts não contam. A Copa Master conta como Master na regra 3.
+/// regras. Drafts não contam. A Copa Master conta como Master nas regras 3
+/// e 6 (os times são os mesmos).
+///
+/// Regra 6: com os confrontos definidos, conta os jogos de cada time na
+/// semana; com horários ainda a definir, conta as etapas (cada time joga uma
+/// vez por rodada ou fase do mata-mata), que é o máximo possível.
 List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
   final jogos = [for (final e in eventos) if (!e.ehDraft) e]
     ..sort((a, b) => a.inicio.compareTo(b.inicio));
@@ -103,6 +115,53 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
         [...master, ...outros],
       ),
     );
+  }
+
+  // 6: três jogos do mesmo time na semana.
+  String grupo(Competicao c) => c == Competicao.copaMaster ? Competicao.master.sigla : c.sigla;
+  for (final MapEntry(key: segunda, value: daSemana) in porSemana.entries) {
+    final domingo = segunda.add(const Duration(days: 6));
+    final semana =
+        'Semana de ${_dd(segunda.day)}/${_dd(segunda.month)} a ${_dd(domingo.day)}/${_dd(domingo.month)}';
+    final porGrupo = <String, List<JogoDoCalendario>>{};
+    for (final j in daSemana) {
+      porGrupo.putIfAbsent(grupo(j.competicao), () => []).add(j);
+    }
+    for (final MapEntry(key: sigla, value: doGrupo) in porGrupo.entries) {
+      if (doGrupo.every((j) => !j.aDefinir)) {
+        final jogosDoTime = <String, List<JogoDoCalendario>>{};
+        final nomes = <String, String>{};
+        for (final j in doGrupo) {
+          final p = j.partida!;
+          for (final (id, time) in [(p.mandanteId, j.mandante), (p.visitanteId, j.visitante)]) {
+            jogosDoTime.putIfAbsent(id, () => []).add(j);
+            nomes[id] = time?.nome ?? id;
+          }
+        }
+        for (final MapEntry(key: id, value: doTime) in jogosDoTime.entries) {
+          if (doTime.length >= 3) {
+            saida.add(
+              Inconsistencia(
+                RegraCalendario.tresNaSemana,
+                '$semana: ${nomes[id]} ($sigla) joga ${doTime.length} vezes.',
+                doTime,
+              ),
+            );
+          }
+        }
+        continue;
+      }
+      final etapas = <String>{for (final j in doGrupo) '${j.competicao.sigla} ${_etapa(j)}'};
+      if (etapas.length >= 3) {
+        saida.add(
+          Inconsistencia(
+            RegraCalendario.tresNaSemana,
+            '$semana: ${etapas.join(', ')} (o mesmo time pode jogar ${etapas.length} vezes).',
+            doGrupo,
+          ),
+        );
+      }
+    }
   }
 
   // 4 e 5: por jogo.
