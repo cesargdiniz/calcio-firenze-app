@@ -395,12 +395,16 @@ Future<Uint8List> gerarCalendarioPdf(
             decoration: pw.BoxDecoration(color: _verde, borderRadius: pw.BorderRadius.circular(8)),
             child: pw.Row(
               children: [
+                // O escudo é mais alto que largo: centralizado no círculo.
                 pw.Container(
-                  width: 40,
-                  height: 40,
-                  padding: const pw.EdgeInsets.all(3),
+                  width: 42,
+                  height: 42,
+                  alignment: pw.Alignment.center,
                   decoration: const pw.BoxDecoration(color: PdfColors.white, shape: pw.BoxShape.circle),
-                  child: pw.Image(r.logo, fit: pw.BoxFit.contain),
+                  child: pw.SizedBox(
+                    height: 32,
+                    child: pw.Image(r.logo, fit: pw.BoxFit.contain, alignment: pw.Alignment.center),
+                  ),
                 ),
                 pw.SizedBox(width: 12),
                 pw.Column(

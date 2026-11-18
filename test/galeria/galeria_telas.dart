@@ -215,7 +215,7 @@ void main() {
           pw.Font.ttf(ByteData.sublistView(File('assets/fonts/$nome.ttf').readAsBytesSync()));
       final eventos = montarCalendarioGeral({
         // Draft-1 da arte oficial; o Draft-2 ainda não tem data.
-        Categoria.master: DadosCalendario(drafts: {1: DateTime(2026, 12, 8)}),
+        Categoria.master: DadosCalendario(drafts: {1: DateTime(2026, 12, 3)}),
       });
       final bytes = await gerarCalendarioPdf(
         eventos,
