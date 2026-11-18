@@ -47,13 +47,13 @@ final horariosMaster2027 = <int, List<DateTime>>{
     (8, 6, 2), (8, 7, 3), // 1ª rodada
     (8, 17, 2), (8, 19, 2), (8, 20, 1), // 2ª rodada
     (8, 31, 2), (9, 2, 2), (9, 3, 1), // 3ª rodada
-    (9, 14, 2), (9, 16, 2), (9, 17, 1), // 4ª rodada
+    (9, 8, 1), (9, 9, 2), (9, 10, 2), // 4ª rodada
     (9, 21, 2), (9, 23, 2), (9, 24, 1), // 5ª rodada
     (9, 28, 2), (9, 30, 2), (10, 1, 1), // 6ª rodada
     (10, 5, 2), (10, 7, 2), (10, 8, 1), // 7ª rodada
-    (11, 1, 2), (11, 3, 2), (11, 4, 1), // 8ª rodada
-    (11, 5, 1), (11, 8, 2), (11, 9, 2), // 9ª rodada
-    (11, 13, 2), // quartas
+    (10, 27, 1), (10, 28, 2), (10, 29, 2), // 8ª rodada
+    (11, 8, 2), (11, 9, 2), (11, 10, 1), // 9ª rodada
+    (11, 16, 2), // quartas
     (11, 30, 2), // semifinais
     (12, 4, 1), // final do 2º turno
   ]),
@@ -67,27 +67,37 @@ final horariosLivre2027 = <int, List<DateTime>>{
     (3, 10, 2), (3, 12, 2), // 2ª rodada
     (3, 22, 2), (3, 24, 2), // 3ª rodada
     (4, 7, 2), (4, 9, 2), // 4ª rodada
-    (4, 20, 2), (4, 22, 2), // 5ª rodada
+    (4, 19, 2), (4, 23, 2), // 5ª rodada
     (5, 5, 2), (5, 7, 2), // 6ª rodada
     (5, 19, 2), (5, 21, 2), // 7ª rodada
     (6, 2, 2), // quartas
-    (6, 22, 2), // semifinais
+    (6, 21, 2), // semifinais
     (6, 26, 1), // final do 1º turno
   ]),
   2: _dias(const [
     (7, 31, 4), // 1ª rodada
-    (8, 10, 2), (8, 12, 2), // 2ª rodada
-    (8, 25, 2), (8, 27, 2), // 3ª rodada
-    (9, 8, 2), (9, 10, 2), // 4ª rodada
-    (10, 14, 2), (10, 15, 2), // 5ª rodada
-    (10, 18, 2), (10, 20, 2), // 6ª rodada
-    (10, 22, 2), (10, 26, 2), // 7ª rodada
-    (10, 30, 2), // quartas
-    (11, 16, 2), // semifinais
-    (11, 20, 1), // final do 2º turno
+    (8, 9, 2), (8, 11, 2), // 2ª rodada
+    (8, 13, 2), (8, 23, 2), // 3ª rodada
+    (8, 25, 2), (8, 27, 2), // 4ª rodada
+    (9, 15, 2), (9, 17, 2), // 5ª rodada
+    (10, 11, 2), (10, 13, 2), // 6ª rodada
+    (10, 15, 2), (10, 18, 2), // 7ª rodada
+    (10, 22, 2), // quartas
+    (11, 1, 2), // semifinais
+    (11, 6, 1), // final do 2º turno
   ]),
   0: _dias(const [(11, 27, 1)]), // grande final
 };
+
+/// Super Master, classificatória e semifinais do 2º turno.
+final _smTurno2 = _dias(const [
+    (7, 29, 1), (7, 30, 2), // 1ª rodada
+    (8, 10, 1), (8, 12, 2), // 2ª rodada
+    (8, 24, 1), (8, 26, 2), // 3ª rodada
+    (9, 13, 2), (9, 14, 1), // 4ª rodada
+    (10, 14, 2), (10, 19, 1), // 5ª rodada
+    (10, 23, 2), // semifinais
+  ]);
 
 /// Super Master 2027: 6 times, 5 rodadas de 3 jogos por turno, semifinal
 /// direta.
@@ -96,21 +106,17 @@ final horariosSuperMaster2027 = <int, List<DateTime>>{
     (3, 13, 3), // 1ª rodada
     (3, 23, 2), (3, 25, 1), // 2ª rodada
     (4, 6, 1), (4, 8, 2), // 3ª rodada
-    (4, 19, 2), (4, 23, 1), // 4ª rodada
+    (4, 20, 1), (4, 22, 2), // 4ª rodada
     (5, 4, 1), (5, 6, 2), // 5ª rodada
     (5, 20, 2), // semifinais
     (6, 5, 1), // final do 1º turno
   ]),
-  2: _dias(const [
-    (7, 29, 1), (7, 30, 2), // 1ª rodada
-    (8, 11, 1), (8, 13, 2), // 2ª rodada
-    (8, 24, 1), (8, 26, 2), // 3ª rodada
-    (9, 6, 1), (9, 9, 2), // 4ª rodada
-    (10, 11, 2), (10, 13, 1), // 5ª rodada
-    (10, 19, 2), // semifinais
-    (10, 23, 1), // final do 2º turno
-  ]),
-  0: _dias(const [(10, 30, 1)]), // grande final
+  // Finais no sábado junto com as do Livre: o SM joga às 17h, o Livre às 19h.
+  2: [
+    ..._smTurno2,
+    _h(11, 6, 17), // final do 2º turno
+  ],
+  0: [_h(11, 27, 17)], // grande final
 };
 
 /// Um dia reservado no calendário, com os horários dos jogos. Os confrontos

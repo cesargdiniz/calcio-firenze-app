@@ -18,7 +18,11 @@ enum RegraCalendario {
     'quem joga terça, no sábado.',
   ),
   sabado('No sábado, no máximo 4 jogos, a partir das 17:00.'),
-  feriado('Nenhum jogo em feriado, nem nos facultativos.');
+  feriado('Nenhum jogo em feriado, nem nos facultativos.'),
+  livreTercaQuinta(
+    'Terças e quintas são só do Master e do Super Master: o Livre joga segunda, quarta, '
+    'sexta (dividindo com o SM) e, no sábado, aberturas e mata-mata.',
+  );
 
   final String texto;
   const RegraCalendario(this.texto);
@@ -179,6 +183,17 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
           ),
         );
       }
+    }
+  }
+
+  // 10: Livre fora de terça e quinta.
+  for (final MapEntry(key: dia, value: doDia) in porDia.entries) {
+    final livre = doDia.where((j) => j.competicao == Competicao.livre).toList();
+    if (livre.isNotEmpty &&
+        (dia.weekday == DateTime.tuesday || dia.weekday == DateTime.thursday)) {
+      saida.add(
+        Inconsistencia(RegraCalendario.livreTercaQuinta, '${_data(dia)}: ${_contagem(livre)}.', livre),
+      );
     }
   }
 

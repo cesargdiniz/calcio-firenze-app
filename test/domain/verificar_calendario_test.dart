@@ -113,6 +113,17 @@ void main() {
     );
   });
 
+  test('regra 10: Livre não joga terça nem quinta', () {
+    expect(
+      _detalhes([
+        _j(DateTime(2027, 8, 10, 20, 30), Competicao.livre),
+        _j(DateTime(2027, 8, 11, 20, 30), Competicao.livre),
+        _j(DateTime(2027, 8, 12, 20, 30), Competicao.superMaster),
+      ]).where((d) => d.startsWith('R10')),
+      ['R10 Ter 10/08: L1.'],
+    );
+  });
+
   test('regra 9: nenhum jogo em feriado, nem nos facultativos', () {
     expect(
       _detalhes([

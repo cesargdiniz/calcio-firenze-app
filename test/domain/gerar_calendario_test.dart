@@ -72,13 +72,13 @@ void main() {
     expect(assinatura(1) == assinatura(2), isFalse);
   });
 
-  test('2º turno: abertura em 06 e 07/08, última rodada até 09/11', () {
+  test('2º turno: abertura em 06 e 07/08, última rodada até 10/11', () {
     final p = gerar(turno: 2, times: times, horarios: horariosMaster2027[2]!, sorteio: Random(3));
     expect(p, hasLength(45));
     final inicios = p.map((x) => x.inicio).toList()..sort();
     expect(inicios.first, DateTime(2027, 8, 6, 20, 30));
     expect(inicios[2], DateTime(2027, 8, 7, 17));
-    expect(inicios.last, DateTime(2027, 11, 9, 21, 30));
+    expect(inicios.last, DateTime(2027, 11, 10, 20, 30));
   });
 
   test('horários que faltam: avisa quantos', () {
@@ -117,8 +117,8 @@ void main() {
       expect(p, hasLength(15));
       final inicios = p.map((x) => x.inicio).toList()..sort();
       expect(inicios.first, DateTime(2027, 7, 29, 20, 30));
-      expect(inicios.last, DateTime(2027, 10, 13, 20, 30));
-      expect(horariosSuperMaster2027[0], [DateTime(2027, 10, 30, 19)]);
+      expect(inicios.last, DateTime(2027, 10, 19, 20, 30));
+      expect(horariosSuperMaster2027[0], [DateTime(2027, 11, 27, 17)]);
     });
 
     test('cada categoria usa o próprio calendário', () {
