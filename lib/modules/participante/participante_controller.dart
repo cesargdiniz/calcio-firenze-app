@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -6,6 +7,7 @@ import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/organizacao_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/repositories/usuario_repository.dart';
 import '../../domain/usecases/montar_situacao.dart';
@@ -89,6 +91,7 @@ class ParticipanteController extends Cubit<ParticipanteStatus> {
   final TemporadaRepository _temporada;
   final MontarSituacao _montar;
   final CategoriaController _categorias;
+  final GestaoRepository _gestao;
 
   StreamSubscription<void>? _subSessao;
   StreamSubscription<void>? _subUsuario;
@@ -110,6 +113,7 @@ class ParticipanteController extends Cubit<ParticipanteStatus> {
     this._temporada,
     this._montar,
     this._categorias,
+    this._gestao,
   ) : super(const ParticipanteCarregando());
 
   void iniciar() {
@@ -235,6 +239,18 @@ class ParticipanteController extends Cubit<ParticipanteStatus> {
       ),
       Vinculo(temporadaId: dados.id, pessoaId: pessoa.id, timeId: pessoa.timeId, papel: papel),
     );
+  }
+
+  /// O dirigente troca o escudo do próprio time (ou tira, com nulo). As
+  /// regras do Firestore só deixam mudar o escudo, e só do time dele.
+  Future<void> trocarEscudo(Uint8List? png) async {
+    final s = state;
+    final dados = _dados;
+    if (s is! ParticipantePronto || s.papel != Papel.dirigente || dados == null) return;
+    final t = s.time.time;
+    await _gestao.salvarTimes(dados.id, [
+      Time(id: t.id, nome: t.nome, sigla: t.sigla, cor: t.cor, escudo: png),
+    ]);
   }
 
   Future<void> sair() => _auth.sair();

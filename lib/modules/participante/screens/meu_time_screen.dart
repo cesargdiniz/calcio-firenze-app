@@ -1,8 +1,12 @@
 import 'package:calcio_regras/calcio_regras.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/usecases/montar_situacao.dart';
 import '../../../shared/format.dart';
+import '../../../domain/entities/usuario.dart';
+import '../../../shared/seletor_imagem.dart';
+import '../participante_controller.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
@@ -46,6 +50,7 @@ class MeuTimeScreen extends StatelessWidget {
               ),
             ],
           ),
+          if (p.papel == Papel.dirigente) const _TrocarEscudo(),
           const TituloSecao('Antes da rodada'),
           Cartao(
             child: Column(
@@ -148,4 +153,47 @@ class _LinhaAtleta extends StatelessWidget {
       ),
     );
   }
+}
+
+/// O dirigente troca o escudo do time pelo do celular (galeria ou arquivos).
+class _TrocarEscudo extends StatefulWidget {
+  const _TrocarEscudo();
+
+  @override
+  State<_TrocarEscudo> createState() => _TrocarEscudoState();
+}
+
+class _TrocarEscudoState extends State<_TrocarEscudo> {
+  bool _gravando = false;
+
+  Future<void> _trocar() async {
+    final seletor = context.read<SeletorImagem>();
+    final controller = context.read<ParticipanteController>();
+    final avisos = ScaffoldMessenger.of(context);
+    setState(() => _gravando = true);
+    try {
+      final imagem = await seletor.escolherEscudo();
+      if (imagem == null) return;
+      await controller.trocarEscudo(imagem);
+      avisos.showSnackBar(const SnackBar(content: Text('Escudo do time atualizado.')));
+    } on ImagemGrandeDemais {
+      avisos.showSnackBar(
+        const SnackBar(content: Text('A imagem ficou pesada demais. Tente um escudo mais simples.')),
+      );
+    } catch (_) {
+      avisos.showSnackBar(const SnackBar(content: Text('Não foi possível trocar o escudo.')));
+    } finally {
+      if (mounted) setState(() => _gravando = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.centerLeft,
+    child: TextButton.icon(
+      onPressed: _gravando ? null : _trocar,
+      icon: const Icon(Icons.image_outlined, color: AppColors.verde),
+      label: Text(_gravando ? 'Enviando…' : 'Trocar escudo do time'),
+    ),
+  );
 }
