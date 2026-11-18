@@ -5,6 +5,7 @@ import '../../domain/entities/categoria.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
+import '../../shared/widgets/basicos.dart';
 import '../../shared/widgets/logo_calcio.dart';
 import 'categoria_controller.dart';
 
@@ -142,7 +143,7 @@ class EscolherCategoriaScreen extends StatelessWidget {
       child: ListView(
         padding: AppSpacing.tela,
         children: [
-          const SizedBox(height: AppSpacing.lg),
+          const BotaoVoltar(rotulo: 'Voltar', rota: '/entrar'),
           const Align(alignment: Alignment.centerLeft, child: LogoCalcio()),
           const SizedBox(height: AppSpacing.xl),
           const Text('Qual categoria você quer acompanhar?', style: AppTextStyles.tituloTela),

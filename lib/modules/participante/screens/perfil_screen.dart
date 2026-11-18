@@ -105,7 +105,7 @@ class PerfilScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
             child: Column(
               children: [
-                item('Trocar de perfil', Icons.swap_horiz_rounded, () => context.go('/entrar')),
+                item('Trocar de perfil', Icons.swap_horiz_rounded, () => context.push('/entrar')),
                 item('Sair', Icons.logout_rounded, () async {
                   await context.read<ParticipanteController>().sair();
                   if (context.mounted) context.go('/entrar');

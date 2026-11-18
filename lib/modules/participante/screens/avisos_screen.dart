@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
@@ -21,14 +20,7 @@ class AvisosScreen extends StatelessWidget {
       return ListView(
         padding: AppSpacing.tela,
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => context.go('/participante'),
-              icon: const Icon(Icons.chevron_left_rounded, color: AppColors.oliva),
-              label: Text('Início', style: AppTextStyles.subtitulo.copyWith(fontSize: 14)),
-            ),
-          ),
+          const BotaoVoltar(rotulo: 'Início', rota: '/participante'),
           CabecalhoTela(
             'Avisos',
             subtitulo: avisos.isEmpty

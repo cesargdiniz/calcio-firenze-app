@@ -360,7 +360,9 @@ class _SumulaState extends State<_Sumula> {
         const SizedBox(height: AppSpacing.xl),
         FilledButton(
           onPressed: _salvando || problema != null ? null : _encerrar,
-          child: Text(_salvando ? 'Salvando…' : 'Encerrar súmula'),
+          child: Text(
+            _salvando ? 'Salvando…' : (p.encerrada ? 'Salvar correção' : 'Encerrar súmula'),
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         const Text(

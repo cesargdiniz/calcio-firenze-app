@@ -40,7 +40,7 @@ class InicioScreen extends StatelessWidget {
               // Atleta ou Organização que entrou como Torcedor volta à escolha.
               IconButton(
                 tooltip: 'Trocar de perfil',
-                onPressed: () => context.go('/entrar'),
+                onPressed: () => context.push('/entrar'),
                 icon: const Icon(Icons.switch_account_outlined, color: AppColors.texto2),
               ),
             ],

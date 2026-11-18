@@ -1,5 +1,6 @@
 import 'package:calcio_regras/calcio_regras.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/etapa.dart';
@@ -9,6 +10,7 @@ import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
+import '../../organizacao/organizacao_controller.dart';
 import '../widgets/com_painel.dart';
 
 /// S3 · Jogo · Detalhe
@@ -33,14 +35,8 @@ class JogoDetalheScreen extends StatelessWidget {
       return ListView(
         padding: AppSpacing.tela,
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => context.canPop() ? context.pop() : context.go(voltarPara),
-              icon: const Icon(Icons.chevron_left_rounded, color: AppColors.oliva),
-              label: Text('Jogos', style: AppTextStyles.subtitulo.copyWith(fontSize: 14)),
-            ),
-          ),
+          BotaoVoltar(rotulo: 'Jogos', rota: voltarPara),
+          _EditarComoOrganizacao(partida: p, temporadaId: painel.categoria.temporadaId),
           Cartao(
             child: Column(
               children: [
@@ -205,5 +201,29 @@ class _Lista extends StatelessWidget {
           ),
       ],
     ),
+  );
+}
+
+/// Quem organiza a categoria edita o jogo direto daqui (placar, súmula,
+/// agenda), sem precisar procurar na área da Organização.
+class _EditarComoOrganizacao extends StatelessWidget {
+  final Partida partida;
+  final String temporadaId;
+  const _EditarComoOrganizacao({required this.partida, required this.temporadaId});
+
+  @override
+  Widget build(BuildContext context) => BlocBuilder<OrganizacaoController, OrgStatus>(
+    builder: (context, s) {
+      final organiza = s is OrgPronta && s.categorias.any((c) => c.temporadaId == temporadaId);
+      if (!organiza || s.dados.demonstracao) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+        child: FilledButton.icon(
+          onPressed: () => context.go('/organizacao/jogos/${partida.id}'),
+          icon: const Icon(Icons.edit_outlined),
+          label: Text(partida.encerrada ? 'Editar placar e súmula' : 'Lançar placar e súmula'),
+        ),
+      );
+    },
   );
 }

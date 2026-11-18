@@ -54,6 +54,30 @@ void main() {
     expect(find.text('Rodada 1'), findsOneWidget);
   });
 
+  testWidgets('jogo encerrado: corrige o placar sem reabrir', (tester) async {
+    final dados = _real(
+      ajustar: (l) => [l.first.comSumula(const Sumula(golsMandante: 1)), ...l.skip(1)],
+    );
+    final jogo = dados.partidas.first;
+    final gestao = await abrirApp(
+      tester,
+      inicio: '/organizacao/jogos/${jogo.id}',
+      sessao: _org,
+      organizacao: {'org1'},
+      dados: dados,
+    );
+    await acionar(tester, 'Editar placar e súmula');
+    // A publicada continua valendo enquanto a correção não é salva.
+    expect(gestao.temporada.dados.partidas.first.sumula?.golsMandante, 1);
+    await tester.tap(find.byTooltip('Mais um gol').last);
+    await tester.pumpAndSettle();
+    await acionar(tester, 'Salvar correção');
+
+    final salvo = gestao.temporada.dados.partidas.firstWhere((p) => p.id == jogo.id);
+    expect(salvo.sumula?.golsMandante, 1);
+    expect(salvo.sumula?.golsVisitante, 1);
+  });
+
   testWidgets('lançar e encerrar súmula com placar', (tester) async {
     final dados = _real();
     final jogo = dados.partidas.first;

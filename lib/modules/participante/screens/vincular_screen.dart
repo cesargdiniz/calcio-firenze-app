@@ -76,16 +76,17 @@ class _VincularScreenState extends State<VincularScreen> {
         child: ListView(
           padding: AppSpacing.tela,
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () async {
-                  await context.read<ParticipanteController>().sair();
-                  if (context.mounted) context.go('/entrar');
-                },
-                icon: const Icon(Icons.chevron_left_rounded, color: AppColors.oliva),
-                label: Text('Sair', style: AppTextStyles.subtitulo.copyWith(fontSize: 14)),
-              ),
+            Row(
+              children: [
+                const Expanded(child: BotaoVoltar(rotulo: 'Voltar', rota: '/entrar')),
+                TextButton(
+                  onPressed: () async {
+                    await context.read<ParticipanteController>().sair();
+                    if (context.mounted) context.go('/entrar');
+                  },
+                  child: Text('Sair da conta', style: AppTextStyles.subtitulo.copyWith(fontSize: 14)),
+                ),
+              ],
             ),
             CabecalhoTela('Vincular ao elenco', subtitulo: widget.dados.nome),
             const SizedBox(height: AppSpacing.sm),
