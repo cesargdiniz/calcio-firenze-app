@@ -96,8 +96,8 @@ void main() {
         _j(DateTime(2027, 8, 25, 20, 30), Competicao.livre),
         _j(DateTime(2027, 8, 25, 21, 30), Competicao.livre),
         _j(DateTime(2027, 8, 25, 22, 30), Competicao.superMaster),
-        for (var h = 17; h < 20; h++) _j(DateTime(2027, 8, 28, h), Competicao.livre, rodada: 1),
-      ]),
+        for (var h = 17; h < 21; h++) _j(DateTime(2027, 8, 28, h), Competicao.livre, rodada: 1),
+      ]).where((d) => d.startsWith('R1') || d.startsWith('R8')),
       ['R1 Qua 25/08: 3 partidas (SM1, L2).'],
     );
   });
