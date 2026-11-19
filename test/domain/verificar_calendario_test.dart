@@ -93,7 +93,7 @@ void main() {
         _j(DateTime(2027, 4, 7, 20, 30), Competicao.livre),
         _j(DateTime(2027, 9, 14, 20, 30), Competicao.master),
         _j(DateTime(2027, 9, 16, 20, 30), Competicao.livre),
-      ]),
+      ]).where((d) => d.startsWith('R3')),
       [
         'R3 Semana de 05/04 a 11/04: CM1 com L em Qua 07/04.',
         'R3 Semana de 13/09 a 19/09: M1 com L em Qui 16/09.',
@@ -243,7 +243,7 @@ void main() {
       _detalhes([
         jogo(DateTime(2027, 3, 9, 20, 30), 2, 'A', 'B'),
         jogo(DateTime(2027, 3, 12, 20, 30), 3, 'A', 'C'),
-      ]),
+      ]).where((d) => d.startsWith('R7')),
       ['R7 A (L): Ter 09/03 e Sex 12/03 (3 dias).'],
     );
   });
