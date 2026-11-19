@@ -40,7 +40,9 @@ class _Login extends StatefulWidget {
 class _LoginState extends State<_Login> {
   final _email = TextEditingController();
   final _senha = TextEditingController();
-  bool _comSenha = false;
+  // Onde o link por e-mail ainda não funciona (celular), entra direto a
+  // senha: a App Store recusa função anunciada como "na próxima versão".
+  late bool _comSenha = !context.read<LoginController>().aceitaLinkPorEmail;
 
   @override
   void dispose() {
@@ -184,14 +186,16 @@ class _LoginState extends State<_Login> {
                       style: AppTextStyles.corpo,
                     ),
                   ),
-                const SizedBox(height: AppSpacing.sm),
-                TextButton(
-                  onPressed: () => setState(() {
-                    _comSenha = !_comSenha;
-                    controller.voltar();
-                  }),
-                  child: Text(_comSenha ? 'Prefiro receber um link' : 'Prefiro entrar com senha'),
-                ),
+                if (controller.aceitaLinkPorEmail) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  TextButton(
+                    onPressed: () => setState(() {
+                      _comSenha = !_comSenha;
+                      controller.voltar();
+                    }),
+                    child: Text(_comSenha ? 'Prefiro receber um link' : 'Prefiro entrar com senha'),
+                  ),
+                ],
               ],
             );
           },

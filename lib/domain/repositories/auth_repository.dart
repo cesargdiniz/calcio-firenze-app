@@ -24,6 +24,9 @@ abstract interface class AuthRepository {
   /// Envia o link de acesso para o e-mail.
   Future<void> enviarLinkPorEmail(String email);
 
+  /// Se o login por link no e-mail funciona nesta plataforma.
+  bool get aceitaLinkPorEmail;
+
   /// Se [link] for um link de acesso enviado por e-mail, conclui o login e
   /// devolve verdadeiro.
   Future<bool> concluirLinkSeHouver(String link);
