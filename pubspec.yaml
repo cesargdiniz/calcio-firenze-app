@@ -10,8 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations:
-    sdk: flutter
   calcio_regras:
     path: packages/calcio_regras
   cloud_firestore: ^6.0.0
