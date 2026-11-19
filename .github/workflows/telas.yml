@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       loja:
-        description: 'Capturas no tamanho da App Store (iPhone de 6,9", 1320 x 2868)'
+        description: 'Capturas no tamanho da App Store (iPhone com Dynamic Island, tela média: 1206 x 2622)'
         type: boolean
         default: false
 
@@ -31,7 +31,7 @@ jobs:
         if: ${{ inputs.loja == true }}
         run: >
           flutter test test/galeria/galeria_telas.dart --update-goldens
-          --dart-define=TELA_LARGURA=440 --dart-define=TELA_ALTURA=956
+          --dart-define=TELA_LARGURA=402 --dart-define=TELA_ALTURA=874
           --dart-define=TELA_DENSIDADE=3
       - name: Publicar as capturas no branch galeria-telas-capturas
         if: always()
