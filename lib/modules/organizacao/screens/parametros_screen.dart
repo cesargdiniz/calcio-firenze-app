@@ -306,7 +306,7 @@ class _LinhaDraft extends StatelessWidget {
     final atual = drafts[numero];
     final data = await showDatePicker(
       context: context,
-      initialDate: atual ?? DateTime(2027, 1, 1),
+      initialDate: atual ?? _hojeEntre(DateTime(2026, 1, 1), DateTime(2027, 12, 31)),
       firstDate: DateTime(2026, 1, 1),
       lastDate: DateTime(2027, 12, 31),
       helpText: 'Data do Draft-$numero',
@@ -341,4 +341,10 @@ class _LinhaDraft extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Hoje, se estiver no intervalo; senão, a ponta mais próxima.
+DateTime _hojeEntre(DateTime inicio, DateTime fim) {
+  final hoje = DateUtils.dateOnly(DateTime.now());
+  return hoje.isBefore(inicio) ? inicio : (hoje.isAfter(fim) ? fim : hoje);
 }

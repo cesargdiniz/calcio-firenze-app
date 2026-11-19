@@ -72,6 +72,9 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             decisoes: exemplo.decisoes,
             parametros: parametros!,
             patrocinador: patrocinador,
+            // Datas e sorteios da Organização valem também na demonstração.
+            sorteios: sorteios,
+            drafts: drafts,
             demonstracao: true,
             relogio: exemplo.relogio,
           ),

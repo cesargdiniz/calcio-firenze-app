@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 import '../domain/repositories/auth_repository.dart';
@@ -108,6 +109,10 @@ class _CalcioAppState extends State<CalcioApp> {
         title: 'Calcio Firenze',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.claro(),
+        // Calendários, botões e textos do sistema em português.
+        locale: const Locale('pt', 'BR'),
+        supportedLocales: const [Locale('pt', 'BR')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         routerConfig: _router,
       ),
     ),

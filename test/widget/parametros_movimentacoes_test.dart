@@ -9,6 +9,8 @@ import 'package:calcio_regras/calcio_regras.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:calcio_firenze/shared/format.dart';
+
 import 'apoio.dart';
 
 const _org = Sessao(uid: 'org1', email: 'cesar@exemplo.com');
@@ -97,8 +99,15 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
-      expect(gestao.temporada.dados.drafts, {1: DateTime(2027, 1, 1)});
-      expect(find.text('01/01/2027'), findsOneWidget);
+      // O calendário abre em hoje (dentro de 2026–2027).
+      final hoje = DateUtils.dateOnly(DateTime.now());
+      final esperado = hoje.isBefore(DateTime(2026))
+          ? DateTime(2026)
+          : (hoje.isAfter(DateTime(2027, 12, 31)) ? DateTime(2027, 12, 31) : hoje);
+      expect(gestao.temporada.dados.drafts, {1: esperado});
+      // A data escolhida aparece na tela.
+      expect(find.text(dataCompleta(esperado)), findsOneWidget);
+      expect(find.text('Sem data'), findsOneWidget);
 
       await tester.tap(find.byTooltip('Apagar a data do Draft-1'));
       await tester.pumpAndSettle();
