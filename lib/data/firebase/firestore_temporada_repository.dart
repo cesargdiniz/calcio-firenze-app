@@ -204,14 +204,22 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
       onListen: () {
         subs.add(
           ref.collection('times').snapshots().listen((s) {
-            times = [for (final d in s.docs) timeDeMapa(d.id, d.data())];
-            emitir();
+            try {
+              times = [for (final d in s.docs) timeDeMapa(d.id, d.data())];
+              emitir();
+            } catch (e) {
+              saida.addError('times: $e');
+            }
           }, onError: saida.addError),
         );
         subs.add(
           ref.collection('partidas').snapshots().listen((s) {
-            partidas = [for (final d in s.docs) partidaDeMapa(d.id, d.data())];
-            emitir();
+            try {
+              partidas = [for (final d in s.docs) partidaDeMapa(d.id, d.data())];
+              emitir();
+            } catch (e) {
+              saida.addError('partidas: $e');
+            }
           }, onError: saida.addError),
         );
         subs.add(

@@ -33,11 +33,29 @@ class ParticipanteShell extends StatelessWidget {
           _comBarra(
             AguardandoScreen(usuario: usuario, vinculo: vinculo, pessoa: pessoa, time: time),
           ),
-        ParticipanteFalha(:final mensagem) => Scaffold(
+        ParticipanteFalha(:final mensagem, :final detalhe) => Scaffold(
           body: Center(
             child: Padding(
               padding: AppSpacing.tela,
-              child: Text(mensagem, style: AppTextStyles.corpo, textAlign: TextAlign.center),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(mensagem, style: AppTextStyles.corpo, textAlign: TextAlign.center),
+                  if (detalhe != null) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    SelectableText(
+                      detalhe,
+                      style: AppTextStyles.pequeno,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.md),
+                  FilledButton(
+                    onPressed: context.read<ParticipanteController>().tentarDeNovo,
+                    child: const Text('Tentar de novo'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
