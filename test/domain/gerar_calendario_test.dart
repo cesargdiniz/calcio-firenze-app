@@ -116,9 +116,9 @@ void main() {
       );
       expect(p, hasLength(15));
       final inicios = p.map((x) => x.inicio).toList()..sort();
-      expect(inicios.first, DateTime(2027, 7, 29, 20, 30));
-      expect(inicios.last, DateTime(2027, 10, 19, 20, 30));
-      expect(horariosSuperMaster2027[0], [DateTime(2027, 11, 27, 17)]);
+      expect(inicios.first, DateTime(2027, 7, 24, 17));
+      expect(inicios.last, DateTime(2027, 9, 14, 21, 30));
+      expect(horariosSuperMaster2027[0], [DateTime(2027, 10, 23, 19)]);
     });
 
     test('cada categoria usa o próprio calendário', () {

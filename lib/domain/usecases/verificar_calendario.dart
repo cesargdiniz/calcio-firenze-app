@@ -22,6 +22,10 @@ enum RegraCalendario {
   livreTercaQuinta(
     'Terças e quintas são só do Master e do Super Master: o Livre joga segunda, quarta, '
     'sexta (dividindo com o SM) e, no sábado, aberturas e mata-mata.',
+  ),
+  finalDupla(
+    'Nada de finais duplas: duas finais (de turno, grande final ou da Copa) nunca no '
+    'mesmo dia, porque há jogadores em mais de uma categoria.',
   );
 
   final String texto;
@@ -183,6 +187,26 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
           ),
         );
       }
+    }
+  }
+
+  // 11: finais duplas.
+  for (final MapEntry(key: dia, value: doDia) in porDia.entries) {
+    final finais = [
+      for (final j in doDia)
+        if (j.fase == Fase.finalTurno ||
+            j.fase == Fase.grandeFinal ||
+            (j.competicao == Competicao.copaMaster && j.etapa == 'Final'))
+          j,
+    ];
+    if (finais.length > 1) {
+      saida.add(
+        Inconsistencia(
+          RegraCalendario.finalDupla,
+          '${_data(dia)}: ${[for (final j in finais) _jogo(j)].join(' e ')}.',
+          finais,
+        ),
+      );
     }
   }
 

@@ -89,16 +89,6 @@ final horariosLivre2027 = <int, List<DateTime>>{
   0: _dias(const [(11, 27, 1)]), // grande final
 };
 
-/// Super Master, classificatória e semifinais do 2º turno.
-final _smTurno2 = _dias(const [
-    (7, 29, 1), (7, 30, 2), // 1ª rodada
-    (8, 10, 1), (8, 12, 2), // 2ª rodada
-    (8, 24, 1), (8, 26, 2), // 3ª rodada
-    (9, 13, 2), (9, 14, 1), // 4ª rodada
-    (10, 14, 2), (10, 19, 1), // 5ª rodada
-    (10, 23, 2), // semifinais
-  ]);
-
 /// Super Master 2027: 6 times, 5 rodadas de 3 jogos por turno, semifinal
 /// direta.
 final horariosSuperMaster2027 = <int, List<DateTime>>{
@@ -111,12 +101,16 @@ final horariosSuperMaster2027 = <int, List<DateTime>>{
     (5, 20, 2), // semifinais
     (6, 5, 1), // final do 1º turno
   ]),
-  // Finais no sábado junto com as do Livre: o SM joga às 17h, o Livre às 19h.
-  2: [
-    ..._smTurno2,
-    _h(11, 6, 17), // final do 2º turno
-  ],
-  0: [_h(11, 27, 17)], // grande final
+  2: _dias(const [
+    (7, 24, 2), (7, 26, 1), // 1ª rodada
+    (7, 29, 1), (7, 30, 2), // 2ª rodada
+    (8, 10, 1), (8, 12, 2), // 3ª rodada
+    (8, 24, 1), (8, 26, 2), // 4ª rodada
+    (9, 13, 1), (9, 14, 2), // 5ª rodada
+    (9, 18, 2), // semifinais
+    (10, 16, 1), // final do 2º turno
+  ]),
+  0: _dias(const [(10, 23, 1)]), // grande final
 };
 
 /// Um dia reservado no calendário, com os horários dos jogos. Os confrontos

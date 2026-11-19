@@ -113,6 +113,16 @@ void main() {
     );
   });
 
+  test('regra 11: nada de finais duplas', () {
+    expect(
+      _detalhes([
+        _j(DateTime(2027, 11, 6, 17), Competicao.superMaster, fase: Fase.finalTurno, turno: 2),
+        _j(DateTime(2027, 11, 6, 19), Competicao.livre, fase: Fase.finalTurno, turno: 2),
+      ]).where((d) => d.startsWith('R11')),
+      ['R11 Sáb 06/11: SM · Final do 2º turno e L · Final do 2º turno.'],
+    );
+  });
+
   test('regra 10: Livre não joga terça nem quinta', () {
     expect(
       _detalhes([
