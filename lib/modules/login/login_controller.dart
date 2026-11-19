@@ -38,6 +38,8 @@ class LoginController extends Cubit<LoginStatus> {
   final AuthRepository _auth;
   LoginController(this._auth) : super(const LoginOcioso());
 
+  bool get aceitaLinkPorEmail => _auth.aceitaLinkPorEmail;
+
   Future<void> _executar(Future<LoginStatus?> Function() acao) async {
     emit(const LoginEnviando());
     try {

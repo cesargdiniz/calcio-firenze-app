@@ -48,6 +48,10 @@ class FirebaseAuthRepository implements AuthRepository {
     }
   });
 
+  // No celular, o link ainda não volta para o app.
+  @override
+  bool get aceitaLinkPorEmail => kIsWeb;
+
   @override
   Future<void> enviarLinkPorEmail(String email) => _tentar(() async {
     if (!kIsWeb) {

@@ -43,7 +43,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Para a Organização escolher a imagem do escudo de um time.</string>
+	<string>Para escolher a imagem do escudo de um time (Organização ou dirigente do time).</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

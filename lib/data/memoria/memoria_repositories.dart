@@ -14,6 +14,9 @@ import '../../domain/repositories/usuario_repository.dart';
 
 /// Login em memória, para testes e para rodar sem Firebase.
 class MemoriaAuthRepository implements AuthRepository {
+  @override
+  bool get aceitaLinkPorEmail => true;
+
   Sessao? _sessao;
   final _mudancas = StreamController<Sessao?>.broadcast();
   final Map<String, String> _senhas = {};
