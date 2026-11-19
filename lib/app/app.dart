@@ -108,6 +108,10 @@ class _CalcioAppState extends State<CalcioApp> {
         title: 'Calcio Firenze',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.claro(),
+        // Calendários, botões e textos do sistema em português.
+        locale: const Locale('pt', 'BR'),
+        supportedLocales: const [Locale('pt', 'BR')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         routerConfig: _router,
       ),
     ),

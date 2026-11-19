@@ -42,11 +42,36 @@ class OrganizacaoShell extends StatelessWidget {
       ),
       OrgSemAcesso(:final sessao) => _SemAcesso(uid: sessao.uid, email: sessao.email),
       OrgSemCategoria(:final sessao) => _InformarCategoria(email: sessao.email),
-      OrgFalha(:final mensagem) => Scaffold(
+      OrgFalha(:final mensagem, :final detalhe) => Scaffold(
         body: Center(
           child: Padding(
             padding: AppSpacing.tela,
-            child: Text(mensagem, style: AppTextStyles.corpo, textAlign: TextAlign.center),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(mensagem, style: AppTextStyles.corpo, textAlign: TextAlign.center),
+                if (detalhe != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  SelectableText(
+                    detalhe,
+                    style: AppTextStyles.pequeno,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.md),
+                FilledButton(
+                  onPressed: context.read<OrganizacaoController>().tentarDeNovo,
+                  child: const Text('Tentar de novo'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await context.read<OrganizacaoController>().sair();
+                    if (context.mounted) context.go('/entrar');
+                  },
+                  child: const Text('Sair'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

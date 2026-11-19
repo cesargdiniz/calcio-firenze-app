@@ -75,7 +75,10 @@ final class OrgPronta extends OrgStatus {
 
 final class OrgFalha extends OrgStatus {
   final String mensagem;
-  const OrgFalha(this.mensagem);
+
+  /// Detalhe técnico (o que falhou), para quem for investigar.
+  final String? detalhe;
+  const OrgFalha(this.mensagem, {this.detalhe});
 }
 
 /// Área da Organização. Cada conta organiza uma ou mais categorias; a área
@@ -95,6 +98,11 @@ class OrganizacaoController extends Cubit<OrgStatus> {
 
   Sessao? _sessao;
   bool _sessaoCarregada = false;
+
+  /// Primeira falha de leitura da categoria; fica até "Tentar de novo" (antes,
+  /// a próxima atualização de outra lista voltava a tela para o carregando).
+  String? _falha;
+  Timer? _demora;
   AcessoOrganizacao? _acesso;
   Categoria? _categoria;
   DadosTemporada? _dados;
@@ -157,23 +165,32 @@ class OrganizacaoController extends Cubit<OrgStatus> {
   void _ouvirCategoria(Categoria c) {
     _pararCategoria();
     final id = c.temporadaId;
+    _falha = null;
+    _demora?.cancel();
+    // Se algo não chegar em 25 s, a tela diz o que falta em vez de girar sem fim.
+    _demora = Timer(const Duration(seconds: 25), () {
+      if (state is OrgCarregando && _categoria != null) {
+        _falha = 'Demorou demais: ${_pendentes().join(', ')}';
+        _recalcular();
+      }
+    });
     _porCategoria.add(
       _temporada.observar(id).listen((d) {
         _dados = d;
         _recalcular();
-      }, onError: _falhar),
+      }, onError: (Object e) => _falharEm('dados da categoria', e)),
     );
     _porCategoria.add(
       _gestao.observarPedidos(id).listen((l) {
         _pedidos = l;
         _recalcular();
-      }, onError: _falhar),
+      }, onError: (Object e) => _falharEm('pedidos de vínculo', e)),
     );
     _porCategoria.add(
       _gestao.observarAprovados(id).listen((l) {
         _aprovados = l;
         _recalcular();
-      }, onError: _falhar),
+      }, onError: (Object e) => _falharEm('vínculos aprovados', e)),
     );
     _porCategoria.add(
       _gestao.observarMovimentacoes(id).listen(
@@ -201,8 +218,33 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     await _escolha.escolher(c);
   }
 
-  void _falhar(Object _) {
-    if (!isClosed) emit(const OrgFalha('Não foi possível carregar os dados da Organização.'));
+  void _falhar(Object e) => _falharEm('acesso da Organização', e);
+
+  void _falharEm(String parte, Object e) {
+    _falha ??= '$parte: ${_resumo(e)}';
+    _recalcular();
+  }
+
+  static String _resumo(Object e) {
+    final texto = e.toString();
+    return texto.length > 160 ? '${texto.substring(0, 160)}…' : texto;
+  }
+
+  /// O que ainda não chegou do Firestore.
+  List<String> _pendentes() => [
+    if (_dados == null) 'dados da categoria',
+    if (_pedidos == null) 'pedidos de vínculo',
+    if (_aprovados == null) 'vínculos aprovados',
+    if (_movimentacoes == null) 'movimentações',
+  ];
+
+  /// Recomeça as leituras da categoria (botão "Tentar de novo").
+  void tentarDeNovo() {
+    final c = _categoria;
+    _falha = null;
+    if (c == null) return _recalcular();
+    _ouvirCategoria(c);
+    _recalcular();
   }
 
   void _recalcular() {
@@ -215,11 +257,16 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     if (!acesso.ehOrganizacao) return emit(OrgSemAcesso(sessao));
     final categorias = acesso.categorias;
     if (categorias.isEmpty) return emit(OrgSemCategoria(sessao));
+    final falha = _falha;
+    if (falha != null) {
+      return emit(OrgFalha('Não foi possível carregar os dados da Organização.', detalhe: falha));
+    }
     final dados = _dados;
     final movimentacoes = _movimentacoes;
     if (dados == null || _pedidos == null || _aprovados == null || movimentacoes == null) {
       return emit(const OrgCarregando());
     }
+    _demora?.cancel();
     emit(
       OrgPronta(sessao, dados, _pedidos!, _aprovados!, movimentacoes, categorias: categorias),
     );
@@ -319,6 +366,7 @@ class OrganizacaoController extends Cubit<OrgStatus> {
 
   @override
   Future<void> close() async {
+    _demora?.cancel();
     await _subSessao?.cancel();
     await _subEscolha?.cancel();
     for (final x in [..._porConta, ..._porCategoria]) {

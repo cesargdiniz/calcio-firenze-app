@@ -72,6 +72,9 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
             decisoes: exemplo.decisoes,
             parametros: parametros!,
             patrocinador: patrocinador,
+            // Datas e sorteios da Organização valem também na demonstração.
+            sorteios: sorteios,
+            drafts: drafts,
             demonstracao: true,
             relogio: exemplo.relogio,
           ),
@@ -110,8 +113,14 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
       subs.add(
         col(colecao).snapshots().listen(
           (s) {
-            guardar([for (final d in s.docs) ler(d.id, d.data())]);
-            emitir();
+            // Documento com formato inesperado vira erro do fluxo (e aparece
+            // na tela), em vez de sumir e deixar a tela carregando para sempre.
+            try {
+              guardar([for (final d in s.docs) ler(d.id, d.data())]);
+              emitir();
+            } catch (e) {
+              saida.addError('$colecao: $e');
+            }
           },
           onError: (Object e) {
             // Pagamentos só podem ser lidos com login: o Torcedor segue sem eles.
@@ -144,11 +153,15 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
         subs.add(
           _db.collection('temporadas').doc(temporadaId).snapshots().listen(
             (s) {
-              parametros = parametrosDeMapa(s.data()?['parametros'] as Map<String, dynamic>?);
-              patrocinador = s.data()?['patrocinador'] as String?;
-              sorteios = sorteiosDeMapa(s.data()?['sorteios']);
-              drafts = draftsDeMapa(s.data());
-              emitir();
+              try {
+                parametros = parametrosDeMapa(s.data()?['parametros'] as Map<String, dynamic>?);
+                patrocinador = s.data()?['patrocinador'] as String?;
+                sorteios = sorteiosDeMapa(s.data()?['sorteios']);
+                drafts = draftsDeMapa(s.data());
+                emitir();
+              } catch (e) {
+                saida.addError('temporada: $e');
+              }
             },
             onError: (Object _) {
               parametros = Parametros.master2027;
