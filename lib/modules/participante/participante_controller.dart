@@ -79,7 +79,8 @@ final class ParticipantePronto extends ParticipanteStatus {
 
 final class ParticipanteFalha extends ParticipanteStatus {
   final String mensagem;
-  const ParticipanteFalha(this.mensagem);
+  final String? detalhe;
+  const ParticipanteFalha(this.mensagem, {this.detalhe});
 }
 
 /// Junta sessão (login), cadastro do usuário e a temporada da categoria
@@ -107,6 +108,9 @@ class ParticipanteController extends Cubit<ParticipanteStatus> {
   DadosTemporada? _dados;
   final Map<String, DadosTemporada> _outras = {};
 
+  /// Primeira falha de leitura; fica na tela até "Tentar de novo".
+  String? _falha;
+
   ParticipanteController(
     this._auth,
     this._usuarios,
@@ -121,10 +125,7 @@ class ParticipanteController extends Cubit<ParticipanteStatus> {
       _categoria = c;
       _dados = null;
       _subTemporada?.cancel();
-      _subTemporada = _temporada.observar(c.temporadaId).listen((d) {
-        _dados = d;
-        _recalcular();
-      }, onError: _falhar);
+      _ouvirTemporada(c);
       _sincronizarOutras();
       _recalcular();
     });
@@ -173,8 +174,40 @@ class ParticipanteController extends Cubit<ParticipanteStatus> {
     }
   }
 
-  void _falhar(Object _) {
-    if (!isClosed) emit(const ParticipanteFalha('Não foi possível carregar seus dados.'));
+  void _ouvirTemporada(Categoria c) {
+    _subTemporada?.cancel();
+    _subTemporada = _temporada.observar(c.temporadaId).listen((d) {
+      _dados = d;
+      _recalcular();
+    }, onError: _falhar);
+  }
+
+  void _falhar(Object e) {
+    final texto = e.toString();
+    _falha ??= texto.length > 160 ? '${texto.substring(0, 160)}…' : texto;
+    _recalcular();
+  }
+
+  /// Recomeça a leitura da categoria e do cadastro (botão "Tentar de novo").
+  void tentarDeNovo() {
+    _falha = null;
+    final c = _categoria;
+    if (c != null) {
+      _dados = null;
+      _ouvirTemporada(c);
+    }
+    final s = _sessao;
+    if (s != null) {
+      _subUsuario?.cancel();
+      _usuarioCarregado = false;
+      _subUsuario = _usuarios.observar(s.uid).listen((u) {
+        _usuario = u;
+        _usuarioCarregado = true;
+        _sincronizarOutras();
+        _recalcular();
+      }, onError: _falhar);
+    }
+    _recalcular();
   }
 
   /// Situação nas outras categorias já carregadas.
@@ -192,6 +225,9 @@ class ParticipanteController extends Cubit<ParticipanteStatus> {
 
   void _recalcular() {
     if (isClosed) return;
+    if (_falha case final falha?) {
+      return emit(ParticipanteFalha('Não foi possível carregar seus dados.', detalhe: falha));
+    }
     final dados = _dados;
     final sessao = _sessao;
     if (dados == null || !_sessaoCarregada) return emit(const ParticipanteCarregando());
@@ -212,12 +248,19 @@ class ParticipanteController extends Cubit<ParticipanteStatus> {
 
     switch (v.status) {
       case StatusVinculo.pendente:
-        final time = dados.times.firstWhere((t) => t.id == pessoa.timeId);
+        final time =
+            dados.times.where((t) => t.id == pessoa.timeId).firstOrNull ??
+            Time(id: pessoa.timeId, nome: pessoa.timeId, sigla: pessoa.timeId, cor: 0xFF6E6E6E);
         emit(ParticipanteAguardando(usuario, v, pessoa, time));
       case StatusVinculo.recusado:
         emit(ParticipanteRecusado(sessao, dados));
       case StatusVinculo.aprovado:
-        final s = _montar(dados, pessoa.id, verPendenciasDoTime: v.papel.veTime);
+        final ({SituacaoPessoa pessoal, SituacaoTime time}) s;
+        try {
+          s = _montar(dados, pessoa.id, verPendenciasDoTime: v.papel.veTime);
+        } catch (e) {
+          return _falhar(e);
+        }
         emit(
           ParticipantePronto(usuario, v.papel, s.pessoal, s.time, outras: _situacoesOutras(usuario)),
         );

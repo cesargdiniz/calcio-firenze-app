@@ -54,7 +54,13 @@ class FirestoreUsuarioRepository implements UsuarioRepository {
           subs.add(
             _vinculo(c.temporadaId, uid).snapshots().listen(
               (s) {
-                vinculos[c.temporadaId] = s.exists ? vinculoDeMapa(c.temporadaId, s.data()!) : null;
+                try {
+                  vinculos[c.temporadaId] =
+                      s.exists ? vinculoDeMapa(c.temporadaId, s.data()!) : null;
+                } catch (_) {
+                  // Vínculo gravado pela metade conta como inexistente.
+                  vinculos[c.temporadaId] = null;
+                }
                 emitir();
               },
               // Uma categoria fora do ar não pode travar as outras.

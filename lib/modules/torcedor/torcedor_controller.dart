@@ -55,17 +55,32 @@ class TorcedorController extends Cubit<TorcedorStatus> {
     _assinatura = _repository.observar(c.temporadaId).listen(
       (dados) {
         _dados = dados;
-        emit(TorcedorPronto(_montarPainel(dados, turno: _turno)));
+        _mostrar(dados);
       },
       onError: (Object e) => emit(const TorcedorFalha('Não foi possível carregar a temporada.')),
     );
+  }
+
+  /// Monta o painel; um dado inesperado vira aviso na tela, não tela travada.
+  void _mostrar(DadosTemporada d) {
+    try {
+      emit(TorcedorPronto(_montarPainel(d, turno: _turno)));
+    } catch (_) {
+      emit(const TorcedorFalha('Não foi possível montar a tabela desta categoria.'));
+    }
+  }
+
+  /// Recomeça a leitura da categoria atual.
+  void tentarDeNovo() {
+    final c = _categorias.atual;
+    if (c != null) _ouvir(c);
   }
 
   /// 1, 2 ou [Painel.geral]. A escolha vale para Início e Tabela.
   void escolherTurno(int turno) {
     _turno = turno;
     final d = _dados;
-    if (d != null) emit(TorcedorPronto(_montarPainel(d, turno: turno)));
+    if (d != null) _mostrar(d);
   }
 
   @override

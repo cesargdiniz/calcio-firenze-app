@@ -49,7 +49,7 @@ void main() {
     await tester.tap(find.text('Livre'));
     await tester.pumpAndSettle();
     expect(find.text('LIVRE'), findsOneWidget);
-    expect(find.text('Calendário ainda não publicado'), findsOneWidget);
+    expect(find.text('Confrontos ainda não sorteados'), findsOneWidget);
   });
 
   testWidgets('a barra do topo troca a categoria do Torcedor', (tester) async {
@@ -59,7 +59,7 @@ void main() {
 
     await _trocarPara(tester, 'Super Master');
     expect(find.text('SUPER MASTER'), findsOneWidget);
-    expect(find.text('Calendário ainda não publicado'), findsOneWidget);
+    expect(find.text('Confrontos ainda não sorteados'), findsOneWidget);
 
     await _trocarPara(tester, 'Master');
     expect(find.text('Próximos jogos · Rodada 4'), findsOneWidget);

@@ -154,7 +154,8 @@ class _JogosState extends State<_Jogos> {
           ListaVazia(
             icone: Icons.event_outlined,
             titulo: 'Sem jogos no $_turnoº turno',
-            texto: 'Os jogos aparecem aqui quando a Organização sortear o calendário do turno.',
+            texto: 'As datas já estão no calendário completo; os confrontos aparecem aqui '
+                'quando a Organização sortear o turno.',
           ),
         for (final p in jogos) ...[
           CardJogo(

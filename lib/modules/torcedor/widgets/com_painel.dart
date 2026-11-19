@@ -27,7 +27,7 @@ class ComPainel extends StatelessWidget {
               Text(mensagem, style: AppTextStyles.corpo, textAlign: TextAlign.center),
               const SizedBox(height: AppSpacing.lg),
               OutlinedButton(
-                onPressed: () => context.read<TorcedorController>().iniciar(),
+                onPressed: () => context.read<TorcedorController>().tentarDeNovo(),
                 child: const Text('Tentar de novo'),
               ),
             ],

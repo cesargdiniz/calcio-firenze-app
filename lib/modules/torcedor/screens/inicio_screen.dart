@@ -2,6 +2,7 @@ import 'package:calcio_regras/calcio_regras.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../calendario/calendario_screen.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -46,13 +47,15 @@ class InicioScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          if (painel.partidas.isEmpty)
+          if (painel.partidas.isEmpty) ...[
             const ListaVazia(
               icone: Icons.event_outlined,
-              titulo: 'Calendário ainda não publicado',
-              texto: 'Os jogos, a tabela e os suspensos desta categoria aparecem aqui assim que '
-                  'a Organização sortear o calendário.',
+              titulo: 'Confrontos ainda não sorteados',
+              texto: 'As datas de todas as categorias já estão no calendário completo. Jogos, '
+                  'tabela e suspensos aparecem aqui quando a Organização sortear os confrontos.',
             ),
+            const AtalhoCalendario(),
+          ],
           if (painel.proximaEtapa != null && suspensos > 0)
             _AvisoSuspensos(
               texto: suspensos == 1
