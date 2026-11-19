@@ -81,8 +81,8 @@ void main() {
   });
 
   test('regra 2: nenhuma partida aos domingos', () {
-    expect(_detalhes([_j(DateTime(2027, 8, 15, 10), Competicao.livre)]), [
-      'R2 Dom 15/08: L1.',
+    expect(_detalhes([_j(DateTime(2027, 8, 22, 10), Competicao.livre)]), [
+      'R2 Dom 22/08: L1.',
     ]);
   });
 
@@ -93,7 +93,7 @@ void main() {
         _j(DateTime(2027, 4, 7, 20, 30), Competicao.livre),
         _j(DateTime(2027, 9, 14, 20, 30), Competicao.master),
         _j(DateTime(2027, 9, 16, 20, 30), Competicao.livre),
-      ]),
+      ]).where((d) => d.startsWith('R3')),
       [
         'R3 Semana de 05/04 a 11/04: CM1 com L em Qua 07/04.',
         'R3 Semana de 13/09 a 19/09: M1 com L em Qui 16/09.',
@@ -110,6 +110,40 @@ void main() {
         _j(DateTime(2027, 5, 29, 17), Competicao.master, fase: Fase.semifinal),
       ]).where((d) => d.startsWith('R4')),
       ['R4 Sáb 24/04: L · 1º turno · Rodada 5.', 'R4 Sáb 14/08: SM · 2º turno · Rodada 2.'],
+    );
+  });
+
+  test('regra 11: nada de finais duplas', () {
+    expect(
+      _detalhes([
+        _j(DateTime(2027, 11, 6, 17), Competicao.superMaster, fase: Fase.finalTurno, turno: 2),
+        _j(DateTime(2027, 11, 6, 19), Competicao.livre, fase: Fase.finalTurno, turno: 2),
+      ]).where((d) => d.startsWith('R11')),
+      ['R11 Sáb 06/11: SM · Final do 2º turno e L · Final do 2º turno.'],
+    );
+  });
+
+  test('regra 10: Livre não joga terça nem quinta', () {
+    expect(
+      _detalhes([
+        _j(DateTime(2027, 8, 10, 20, 30), Competicao.livre),
+        _j(DateTime(2027, 8, 11, 20, 30), Competicao.livre),
+        _j(DateTime(2027, 8, 12, 20, 30), Competicao.superMaster),
+      ]).where((d) => d.startsWith('R10')),
+      ['R10 Ter 10/08: L1.'],
+    );
+  });
+
+  test('regra 9: nenhum jogo em feriado, nem nos facultativos', () {
+    expect(
+      _detalhes([
+        _j(DateTime(2027, 11, 2, 20, 30), Competicao.master),
+        _j(DateTime(2027, 10, 25, 20, 30), Competicao.livre, rodada: 7),
+      ]).where((d) => d.startsWith('R9')),
+      [
+        'R9 Seg 25/10 (Data local a confirmar): L1.',
+        'R9 Ter 02/11 (Finados): M1.',
+      ],
     );
   });
 
@@ -219,7 +253,7 @@ void main() {
       _detalhes([
         jogo(DateTime(2027, 3, 9, 20, 30), 2, 'A', 'B'),
         jogo(DateTime(2027, 3, 12, 20, 30), 3, 'A', 'C'),
-      ]),
+      ]).where((d) => d.startsWith('R7')),
       ['R7 A (L): Ter 09/03 e Sex 12/03 (3 dias).'],
     );
   });

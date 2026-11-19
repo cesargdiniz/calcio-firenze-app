@@ -17,7 +17,16 @@ enum RegraCalendario {
     'Entre dois jogos do mesmo time, pelo menos 4 dias: quem joga segunda volta na sexta; '
     'quem joga terça, no sábado.',
   ),
-  sabado('No sábado, no máximo 4 jogos, a partir das 17:00.');
+  sabado('No sábado, no máximo 4 jogos, a partir das 17:00.'),
+  feriado('Nenhum jogo em feriado, nem nos facultativos.'),
+  livreTercaQuinta(
+    'Terças e quintas são só do Master e do Super Master: o Livre joga segunda, quarta, '
+    'sexta (dividindo com o SM) e, no sábado, aberturas e mata-mata.',
+  ),
+  finalDupla(
+    'Nada de finais duplas: duas finais (de turno, grande final ou da Copa) nunca no '
+    'mesmo dia, porque há jogadores em mais de uma categoria.',
+  );
 
   final String texto;
   const RegraCalendario(this.texto);
@@ -181,7 +190,52 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
     }
   }
 
-  // 7: descanso de 72 horas.
+  // 11: finais duplas.
+  for (final MapEntry(key: dia, value: doDia) in porDia.entries) {
+    final finais = [
+      for (final j in doDia)
+        if (j.fase == Fase.finalTurno ||
+            j.fase == Fase.grandeFinal ||
+            (j.competicao == Competicao.copaMaster && j.etapa == 'Final'))
+          j,
+    ];
+    if (finais.length > 1) {
+      saida.add(
+        Inconsistencia(
+          RegraCalendario.finalDupla,
+          '${_data(dia)}: ${[for (final j in finais) _jogo(j)].join(' e ')}.',
+          finais,
+        ),
+      );
+    }
+  }
+
+  // 10: Livre fora de terça e quinta.
+  for (final MapEntry(key: dia, value: doDia) in porDia.entries) {
+    final livre = doDia.where((j) => j.competicao == Competicao.livre).toList();
+    if (livre.isNotEmpty &&
+        (dia.weekday == DateTime.tuesday || dia.weekday == DateTime.thursday)) {
+      saida.add(
+        Inconsistencia(RegraCalendario.livreTercaQuinta, '${_data(dia)}: ${_contagem(livre)}.', livre),
+      );
+    }
+  }
+
+  // 9: feriados (oficiais e facultativos).
+  final datasFeriados = {for (final f in feriados2027) _dia(f.data): f.nome};
+  for (final MapEntry(key: dia, value: doDia) in porDia.entries) {
+    if (datasFeriados[dia] case final nome?) {
+      saida.add(
+        Inconsistencia(
+          RegraCalendario.feriado,
+          '${_data(dia)} ($nome): ${_contagem(doDia)}.',
+          doDia,
+        ),
+      );
+    }
+  }
+
+  // 7: descanso de 4 dias.
   saida.addAll(_descanso(jogos, grupo));
 
   // 4 e 5: por jogo (um aviso por etapa e dia).
