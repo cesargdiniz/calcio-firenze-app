@@ -28,13 +28,14 @@ jobs:
           if ! grep -q "br.com.calciofirenze.app" firebase/android/log.txt; then
             $F apps:create ANDROID "Calcio Firenze" --package-name br.com.calciofirenze.app >> firebase/android/log.txt 2>&1 || true
           fi
-          ID=$($F apps:list ANDROID 2>/dev/null | grep "br.com.calciofirenze.app" | grep -o '1:[0-9]*:android:[0-9a-f]*' | head -1)
+          ID=$($F apps:list ANDROID 2>/dev/null | grep "br.com.calciofirenze.app" | grep -o '1:[0-9]*:android:[0-9a-f]*' | head -1 || true)
           echo "appId: $ID" >> firebase/android/log.txt
           if [ -n "$ID" ]; then
             $F apps:sdkconfig ANDROID "$ID" > firebase/android/google-services.json 2>> firebase/android/log.txt || true
           fi
           sed -i '/private_key/d' firebase/android/log.txt
           rm -f "$RUNNER_TEMP/conta.json"
+          cat firebase/android/log.txt
       - name: Grava no branch
         run: |
           git config user.name "github-actions[bot]"
