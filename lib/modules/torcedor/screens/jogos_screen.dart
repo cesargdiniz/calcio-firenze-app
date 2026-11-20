@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/etapa.dart';
+import '../../../domain/usecases/gerar_calendario.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/compartilhar/compartilhar_imagem.dart';
 import '../../calendario/calendario_screen.dart';
@@ -44,11 +45,34 @@ class _JogosState extends State<_Jogos> {
   /// Mostrando as datas reservadas da Copa (só no Master).
   bool _copa = false;
 
+  /// Mostrando as datas reservadas do mata-mata do turno.
+  bool _mataMata = false;
+
+  /// Etapas do mata-mata do turno (e a grande final, no 2º) que já têm jogos.
+  Set<Fase> _criadas(Painel painel) => {
+    for (final p in painel.partidas)
+      if (p.fase.eliminatoria && (p.turno == _turno || (_turno == 2 && p.turno == 0))) p.fase,
+  };
+
   static int _turnoDa(Etapa e) => e.turno == 0 ? 2 : e.turno;
 
   /// Jogos e resultados da etapa escolhida (ou as datas da Copa), como imagem.
   void _compartilhar(Painel painel, Etapa? etapa, List<Partida> jogos) {
     final competicao = '${painel.categoria.nome} 2027';
+    if (_mataMata) {
+      compartilharComoImagem(
+        context,
+        titulo: 'Mata-mata do $_turnoº turno',
+        subtitulo: '$competicao · Datas reservadas',
+        conteudo: DatasMataMata(
+          categoria: painel.categoria,
+          turno: _turno,
+          criadas: _criadas(painel),
+        ),
+        nomeArquivo: 'calcio-${painel.categoria.name}-t$_turno-mata-mata-datas.png',
+      );
+      return;
+    }
     if (_copa) {
       compartilharComoImagem(
         context,
@@ -96,14 +120,20 @@ class _JogosState extends State<_Jogos> {
         if (_turnoDa(e) == _turno) e,
     ];
     final etapa = etapas.contains(_etapa) ? _etapa : etapas.firstOrNull;
-    final jogos = etapa == null || _copa ? const <Partida>[] : painel.jogosDa(etapa);
+    final extra = _copa || _mataMata;
+    final jogos = etapa == null || extra ? const <Partida>[] : painel.jogosDa(etapa);
     final temCopa = painel.categoria == Categoria.master && _turno == 1;
+    final criadas = _criadas(painel);
+    final temMataMata = datasMataMata(
+      painel.categoria,
+      _turno,
+    ).any((d) => !criadas.contains(d.fase));
     return ListView(
       padding: AppSpacing.tela,
       children: [
         CabecalhoTela(
           'Jogos',
-          acao: _copa || etapa != null
+          acao: extra || etapa != null
               ? BotaoCompartilhar(onPressed: () => _compartilhar(painel, etapa, jogos))
               : null,
         ),
@@ -121,6 +151,7 @@ class _JogosState extends State<_Jogos> {
                   _turno = t;
                   _etapa = null;
                   _copa = false;
+                  _mataMata = false;
                 }),
               ),
           ],
@@ -133,20 +164,41 @@ class _JogosState extends State<_Jogos> {
               for (final e in etapas) ...[
                 ChipFiltro(
                   e.curto,
-                  ativo: !_copa && e == etapa,
+                  ativo: !extra && e == etapa,
                   onTap: () => setState(() {
                     _etapa = e;
+                    _copa = false;
+                    _mataMata = false;
+                  }),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              if (temMataMata) ...[
+                ChipFiltro(
+                  'Mata-mata',
+                  ativo: _mataMata,
+                  onTap: () => setState(() {
+                    _mataMata = true;
                     _copa = false;
                   }),
                 ),
                 const SizedBox(width: AppSpacing.sm),
               ],
               if (temCopa)
-                ChipFiltro('Copa', ativo: _copa, onTap: () => setState(() => _copa = true)),
+                ChipFiltro(
+                  'Copa',
+                  ativo: _copa,
+                  onTap: () => setState(() {
+                    _copa = true;
+                    _mataMata = false;
+                  }),
+                ),
             ],
           ),
         ),
-        if (_copa)
+        if (_mataMata)
+          DatasMataMata(categoria: painel.categoria, turno: _turno, criadas: criadas)
+        else if (_copa)
           const DatasCopa()
         else if (etapa != null)
           TituloSecao(etapa.rotulo)
@@ -155,7 +207,8 @@ class _JogosState extends State<_Jogos> {
             icone: Icons.event_outlined,
             titulo: 'Sem jogos no $_turnoº turno',
             texto: 'As datas já estão no calendário completo; os confrontos aparecem aqui '
-                'quando a Organização sortear o turno.',
+                'quando a Organização sortear o turno. As datas do mata-mata estão no botão '
+                'Mata-mata.',
           ),
         for (final p in jogos) ...[
           CardJogo(

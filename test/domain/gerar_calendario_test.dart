@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:calcio_regras/calcio_regras.dart';
 import 'package:calcio_firenze/domain/entities/categoria.dart';
 import 'package:calcio_firenze/domain/usecases/gerar_calendario.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -145,5 +146,40 @@ void main() {
     // Nenhuma data da Copa cai em horário do Master.
     final master = {...horariosMaster2027[1]!, ...horariosMaster2027[2]!};
     expect(datasCopaMaster2027.expand((d) => d.horarios).where(master.contains), isEmpty);
+  });
+
+  group('datas do mata-mata', () {
+    test('Master 1º turno: quartas 28/05, semis 10/06 e final 03/07', () {
+      final d = datasMataMata(Categoria.master, 1);
+      expect(d.map((e) => e.fase), [Fase.quartas, Fase.semifinal, Fase.finalTurno]);
+      expect(d.map((e) => e.etapa), ['Quartas de final', 'Semifinais', 'Final do 1º turno']);
+      expect(d.map((e) => e.horarios.length), [2, 2, 1]);
+      expect(d[0].horarios.first, DateTime(2027, 5, 28, 20, 30));
+      expect(d[2].horarios.single.day, 3);
+      expect(d[2].horarios.single.month, 7);
+    });
+
+    test('2º turno inclui a grande final', () {
+      final d = datasMataMata(Categoria.master, 2);
+      expect(d.last.fase, Fase.grandeFinal);
+      expect(d.last.horarios.single.month, 12);
+      expect(d.last.horarios.single.day, 11);
+    });
+
+    test('Super Master não tem quartas', () {
+      final d = datasMataMata(Categoria.superMaster, 1);
+      expect(d.map((e) => e.fase), [Fase.semifinal, Fase.finalTurno]);
+      expect(d.first.horarios.first.month, 5);
+      expect(d.first.horarios.first.day, 20);
+    });
+
+    test('Livre: quartas, semis e final em cada turno', () {
+      for (final t in [1, 2]) {
+        expect(
+          datasMataMata(Categoria.livre, t).where((e) => e.fase != Fase.grandeFinal).map((e) => e.fase),
+          [Fase.quartas, Fase.semifinal, Fase.finalTurno],
+        );
+      }
+    });
   });
 }
