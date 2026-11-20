@@ -309,6 +309,16 @@ void main() {
       await _abrir(t, '/torcedor/jogos');
       await _capturar(t, '05_torcedor_jogos');
     });
+    _tela('05d eliminatórias do 2º turno', (t) async {
+      await _abrir(t, '/torcedor/jogos');
+      await _tocar(t, 'Eliminatórias 2ºT');
+      await _capturar(t, '05d_torcedor_eliminatorias_2t');
+    });
+    _tela('08g campeões', (t) async {
+      await _abrir(t, '/torcedor/tabela');
+      await _tocar(t, 'Campeões');
+      await _capturar(t, '08g_torcedor_campeoes');
+    });
     _tela('06 detalhe do jogo', (t) async {
       await _abrir(t, '/torcedor/jogos/${comCartoes.id}');
       await _capturar(t, '06_torcedor_jogo_encerrado');
