@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/repositories/preferencias_repository.dart';
+import '../../shared/links.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
@@ -54,6 +55,8 @@ class EntradaScreen extends StatelessWidget {
             descricao: 'Súmulas, disciplina e gestão da temporada.',
             onTap: () => _entrar(context, '/organizacao'),
           ),
+          const SizedBox(height: AppSpacing.md),
+          const LinksLegais(),
         ],
       ),
     ),
