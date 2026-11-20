@@ -11,9 +11,6 @@ npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and con
 └──────────────────┴────────────────────────────────────────────────┴──────────┘
 
 1 app(s) total.
-Create your ANDROID app in project [1mcalcio-firenze[22m:
-- Creating your Android app
-✖ Creating your Android app
-
-[1m[31mError:[39m[22m Failed to create Android app for project calcio-firenze. See firebase-debug.log for more info.
-appId: 
+appId: 1:1010799319095:android:8233603a574129c1ba47b2
+- Downloading configuration data of your Firebase ANDROID app
+✔ Downloading configuration data of your Firebase ANDROID app
