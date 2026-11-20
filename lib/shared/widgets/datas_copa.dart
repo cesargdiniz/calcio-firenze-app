@@ -46,7 +46,7 @@ class DatasMataMata extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DatasReservadas(
-    titulo: 'Mata-mata do $turnoº turno · datas reservadas',
+    titulo: 'Eliminatórias do $turnoº turno · datas reservadas',
     texto: 'Os confrontos saem da classificação, mas as datas já estão definidas na Arena '
         'Gugu. Programe-se para estar no condomínio nesses dias.',
     dias: dias,

@@ -150,16 +150,16 @@ void main() {
     expect(find.text('Copa'), findsNothing);
   });
 
-  testWidgets('Jogos mostra as datas reservadas do mata-mata do turno', (tester) async {
+  testWidgets('Jogos separa turnos e eliminatórias, com as datas reservadas', (tester) async {
     await abrirApp(tester, inicio: '/torcedor/jogos');
-    await tester.tap(find.text('2º Turno'));
+    for (final t in ['1º Turno', 'Eliminatórias 1ºT', '2º Turno', 'Eliminatórias 2ºT']) {
+      expect(find.text(t), findsOneWidget);
+    }
+    await tester.tap(find.text('Eliminatórias 2ºT'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Mata-mata'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Mata-mata'));
-    await tester.pumpAndSettle();
-    expect(find.text('Mata-mata do 2º turno · datas reservadas'), findsOneWidget);
+    expect(find.text('Eliminatórias do 2º turno · datas reservadas'), findsOneWidget);
     expect(find.text('Quartas de final'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Grande final (se necessária)'), 200);
     expect(find.text('Grande final (se necessária)'), findsOneWidget);
   });
 
