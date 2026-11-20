@@ -20,10 +20,7 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
@@ -57,6 +54,14 @@ class DefaultFirebaseOptions {
   );
 
   /// Do GoogleService-Info.plist do app iOS `br.com.calciofirenze.app`.
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCpRzf5gM_UlHIWMUkkJ63hWHgTdVO1UmQ',
+    appId: '1:1010799319095:android:8233603a574129c1ba47b2',
+    messagingSenderId: '1010799319095',
+    projectId: 'calcio-firenze',
+    storageBucket: 'calcio-firenze.firebasestorage.app',
+  );
+
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDFtCSEajVDsn3Pi936xCVI83Ixn1knBNI',
     appId: '1:1010799319095:ios:3260da75be09ef10ba47b2',
