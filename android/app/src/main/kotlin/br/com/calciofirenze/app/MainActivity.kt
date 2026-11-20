@@ -1,4 +1,4 @@
-package br.com.calciofirenze.calcio_firenze
+package br.com.calciofirenze.app
 
 import io.flutter.embedding.android.FlutterActivity
 
