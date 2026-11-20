@@ -163,14 +163,13 @@ void main() {
     expect(find.text('Grande final (se necessária)'), findsOneWidget);
   });
 
-  testWidgets('troféu do Início abre os campeões do Master', (tester) async {
+  testWidgets('troféu do Início abre os campeões da categoria', (tester) async {
     await abrirApp(tester, inicio: '/torcedor');
     await tester.tap(find.byTooltip('Campeões'));
     await tester.pumpAndSettle();
     expect(find.text('Calcio Firenze · Master'), findsOneWidget);
-    expect(find.text('Em andamento'), findsOneWidget);
-    expect(find.bySemanticsLabel('2025, campeão Inter, vice Napoli'), findsOneWidget);
-    expect(find.bySemanticsLabel('2021, campeão Juventus, vice Roma'), findsOneWidget);
+    expect(find.bySemanticsLabel('2025, campeão Inter'), findsOneWidget);
+    expect(find.bySemanticsLabel('2021, campeão Juventus'), findsOneWidget);
   });
 
   testWidgets('organizador informa a categoria no primeiro acesso e fica só nela', (

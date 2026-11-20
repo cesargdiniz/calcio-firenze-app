@@ -1,26 +1,34 @@
 import 'categoria.dart';
 
-/// Campeão e vice de uma temporada. Sem campeão: temporada em andamento.
+/// Campeão de uma temporada.
 class TituloTemporada {
   final int ano;
-  final String? campeao;
-  final String? vice;
+  final String campeao;
 
-  const TituloTemporada(this.ano, {this.campeao, this.vice});
-
-  bool get emAndamento => campeao == null;
+  const TituloTemporada(this.ano, this.campeao);
 }
 
-/// Campeões e vices de cada categoria, da temporada mais recente para a mais
-/// antiga. Categorias sem histórico ficam de fora.
+/// Campeões de cada categoria, da temporada mais recente para a mais antiga.
 const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
   Categoria.master: [
-    TituloTemporada(2026),
-    TituloTemporada(2025, campeao: 'Inter', vice: 'Napoli'),
-    TituloTemporada(2024, campeao: 'Sampdoria', vice: 'Inter'),
-    TituloTemporada(2023, campeao: 'Foggia', vice: 'Sampdoria'),
-    TituloTemporada(2022, campeao: 'Brasil', vice: 'França'),
-    TituloTemporada(2021, campeao: 'Juventus', vice: 'Roma'),
+    TituloTemporada(2025, 'Inter'),
+    TituloTemporada(2024, 'Sampdoria'),
+    TituloTemporada(2023, 'Foggia'),
+    TituloTemporada(2022, 'Brasil'),
+    TituloTemporada(2021, 'Juventus'),
+  ],
+  Categoria.livre: [
+    TituloTemporada(2025, 'Foggia'),
+    TituloTemporada(2024, 'Roma'),
+    TituloTemporada(2023, 'Napoli'),
+    TituloTemporada(2022, 'Fiorentina'),
+    TituloTemporada(2021, 'Milan'),
+  ],
+  Categoria.superMaster: [
+    TituloTemporada(2025, 'Foggia'),
+    TituloTemporada(2024, 'Sport Belém'),
+    TituloTemporada(2023, 'Atlético Mineiro'),
+    TituloTemporada(2022, 'Bayern de Munique'),
   ],
 };
 
