@@ -172,6 +172,18 @@ void main() {
     expect(find.bySemanticsLabel('2021, campeão Juventus'), findsOneWidget);
   });
 
+  testWidgets('Tabela tem o botão Campeões, ao lado de Geral', (tester) async {
+    await abrirApp(tester, inicio: '/torcedor/tabela');
+    await tester.tap(find.text('Campeões'));
+    await tester.pumpAndSettle();
+    expect(find.text('Calcio Firenze · Master'), findsOneWidget);
+    expect(find.bySemanticsLabel('2023, campeão Foggia'), findsOneWidget);
+
+    await tester.tap(find.text('Geral'));
+    await tester.pumpAndSettle();
+    expect(find.text('Geral · os dois turnos somados'), findsOneWidget);
+  });
+
   testWidgets('organizador informa a categoria no primeiro acesso e fica só nela', (
     tester,
   ) async {

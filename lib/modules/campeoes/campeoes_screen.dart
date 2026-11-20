@@ -40,12 +40,26 @@ class CampeoesScreen extends StatelessWidget {
       children: [
         CabecalhoTela('Campeões', subtitulo: 'Calcio Firenze · ${categoria.nome}'),
         const SizedBox(height: AppSpacing.md),
-        for (final t in campeoesDe(categoria)) ...[
-          _CartaoTemporada(t),
-          const SizedBox(height: AppSpacing.sm),
-        ],
+        ListaCampeoes(categoria: categoria),
       ],
     ),
+  );
+}
+
+/// Os campeões da categoria, do mais recente ao mais antigo.
+class ListaCampeoes extends StatelessWidget {
+  final Categoria categoria;
+  const ListaCampeoes({super.key, required this.categoria});
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      for (final t in campeoesDe(categoria)) ...[
+        _CartaoTemporada(t),
+        const SizedBox(height: AppSpacing.sm),
+      ],
+    ],
   );
 }
 
