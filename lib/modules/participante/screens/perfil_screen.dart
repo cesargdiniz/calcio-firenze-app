@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/repositories/auth_repository.dart';
+import '../../../shared/links.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
@@ -106,6 +107,12 @@ class PerfilScreen extends StatelessWidget {
             child: Column(
               children: [
                 item('Trocar de perfil', Icons.swap_horiz_rounded, () => context.push('/entrar')),
+                item(
+                  'Política de privacidade',
+                  Icons.privacy_tip_outlined,
+                  () => abrirLink(urlPrivacidade),
+                ),
+                item('Suporte', Icons.help_outline_rounded, () => abrirLink(urlSuporte)),
                 item('Sair', Icons.logout_rounded, () async {
                   await context.read<ParticipanteController>().sair();
                   if (context.mounted) context.go('/entrar');

@@ -1,0 +1,53 @@
+# Publica a versão web do app no Firebase Hosting (www.calciofirenze.com.br),
+# com as páginas de suporte e privacidade, a cada mudança na main.
+name: Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: web
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Gera a pasta web (se ainda não existir)
+        run: |
+          if [ ! -d web ]; then
+            flutter create . --platforms web --org br.com.calciofirenze --project-name calcio_firenze
+          fi
+      - run: flutter pub get
+      - run: flutter build web --release
+      - name: Páginas de suporte e privacidade, ícones e nome do app
+        run: |
+          cp -r site/* build/web/
+          sed -i 's|<title>[^<]*</title>|<title>Calcio Firenze</title>|; s|content="calcio_firenze"|content="Calcio Firenze"|g; s|content="A new Flutter project."|content="Campeonato Calcio Firenze: jogos, tabela, suspensos e calendário."|' build/web/index.html
+          grep -o '<title>[^<]*</title>' build/web/index.html
+      - name: Confere a chave do Firebase
+        id: chave
+        env:
+          CHAVE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$CHAVE" ]; then
+            echo "Falta o segredo FIREBASE_SERVICE_ACCOUNT no GitHub; o site não foi publicado."
+            echo "tem=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "tem=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publica no Firebase Hosting
+        if: steps.chave.outputs.tem == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: calcio-firenze
+          channelId: live
