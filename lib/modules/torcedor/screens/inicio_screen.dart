@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../calendario/calendario_screen.dart';
+import '../../campeoes/campeoes_screen.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -38,6 +39,7 @@ class InicioScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              BotaoCampeoes(categoria: painel.categoria),
               // Atleta ou Organização que entrou como Torcedor volta à escolha.
               IconButton(
                 tooltip: 'Trocar de perfil',
