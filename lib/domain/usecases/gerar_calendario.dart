@@ -118,7 +118,11 @@ final horariosSuperMaster2027 = <int, List<DateTime>>{
 class DiaReservado {
   final String etapa;
   final List<DateTime> horarios;
-  const DiaReservado(this.etapa, this.horarios);
+
+  /// Etapa do mata-mata da categoria (nula na Copa Master).
+  final Fase? fase;
+
+  const DiaReservado(this.etapa, this.horarios, {this.fase});
 }
 
 /// Copa Master 2027: mata-mata exclusivo dos times do Master. Por enquanto
@@ -132,6 +136,41 @@ final datasCopaMaster2027 = [
   DiaReservado('Semifinais', _dia(6, 19, 2)),
   DiaReservado('Final', _dia(6, 29, 1)),
 ];
+
+/// Datas já reservadas para o mata-mata de um turno: quartas (se houver),
+/// semifinais e final do turno, e no 2º turno também a grande final. Os
+/// confrontos dependem da classificação, mas as datas já são conhecidas.
+List<DiaReservado> datasMataMata(Categoria c, int turno) {
+  final classificatorios = c.rodadas * (c.times ~/ 2);
+  final slots = [...?horariosDe(c)[turno]]..sort();
+  final dias = <DateTime, List<DateTime>>{};
+  for (final h in slots.skip(classificatorios)) {
+    (dias[DateTime(h.year, h.month, h.day)] ??= []).add(h);
+  }
+  final fases = [if (c.temQuartas) Fase.quartas, Fase.semifinal, Fase.finalTurno];
+  String rotulo(Fase f) => switch (f) {
+    Fase.quartas => 'Quartas de final',
+    Fase.semifinal => 'Semifinais',
+    _ => 'Final do $turnoº turno',
+  };
+  final reservados = [
+    for (final (i, h) in dias.values.indexed)
+      DiaReservado(
+        rotulo(fases[i.clamp(0, fases.length - 1)]),
+        h,
+        fase: fases[i.clamp(0, fases.length - 1)],
+      ),
+  ];
+  if (turno == 2) {
+    final grande = [...?horariosDe(c)[0]]..sort();
+    if (grande.isNotEmpty) {
+      reservados.add(
+        DiaReservado('Grande final (se necessária)', grande, fase: Fase.grandeFinal),
+      );
+    }
+  }
+  return reservados;
+}
 
 /// Horários oficiais da categoria, por turno (0 = grande final).
 Map<int, List<DateTime>> horariosDe(Categoria c) => switch (c) {

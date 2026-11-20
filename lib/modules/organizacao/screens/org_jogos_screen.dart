@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/etapa.dart';
+import '../../../domain/usecases/gerar_calendario.dart';
 import '../../../domain/usecases/mata_mata.dart';
 import '../../../shared/format.dart';
 import '../../calendario/calendario_screen.dart';
@@ -90,6 +91,17 @@ class _JogosState extends State<_Jogos> {
     } finally {
       if (mounted) setState(() => _gerando = false);
     }
+  }
+
+  /// Etapas do mata-mata do turno (e a grande final, no 2º) já criadas.
+  Set<Fase> _criadas(OrgPronta o) => {
+    for (final p in o.dados.partidas)
+      if (p.fase.eliminatoria && (p.turno == _turno || (_turno == 2 && p.turno == 0))) p.fase,
+  };
+
+  bool _mataMataPendente(OrgPronta o) {
+    final criadas = _criadas(o);
+    return datasMataMata(o.categoria, _turno).any((d) => !criadas.contains(d.fase));
   }
 
   @override
@@ -179,6 +191,10 @@ class _JogosState extends State<_Jogos> {
               'O sorteio fica travado depois da primeira súmula encerrada.',
               style: AppTextStyles.pequeno,
             ),
+        ],
+        if (_mataMataPendente(o)) ...[
+          const SizedBox(height: AppSpacing.md),
+          DatasMataMata(categoria: o.categoria, turno: _turno, criadas: _criadas(o)),
         ],
         if (o.categoria == Categoria.master && _turno == 1) ...[
           const SizedBox(height: AppSpacing.md),

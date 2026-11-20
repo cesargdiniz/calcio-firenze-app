@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/entities/categoria.dart';
 import '../../../domain/entities/etapa.dart';
+import '../../../domain/usecases/gerar_calendario.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/compartilhar/compartilhar_imagem.dart';
 import '../../calendario/calendario_screen.dart';
@@ -38,15 +39,27 @@ class _Jogos extends StatefulWidget {
 class _JogosState extends State<_Jogos> {
   late Etapa? _etapa = _etapaInicial();
 
-  /// Turno dos botões de etapa (o 2º inclui a grande final).
+  /// Turno escolhido (o 2º inclui a grande final).
   late int _turno = _etapa == null ? widget.painel.turnoAtual : _turnoDa(_etapa!);
 
-  /// Mostrando as datas reservadas da Copa (só no Master).
+  /// Verdadeiro nas abas "Eliminatórias": mostra o mata-mata do turno.
+  late bool _eliminatorias = _etapa?.fase.eliminatoria ?? false;
+
+  /// Mostrando as datas reservadas da Copa (só no Master, 1º turno).
   bool _copa = false;
 
   static int _turnoDa(Etapa e) => e.turno == 0 ? 2 : e.turno;
 
-  /// Jogos e resultados da etapa escolhida (ou as datas da Copa), como imagem.
+  /// Etapas do mata-mata do turno (e a grande final, no 2º) que já têm jogos.
+  Set<Fase> _criadas(Painel painel) => {
+    for (final p in painel.partidas)
+      if (p.fase.eliminatoria && _turnoDa(Etapa.de(p)) == _turno) p.fase,
+  };
+
+  Widget _datas(Painel painel) =>
+      DatasMataMata(categoria: painel.categoria, turno: _turno, criadas: _criadas(painel));
+
+  /// Jogos da etapa escolhida, ou as datas reservadas, como imagem.
   void _compartilhar(Painel painel, Etapa? etapa, List<Partida> jogos) {
     final competicao = '${painel.categoria.nome} 2027';
     if (_copa) {
@@ -59,9 +72,19 @@ class _JogosState extends State<_Jogos> {
       );
       return;
     }
+    if (etapa == null) {
+      compartilharComoImagem(
+        context,
+        titulo: 'Eliminatórias do $_turnoº turno',
+        subtitulo: '$competicao · Datas reservadas',
+        conteudo: _datas(painel),
+        nomeArquivo: 'calcio-${painel.categoria.name}-t$_turno-eliminatorias-datas.png',
+      );
+      return;
+    }
     compartilharComoImagem(
       context,
-      titulo: etapa!.rotulo,
+      titulo: etapa.rotulo,
       subtitulo: etapa.turno == 0 ? competicao : '$competicao · ${etapa.turno}º Turno',
       conteudo: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -88,22 +111,32 @@ class _JogosState extends State<_Jogos> {
     return widget.painel.etapas.firstOrNull;
   }
 
+  void _escolher(int turno, {required bool eliminatorias}) => setState(() {
+    _turno = turno;
+    _eliminatorias = eliminatorias;
+    _etapa = null;
+    _copa = false;
+  });
+
   @override
   Widget build(BuildContext context) {
     final painel = widget.painel;
     final etapas = [
       for (final e in painel.etapas)
-        if (_turnoDa(e) == _turno) e,
+        if (_turnoDa(e) == _turno && e.fase.eliminatoria == _eliminatorias) e,
     ];
-    final etapa = etapas.contains(_etapa) ? _etapa : etapas.firstOrNull;
-    final jogos = etapa == null || _copa ? const <Partida>[] : painel.jogosDa(etapa);
-    final temCopa = painel.categoria == Categoria.master && _turno == 1;
+    final etapa = _copa ? null : (etapas.contains(_etapa) ? _etapa : etapas.firstOrNull);
+    final jogos = etapa == null ? const <Partida>[] : painel.jogosDa(etapa);
+    final temCopa = painel.categoria == Categoria.master && _turno == 1 && !_eliminatorias;
+    final criadas = _criadas(painel);
+    final datasPendentes = _eliminatorias &&
+        datasMataMata(painel.categoria, _turno).any((d) => !criadas.contains(d.fase));
     return ListView(
       padding: AppSpacing.tela,
       children: [
         CabecalhoTela(
           'Jogos',
-          acao: _copa || etapa != null
+          acao: _copa || etapa != null || datasPendentes
               ? BotaoCompartilhar(onPressed: () => _compartilhar(painel, etapa, jogos))
               : null,
         ),
@@ -112,45 +145,44 @@ class _JogosState extends State<_Jogos> {
         const SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: [
-            for (final t in [1, 2])
+            for (final (t, elim) in const [(1, false), (1, true), (2, false), (2, true)])
               ChipFiltro(
-                '$tº Turno',
-                ativo: _turno == t,
-                onTap: () => setState(() {
-                  _turno = t;
-                  _etapa = null;
-                  _copa = false;
-                }),
+                elim ? 'Eliminatórias $tºT' : '$tº Turno',
+                ativo: _turno == t && _eliminatorias == elim,
+                onTap: () => _escolher(t, eliminatorias: elim),
               ),
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (final e in etapas) ...[
-                ChipFiltro(
-                  e.curto,
-                  ativo: !_copa && e == etapa,
-                  onTap: () => setState(() {
-                    _etapa = e;
-                    _copa = false;
-                  }),
-                ),
-                const SizedBox(width: AppSpacing.sm),
+        if (etapas.length > 1 || temCopa) ...[
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final e in etapas) ...[
+                  ChipFiltro(
+                    e.curto,
+                    ativo: e == etapa,
+                    onTap: () => setState(() {
+                      _etapa = e;
+                      _copa = false;
+                    }),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                if (temCopa)
+                  ChipFiltro('Copa', ativo: _copa, onTap: () => setState(() => _copa = true)),
               ],
-              if (temCopa)
-                ChipFiltro('Copa', ativo: _copa, onTap: () => setState(() => _copa = true)),
-            ],
+            ),
           ),
-        ),
+        ],
         if (_copa)
           const DatasCopa()
         else if (etapa != null)
           TituloSecao(etapa.rotulo)
-        else
+        else if (!_eliminatorias)
           ListaVazia(
             icone: Icons.event_outlined,
             titulo: 'Sem jogos no $_turnoº turno',
@@ -167,6 +199,7 @@ class _JogosState extends State<_Jogos> {
           ),
           const SizedBox(height: AppSpacing.md),
         ],
+        if (datasPendentes) _datas(painel),
       ],
     );
   }

@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../campeoes/campeoes_screen.dart';
 import '../../../shared/format.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
@@ -62,6 +63,7 @@ class ParticipanteInicioScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              if (painel != null) BotaoCampeoes(categoria: painel.categoria),
               IconButton(
                 tooltip: avisos == 0 ? 'Avisos' : 'Avisos ($avisos)',
                 onPressed: () => context.go('/participante/avisos'),
