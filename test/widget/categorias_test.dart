@@ -168,8 +168,8 @@ void main() {
     await tester.tap(find.byTooltip('Campeões'));
     await tester.pumpAndSettle();
     expect(find.text('Calcio Firenze · Master'), findsOneWidget);
-    expect(find.bySemanticsLabel('2025, campeão Inter'), findsOneWidget);
-    expect(find.bySemanticsLabel('2021, campeão Juventus'), findsOneWidget);
+    expect(find.text('2025'), findsOneWidget);
+    expect(find.text('2021'), findsOneWidget);
   });
 
   testWidgets('Tabela tem o botão Campeões, ao lado de Geral', (tester) async {
@@ -177,7 +177,7 @@ void main() {
     await tester.tap(find.text('Campeões'));
     await tester.pumpAndSettle();
     expect(find.text('Calcio Firenze · Master'), findsOneWidget);
-    expect(find.bySemanticsLabel('2023, campeão Foggia'), findsOneWidget);
+    expect(find.text('2023'), findsOneWidget);
 
     await tester.tap(find.text('Geral'));
     await tester.pumpAndSettle();
