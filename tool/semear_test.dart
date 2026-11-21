@@ -22,15 +22,27 @@ void main() {
   test('semente das três categorias', () {
     expect(DateTime(2027, 3, 1, 20, 30).timeZoneOffset, const Duration(hours: -3));
     final saida = <String, Object?>{};
-    for (final c in Categoria.values) {
-      final d = montarCategoriaSorteada(c, demonstracao: false);
-      expect(d.times, hasLength(c.times));
-      saida[c.temporadaId] = {
-        'times': {for (final t in d.times) t.id: _json(timeParaMapa(t))},
-        'pessoas': {for (final p in d.pessoas) p.id: _json(pessoaParaMapa(p))},
-        'partidas': {for (final p in d.partidas) p.id: _json(partidaParaMapa(p))},
-      };
-    }
+    // Master volta a zero com os 10 times reais (Livre e Super Master ficam).
+    const reais = {
+      'INT': ('Inter', 'INT'),
+      'FIO': ('Fiorentina', 'FIO'),
+      'SAM': ('Sampdoria', 'SAM'),
+      'FOG': ('Foggia', 'FOG'),
+      'BEN': ('Benevento', 'BEN'),
+      'MIL': ('Milan', 'MIL'),
+      'UDI': ('Udinese', 'UDI'),
+      'COM': ('Como 1907', 'COM'),
+      'JUV': ('Juventus', 'JUV'),
+      'SAS': ('Sassuolo', 'SAS'),
+    };
+    saida[Categoria.master.temporadaId] = {
+      'times': {
+        for (final t in timesMaster2027)
+          t.id: {..._json(timeParaMapa(t))! as Map<String, dynamic>, 'nome': reais[t.id]!.$1, 'sigla': reais[t.id]!.$2},
+      },
+      'pessoas': <String, Object?>{},
+      'partidas': <String, Object?>{},
+    };
     File(Platform.environment['SAIDA'] ?? 'semente.json').writeAsStringSync(jsonEncode(saida));
   });
 }
