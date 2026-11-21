@@ -172,6 +172,16 @@ void main() {
     expect(find.text('2021'), findsOneWidget);
   });
 
+  testWidgets('toque no escudo da Tabela abre a tela do time', (tester) async {
+    await abrirApp(tester, inicio: '/torcedor/tabela');
+    await tester.tap(find.bySemanticsLabel('Ver Leoni Azzurri').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Destaques da temporada'), findsOneWidget);
+    expect(find.textContaining('campeão (2025)'), findsOneWidget);
+    expect(find.text('Artilheiro'), findsOneWidget);
+    expect(find.text('Mais indisciplinado'), findsOneWidget);
+  });
+
   testWidgets('organizador informa a categoria no primeiro acesso e fica só nela', (
     tester,
   ) async {

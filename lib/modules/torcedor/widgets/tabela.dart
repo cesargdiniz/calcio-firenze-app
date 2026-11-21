@@ -1,12 +1,12 @@
 import 'package:calcio_regras/calcio_regras.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../screens/time_screen.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
-import '../../../shared/widgets/escudo.dart';
 
 /// Zona da posição: no turno, quem vai ao mata-mata (art. 16); na
 /// classificação geral, os rebaixados (art. 89).
@@ -99,7 +99,7 @@ class TabelaClassificacao extends StatelessWidget {
                         style: AppTextStyles.rotulo,
                       ),
                     ),
-                    Escudo(painel.time(l.timeId), tamanho: 22),
+                    EscudoClicavel(painel: painel, timeId: l.timeId, tamanho: 22),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(

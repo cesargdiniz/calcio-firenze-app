@@ -9,9 +9,9 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
-import '../../../shared/widgets/escudo.dart';
 import '../../organizacao/organizacao_controller.dart';
 import '../widgets/com_painel.dart';
+import 'time_screen.dart';
 
 /// S3 · Jogo · Detalhe
 class JogoDetalheScreen extends StatelessWidget {
@@ -58,14 +58,20 @@ class JogoDetalheScreen extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _Time(escudo: Escudo(mandante, tamanho: 48), nome: mandante.nome),
+                      child: _Time(
+                        escudo: EscudoClicavel(painel: painel, timeId: mandante.id, tamanho: 48),
+                        nome: mandante.nome,
+                      ),
                     ),
                     Text(
                       s == null ? '×' : _placar(p),
                       style: AppTextStyles.placar.copyWith(fontSize: 36),
                     ),
                     Expanded(
-                      child: _Time(escudo: Escudo(visitante, tamanho: 48), nome: visitante.nome),
+                      child: _Time(
+                        escudo: EscudoClicavel(painel: painel, timeId: visitante.id, tamanho: 48),
+                        nome: visitante.nome,
+                      ),
                     ),
                   ],
                 ),
