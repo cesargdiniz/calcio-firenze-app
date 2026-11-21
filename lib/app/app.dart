@@ -15,6 +15,7 @@ import '../domain/usecases/montar_situacao.dart';
 import '../modules/categoria/categoria_controller.dart';
 import '../modules/organizacao/organizacao_controller.dart';
 import '../modules/participante/participante_controller.dart';
+import '../modules/push/pedido_notificacoes.dart';
 import '../modules/push/sincronizador_push.dart';
 import '../modules/torcedor/torcedor_controller.dart';
 import '../shared/compartilhar/saida_imagem.dart';
@@ -136,6 +137,15 @@ class _CalcioAppState extends State<CalcioApp> {
         supportedLocales: const [Locale('pt', 'BR')],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         routerConfig: _router,
+        // Pedido de notificações, uma vez, depois da escolha da categoria.
+        builder: (context, child) => BlocBuilder<CategoriaController, CategoriaStatus>(
+          bloc: _categoria,
+          builder: (_, status) => PedidoNotificacoes(
+            push: widget.push,
+            pronto: status is CategoriaEscolhida,
+            child: child ?? const SizedBox.shrink(),
+          ),
+        ),
       ),
     ),
   );

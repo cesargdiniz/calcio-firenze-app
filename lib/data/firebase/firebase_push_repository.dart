@@ -14,7 +14,7 @@ class FirebasePushRepository implements PushRepository {
   FirebasePushRepository(this._fcm);
 
   static const _chave = 'push.topicos';
-  bool _permissaoPedida = false;
+  static const _perguntado = 'push.perguntado';
   final _rotas = StreamController<String>.broadcast();
   Future<void> _fila = Future.value();
 
@@ -40,12 +40,30 @@ class FirebasePushRepository implements PushRepository {
         debugPrint('Notificações: $e');
       });
 
+  @override
+  Future<bool> precisaPerguntar() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_perguntado) ?? false) return false;
+    final s = await _fcm.getNotificationSettings();
+    return s.authorizationStatus == AuthorizationStatus.notDetermined;
+  }
+
+  @override
+  Future<bool> autorizar() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_perguntado, true);
+    final r = await _fcm.requestPermission();
+    return r.authorizationStatus == AuthorizationStatus.authorized ||
+        r.authorizationStatus == AuthorizationStatus.provisional;
+  }
+
+  @override
+  Future<void> recusar() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_perguntado, true);
+  }
+
   Future<void> _sincronizar(Set<String> topicos) async {
-    if (topicos.isNotEmpty && !_permissaoPedida) {
-      _permissaoPedida = true;
-      final r = await _fcm.requestPermission();
-      if (r.authorizationStatus == AuthorizationStatus.denied) return;
-    }
     final prefs = await SharedPreferences.getInstance();
     final atuais = (prefs.getStringList(_chave) ?? const <String>[]).toSet();
     for (final t in atuais.difference(topicos)) {

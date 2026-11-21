@@ -13,6 +13,7 @@ import 'package:calcio_firenze/data/memoria/memoria_repositories.dart';
 import 'package:calcio_firenze/domain/entities/categoria.dart';
 import 'package:calcio_firenze/domain/entities/temporada.dart';
 import 'package:calcio_firenze/domain/entities/usuario.dart';
+import 'package:calcio_firenze/domain/repositories/push_repository.dart';
 import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
 import 'package:calcio_firenze/domain/usecases/montar_situacao.dart';
 import 'package:calcio_firenze/domain/usecases/montar_sumula_impressa.dart';
@@ -111,6 +112,7 @@ Future<MemoriaGestaoRepository> _abrir(
   bool assentar = true,
   String? categoria = 'master-2027',
   Map<String, List<Categoria>>? organizacaoPorCategoria,
+  PushRepository push = const PushDesligado(),
 }) async {
   tester.view.physicalSize = const Size(_largura * _densidade, _altura * _densidade);
   tester.view.devicePixelRatio = _densidade;
@@ -132,6 +134,7 @@ Future<MemoriaGestaoRepository> _abrir(
       montarPainel: MontarPainel(agora: agora),
       montarSituacao: MontarSituacao(agora: agora),
       preferencias: MemoriaPreferencias(categoria),
+      push: push,
       initialLocation: rota,
     ),
   );
@@ -301,6 +304,10 @@ void main() {
   });
 
   group('Torcedor', () {
+    _tela('03p pedido de notificações', (t) async {
+      await _abrir(t, '/torcedor', push: _PushPerguntando());
+      await _capturar(t, '03p_pedido_notificacoes');
+    });
     _tela('03 início', (t) async {
       await _abrir(t, '/torcedor');
       await _capturar(t, '03_torcedor_inicio');
@@ -513,4 +520,18 @@ void main() {
       await _capturar(t, '38_org_editar_decisao');
     });
   });
+}
+
+/// Celular que ainda não respondeu sobre notificações.
+class _PushPerguntando implements PushRepository {
+  @override
+  Future<void> sincronizar(Set<String> topicos) async {}
+  @override
+  Future<bool> precisaPerguntar() async => true;
+  @override
+  Future<bool> autorizar() async => true;
+  @override
+  Future<void> recusar() async {}
+  @override
+  Stream<String> get rotasAbertas => const Stream.empty();
 }
