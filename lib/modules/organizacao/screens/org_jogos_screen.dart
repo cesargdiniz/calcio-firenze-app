@@ -17,6 +17,7 @@ import '../../../shared/widgets/card_jogo.dart';
 import '../../../shared/widgets/datas_copa.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
+import '../../../shared/widgets/seletor_fase.dart';
 
 /// O9 · Organização · Jogos: calendário do turno e acesso à súmula.
 class OrgJogosScreen extends StatelessWidget {
@@ -138,21 +139,16 @@ class _JogosState extends State<_Jogos> {
         const SizedBox(height: AppSpacing.md),
         const AtalhoCalendario(),
         const SizedBox(height: AppSpacing.md),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            for (final (t, elim) in const [(1, false), (1, true), (2, false), (2, true)])
-              ChipFiltro(
-                elim ? 'Eliminatórias T$t' : '$tº Turno',
-                ativo: _turno == t && _elim == elim,
-                onTap: () => setState(() {
-                  _turno = t;
-                  _elim = elim;
-                  _etapa = null;
-                }),
-              ),
-          ],
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SeletorFase(
+            atual: (turno: _turno, eliminatorias: _elim),
+            onEscolher: (f) => setState(() {
+              _turno = f.turno;
+              _elim = f.eliminatorias;
+              _etapa = null;
+            }),
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         if (!_elim && jogos.isEmpty) ...[

@@ -14,6 +14,7 @@ import '../../../shared/widgets/card_jogo.dart';
 import '../../../shared/widgets/datas_copa.dart';
 import '../widgets/com_painel.dart';
 import 'time_screen.dart';
+import '../../../shared/widgets/seletor_fase.dart';
 
 /// T2 · Torcedor · Jogos
 class JogosScreen extends StatelessWidget {
@@ -145,17 +146,12 @@ class _JogosState extends State<_Jogos> {
         const SizedBox(height: AppSpacing.md),
         const AtalhoCalendario(),
         const SizedBox(height: AppSpacing.md),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            for (final (t, elim) in const [(1, false), (1, true), (2, false), (2, true)])
-              ChipFiltro(
-                elim ? 'Eliminatórias T$t' : '$tº Turno',
-                ativo: _turno == t && _eliminatorias == elim,
-                onTap: () => _escolher(t, eliminatorias: elim),
-              ),
-          ],
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SeletorFase(
+            atual: (turno: _turno, eliminatorias: _eliminatorias),
+            onEscolher: (f) => _escolher(f.turno, eliminatorias: f.eliminatorias),
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         if (etapas.length > 1 || temCopa) ...[
