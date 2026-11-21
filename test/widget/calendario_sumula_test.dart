@@ -33,6 +33,25 @@ DadosTemporada _real({List<Partida> Function(List<Partida>)? ajustar}) {
 }
 
 void main() {
+  testWidgets('Jogos da Organização: um seletor com turnos e eliminatórias', (tester) async {
+    await abrirApp(
+      tester,
+      inicio: '/organizacao/jogos',
+      sessao: _org,
+      organizacao: {'org1'},
+      dados: _real(),
+    );
+    for (final t in ['1º Turno', 'Eliminatórias T1', '2º Turno', 'Eliminatórias T2']) {
+      expect(find.text(t), findsOneWidget);
+    }
+    expect(find.text('Rodada 1'), findsOneWidget);
+    await tester.tap(find.text('Eliminatórias T1'));
+    await tester.pumpAndSettle();
+    expect(find.text('Rodada 1'), findsNothing);
+    await tester.scrollUntilVisible(find.text('Eliminatórias do 1º turno · datas reservadas'), 200);
+    expect(find.text('Eliminatórias do 1º turno · datas reservadas'), findsOneWidget);
+  });
+
   testWidgets('Organização sorteia e gera o 1º turno', (tester) async {
     final gestao = await abrirApp(
       tester,

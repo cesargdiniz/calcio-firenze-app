@@ -318,7 +318,7 @@ void main() {
       );
       await _tocar(t, '1º Turno');
       await _capturar(t, '05L_livre_jogos_1t');
-      await _tocar(t, 'Eliminatórias 1ºT');
+      await _tocar(t, 'Eliminatórias T1');
       await _capturar(t, '05L_livre_eliminatorias_1t');
     });
     _tela('05S super master jogos sorteados', (t) async {

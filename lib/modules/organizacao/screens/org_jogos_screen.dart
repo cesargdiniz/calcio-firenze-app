@@ -37,16 +37,29 @@ class _Jogos extends StatefulWidget {
 
 class _JogosState extends State<_Jogos> {
   int _turno = 1;
+
+  /// Abas "Eliminatórias": o mata-mata do turno (no 2º, com a grande final).
+  bool _elim = false;
   Etapa? _etapa;
   bool _gerando = false;
 
-  /// Jogos do turno; no 2º, também a grande final.
-  List<Partida> get _doTurno => widget.o.dados.demonstracao
+  /// Jogos da aba: a fase classificatória do turno ou o mata-mata dele (no
+  /// 2º turno, também a grande final).
+  List<Partida> get _daAba => widget.o.dados.demonstracao
       ? const []
       : (widget.o.dados.partidas
-                .where((p) => p.turno == _turno || (_turno == 2 && p.fase == Fase.grandeFinal))
+                .where(
+                  (p) =>
+                      (p.turno == _turno || (_turno == 2 && p.fase == Fase.grandeFinal)) &&
+                      p.fase.eliminatoria == _elim,
+                )
                 .toList()
             ..sort((a, b) => a.inicio.compareTo(b.inicio)));
+
+  /// Algum jogo da fase classificatória do turno já sorteado?
+  bool get _turnoSorteado => widget.o.dados.partidas.any(
+    (p) => p.turno == _turno && p.fase == Fase.classificatoria,
+  );
 
   Future<void> _gerar({required bool refazer}) async {
     final demo = widget.o.dados.demonstracao;
@@ -107,14 +120,16 @@ class _JogosState extends State<_Jogos> {
   @override
   Widget build(BuildContext context) {
     final o = widget.o;
-    final jogos = _doTurno;
+    final jogos = _daAba;
     final etapas = etapasDe(jogos);
     final pendente = jogos.where((p) => !p.encerrada).firstOrNull;
     final etapa = etapas.contains(_etapa)
         ? _etapa
         : (pendente != null ? Etapa.de(pendente) : etapas.lastOrNull);
     final daEtapa = etapa == null ? const <Partida>[] : jogos.where(etapa.contem).toList();
-    final algumaSumula = jogos.any((p) => p.encerrada && p.fase == Fase.classificatoria);
+    final algumaSumula = o.dados.partidas.any(
+      (p) => p.turno == _turno && p.encerrada && p.fase == Fase.classificatoria,
+    );
 
     return ListView(
       padding: AppSpacing.tela,
@@ -123,23 +138,24 @@ class _JogosState extends State<_Jogos> {
         const SizedBox(height: AppSpacing.md),
         const AtalhoCalendario(),
         const SizedBox(height: AppSpacing.md),
-        Row(
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: [
-            for (final t in const [1, 2]) ...[
+            for (final (t, elim) in const [(1, false), (1, true), (2, false), (2, true)])
               ChipFiltro(
-                '$tº Turno',
-                ativo: t == _turno,
+                elim ? 'Eliminatórias T$t' : '$tº Turno',
+                ativo: _turno == t && _elim == elim,
                 onTap: () => setState(() {
                   _turno = t;
+                  _elim = elim;
                   _etapa = null;
                 }),
               ),
-              const SizedBox(width: AppSpacing.sm),
-            ],
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        if (jogos.isEmpty) ...[
+        if (!_elim && jogos.isEmpty) ...[
           ListaVazia(
             titulo: 'Calendário ainda não gerado',
             texto: o.dados.demonstracao
@@ -153,17 +169,18 @@ class _JogosState extends State<_Jogos> {
             child: Text(_gerando ? 'Gerando…' : 'Sortear e gerar o $_turnoº turno'),
           ),
         ] else ...[
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final e in etapas) ...[
-                  ChipFiltro(e.curto, ativo: e == etapa, onTap: () => setState(() => _etapa = e)),
-                  const SizedBox(width: AppSpacing.sm),
+          if (etapas.length > 1)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final e in etapas) ...[
+                    ChipFiltro(e.curto, ativo: e == etapa, onTap: () => setState(() => _etapa = e)),
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
           if (etapa != null) TituloSecao(etapa.rotulo),
           for (final p in daEtapa) ...[
             CardJogo(
@@ -175,28 +192,37 @@ class _JogosState extends State<_Jogos> {
             ),
             const SizedBox(height: AppSpacing.md),
           ],
-          _PainelMataMata(
-            o: o,
-            turno: _turno,
-            onCriado: (e) => setState(() => _etapa = e),
-          ),
-          if (_turno == 2) _PainelMataMata(o: o, turno: 0, onCriado: (e) => setState(() => _etapa = e)),
-          if (!algumaSumula)
+          if (_elim) ...[
+            if (!_turnoSorteado)
+              Text(
+                'O mata-mata do $_turnoº turno sai da classificação: sorteie o turno primeiro.',
+                style: AppTextStyles.corpo,
+              )
+            else ...[
+              _PainelMataMata(
+                o: o,
+                turno: _turno,
+                onCriado: (e) => setState(() => _etapa = e),
+              ),
+              if (_turno == 2)
+                _PainelMataMata(o: o, turno: 0, onCriado: (e) => setState(() => _etapa = e)),
+            ],
+          ] else if (!algumaSumula)
             TextButton(
               onPressed: _gerando ? null : () => _gerar(refazer: true),
               child: const Text('Refazer o sorteio deste turno'),
-            ),
-          if (algumaSumula)
+            )
+          else
             const Text(
               'O sorteio fica travado depois da primeira súmula encerrada.',
               style: AppTextStyles.pequeno,
             ),
         ],
-        if (_mataMataPendente(o)) ...[
+        if (_elim && _mataMataPendente(o)) ...[
           const SizedBox(height: AppSpacing.md),
           DatasMataMata(categoria: o.categoria, turno: _turno, criadas: _criadas(o)),
         ],
-        if (o.categoria == Categoria.master && _turno == 1) ...[
+        if (!_elim && o.categoria == Categoria.master && _turno == 1) ...[
           const SizedBox(height: AppSpacing.md),
           const DatasCopa(),
         ],

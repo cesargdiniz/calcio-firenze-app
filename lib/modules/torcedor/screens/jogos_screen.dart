@@ -151,7 +151,7 @@ class _JogosState extends State<_Jogos> {
           children: [
             for (final (t, elim) in const [(1, false), (1, true), (2, false), (2, true)])
               ChipFiltro(
-                elim ? 'Eliminatórias $tºT' : '$tº Turno',
+                elim ? 'Eliminatórias T$t' : '$tº Turno',
                 ativo: _turno == t && _eliminatorias == elim,
                 onTap: () => _escolher(t, eliminatorias: elim),
               ),
