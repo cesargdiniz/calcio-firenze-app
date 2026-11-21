@@ -15,6 +15,7 @@ import '../../torcedor/torcedor_controller.dart';
 import '../avisos.dart';
 import '../participante_controller.dart';
 import '../widgets/pendencia_card.dart';
+import '../../torcedor/screens/time_screen.dart';
 
 /// Entrega o estado "pronto" às telas do Participante.
 class ComParticipante extends StatelessWidget {
@@ -121,6 +122,7 @@ class ParticipanteInicioScreen extends StatelessWidget {
           if (s.proximoJogo != null && painel != null) ...[
             const TituloSecao('Próximo jogo'),
             CardJogo(
+              onTapTime: (id) => abrirTime(context, painel, id),
               partida: s.proximoJogo!,
               mandante: painel.time(s.proximoJogo!.mandanteId),
               visitante: painel.time(s.proximoJogo!.visitanteId),

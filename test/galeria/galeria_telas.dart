@@ -24,6 +24,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:calcio_firenze/modules/torcedor/screens/time_screen.dart';
 
 /// Tamanho da tela capturada. O padrão é um celular comum, a 2x. Para as
 /// capturas da App Store (iPhone de 6,9", 1320 × 2868):
@@ -330,6 +331,12 @@ void main() {
       await _tocar(t, '1º Turno');
       await _capturar(t, '05S_super_master_jogos_1t');
     });
+    _tela('08t tela do time', (t) async {
+      await _abrir(t, '/torcedor/tabela');
+      await t.tap(find.byType(EscudoClicavel).first);
+      await t.pumpAndSettle();
+      await _capturar(t, '08t_tela_do_time');
+    });
     _tela('03 início', (t) async {
       await _abrir(t, '/torcedor');
       await _capturar(t, '03_torcedor_inicio');
@@ -516,7 +523,7 @@ void main() {
     _tela('32 nova movimentação', (t) async {
       await org(t, '/organizacao/gestao/movimentacoes/nova');
       await _tocar(t, 'Troca de goleiro');
-      await _tocar(t, 'MAR');
+      await _tocar(t, 'SAM');
       await _capturar(t, '32_org_nova_movimentacao');
       await _rolar(t);
       await _capturar(t, '33_org_nova_movimentacao_continuacao');
@@ -531,7 +538,7 @@ void main() {
     });
     _tela('36 nova decisão', (t) async {
       await org(t, '/organizacao/gestao/decisoes/nova');
-      await _tocar(t, 'OND');
+      await _tocar(t, 'COM');
       await _capturar(t, '36_org_nova_decisao');
       await _rolar(t);
       await _capturar(t, '37_org_nova_decisao_continuacao');

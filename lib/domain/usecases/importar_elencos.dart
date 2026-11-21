@@ -30,7 +30,7 @@ class ResultadoImportacao {
 ///
 /// Uma linha por pessoa, colunas nesta ordem (tabulação, ponto e vírgula ou
 /// vírgula): **Time · Número · Nome · Posição · Função**.
-/// - Time: sigla (MAR) ou nome (Marinai Blu).
+/// - Time: sigla (SAM) ou nome (Sampdoria).
 /// - Posição: "Goleiro"/"G" ou "Linha"/"L" (vazio = linha).
 /// - Função: "Atleta" (padrão), "Técnico" ou "Dirigente". Dirigente com
 ///   número é também atleta.

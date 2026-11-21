@@ -14,6 +14,7 @@ import '../../../shared/widgets/card_jogo.dart';
 import '../../../shared/widgets/logo_calcio.dart';
 import '../widgets/com_painel.dart';
 import '../widgets/tabela.dart';
+import 'time_screen.dart';
 
 /// T1 · Torcedor · Início
 class InicioScreen extends StatelessWidget {
@@ -73,6 +74,7 @@ class InicioScreen extends StatelessWidget {
             ),
             for (final p in painel.proximosJogos.take(2)) ...[
               CardJogo(
+              onTapTime: (id) => abrirTime(context, painel, id),
                 partida: p,
                 mandante: painel.time(p.mandanteId),
                 visitante: painel.time(p.visitanteId),

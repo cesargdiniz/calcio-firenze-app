@@ -13,6 +13,7 @@ import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/card_jogo.dart';
 import '../../../shared/widgets/datas_copa.dart';
 import '../widgets/com_painel.dart';
+import 'time_screen.dart';
 
 /// T2 · Torcedor · Jogos
 class JogosScreen extends StatelessWidget {
@@ -91,6 +92,7 @@ class _JogosState extends State<_Jogos> {
         children: [
           for (final p in jogos) ...[
             CardJogo(
+              onTapTime: (id) => abrirTime(context, painel, id),
               partida: p,
               mandante: painel.time(p.mandanteId),
               visitante: painel.time(p.visitanteId),
@@ -191,6 +193,7 @@ class _JogosState extends State<_Jogos> {
           ),
         for (final p in jogos) ...[
           CardJogo(
+              onTapTime: (id) => abrirTime(context, painel, id),
             partida: p,
             mandante: painel.time(p.mandanteId),
             visitante: painel.time(p.visitanteId),

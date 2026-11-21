@@ -33,6 +33,9 @@ class Painel {
 
   /// Nome de cada pessoa, para súmula e listas.
   final Map<String, String> nomes;
+
+  /// Elencos da temporada (atletas, técnicos e dirigentes).
+  final List<Pessoa> pessoas;
   final List<LinhaClassificacao> tabela;
 
   /// Goleadores do turno, do que mais marcou para o que menos marcou.
@@ -75,6 +78,7 @@ class Painel {
   static const geral = 0;
 
   const Painel({
+    this.pessoas = const [],
     this.categoria = Categoria.master,
     this.turno = 1,
     this.turnoAtual = 1,
@@ -229,6 +233,7 @@ class MontarPainel {
       local: d.local,
       times: times,
       nomes: {for (final p in d.pessoas) p.id: p.nome},
+      pessoas: d.pessoas,
       tabela: tabela,
       artilharia: artilharia(partidas, turno: turnoStats),
       melhoresDaPartida: melhoresDaPartida(partidas, turno: turnoStats),

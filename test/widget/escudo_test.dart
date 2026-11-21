@@ -116,7 +116,7 @@ void main() {
     await tester.tap(find.text('Trocar escudo do time'));
     await tester.pumpAndSettle();
     expect(_sam(gestao).escudo, _png);
-    expect(_sam(gestao).nome, 'Marinai Blu', reason: 'só o escudo muda');
+    expect(_sam(gestao).nome, 'Sampdoria', reason: 'só o escudo muda');
   });
 
   testWidgets('atleta não vê a troca de escudo', (tester) async {

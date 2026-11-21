@@ -17,6 +17,9 @@ class CardJogo extends StatelessWidget {
   final String local;
   final VoidCallback? onTap;
 
+  /// Toque no escudo (abre a tela do time).
+  final void Function(String timeId)? onTapTime;
+
   const CardJogo({
     super.key,
     required this.partida,
@@ -24,6 +27,7 @@ class CardJogo extends StatelessWidget {
     required this.visitante,
     required this.local,
     this.onTap,
+    this.onTapTime,
   });
 
   String get _info {
@@ -36,6 +40,19 @@ class CardJogo extends StatelessWidget {
     };
     return '$fase · ${dataHoraJogo(partida.inicio)}';
   }
+
+  Widget _escudo(Time t) => onTapTime == null
+      ? Escudo(t)
+      : Semantics(
+          button: true,
+          label: 'Ver ${t.nome}',
+          excludeSemantics: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => onTapTime!(t.id),
+            child: Escudo(t),
+          ),
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +79,7 @@ class CardJogo extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              Escudo(mandante),
+              _escudo(mandante),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
@@ -88,7 +105,7 @@ class CardJogo extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Escudo(visitante),
+              _escudo(visitante),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),

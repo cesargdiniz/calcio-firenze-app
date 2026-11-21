@@ -16,10 +16,6 @@ import 'mapeadores.dart';
 
 /// Temporada no Firestore: `temporadas/{id}/times`, `/pessoas`, `/partidas`,
 /// `/decisoes` e `/pagamentos`. Uma temporada por categoria.
-///
-/// No Master, enquanto não houver elencos nem jogos cadastrados, mostra a
-/// temporada de exemplo (com os times já salvos no Firestore, se houver). As
-/// outras categorias começam vazias, com os times que a Organização cadastrar.
 class FirestoreTemporadaRepository implements TemporadaRepository {
   final FirebaseFirestore _db;
 
@@ -60,73 +56,27 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
         porId[t.id] = t;
       }
       final listaTimes = porId.values.toList();
-      if (categoria != Categoria.master && pessoas!.isEmpty && partidas!.isEmpty) {
-        // Livre e Super Master sem elencos nem jogos: times fictícios e os
-        // dois turnos já sorteados (com cor e escudo salvos na Gestão).
-        final salvos = {for (final t in times!) t.id: t};
-        final demo = montarCategoriaSorteada(
-          categoria,
-          times: [for (final t in timesPadrao(categoria)) salvos[t.id] ?? t],
-          parametros: parametros,
-        );
-        saida.add(
-          DadosTemporada(
-            id: demo.id,
-            nome: demo.nome,
-            local: demo.local,
-            times: demo.times,
-            pessoas: demo.pessoas,
-            partidas: demo.partidas,
-            parametros: parametros!,
-            patrocinador: patrocinador,
-            sorteios: sorteios,
-            drafts: drafts,
-            demonstracao: true,
-          ),
-        );
-      } else if (categoria == Categoria.master && pessoas!.isEmpty && partidas!.isEmpty) {
-        final exemplo = montarTemporadaExemplo();
-        saida.add(
-          DadosTemporada(
-            id: exemplo.id,
-            nome: exemplo.nome,
-            local: exemplo.local,
-            times: listaTimes,
-            pessoas: exemplo.pessoas,
-            partidas: exemplo.partidas,
-            decisoes: exemplo.decisoes,
-            parametros: parametros!,
-            patrocinador: patrocinador,
-            // Datas e sorteios da Organização valem também na demonstração.
-            sorteios: sorteios,
-            drafts: drafts,
-            demonstracao: true,
-            relogio: exemplo.relogio,
-          ),
-        );
-      } else {
-        saida.add(
-          DadosTemporada(
-            id: temporadaId,
-            nome: categoria.titulo,
-            local: 'Arena Gugu',
-            times: listaTimes,
-            pessoas: pessoas!,
-            partidas: partidas!,
-            pagamentos: pagamentos!,
-            parametros: parametros!,
-            patrocinador: patrocinador,
-            sorteios: sorteios,
-            drafts: drafts,
-            // Decisão cujo jogo de origem saiu do calendário não tem como ser
-            // calculada; fica de fora em vez de derrubar as telas.
-            decisoes: [
-              for (final x in decisoes!)
-                if (partidas!.any((p) => p.id == x.partidaOrigemId)) x,
-            ],
-          ),
-        );
-      }
+      saida.add(
+        DadosTemporada(
+          id: temporadaId,
+          nome: categoria.titulo,
+          local: 'Arena Gugu',
+          times: listaTimes,
+          pessoas: pessoas!,
+          partidas: partidas!,
+          pagamentos: pagamentos!,
+          parametros: parametros!,
+          patrocinador: patrocinador,
+          sorteios: sorteios,
+          drafts: drafts,
+          // Decisão cujo jogo de origem saiu do calendário não tem como ser
+          // calculada; fica de fora em vez de derrubar as telas.
+          decisoes: [
+            for (final x in decisoes!)
+              if (partidas!.any((p) => p.id == x.partidaOrigemId)) x,
+          ],
+        ),
+      );
     }
 
     void ouvir<T>(
