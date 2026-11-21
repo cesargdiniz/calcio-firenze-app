@@ -16,10 +16,6 @@ import 'mapeadores.dart';
 
 /// Temporada no Firestore: `temporadas/{id}/times`, `/pessoas`, `/partidas`,
 /// `/decisoes` e `/pagamentos`. Uma temporada por categoria.
-///
-/// No Master, enquanto não houver elencos nem jogos cadastrados, mostra a
-/// temporada como está no Firestore (o Master parte dos 10 times-padrão). As
-/// outras categorias começam vazias, com os times que a Organização cadastrar.
 class FirestoreTemporadaRepository implements TemporadaRepository {
   final FirebaseFirestore _db;
 
