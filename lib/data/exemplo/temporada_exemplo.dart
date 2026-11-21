@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:calcio_regras/calcio_regras.dart';
 
 import '../../domain/usecases/calendario_geral.dart';
 import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/repositories/temporada_repository.dart';
+import '../../domain/usecases/gerar_calendario.dart';
 
 /// Temporada de exemplo, para ver o app funcionando antes do Firebase.
 ///
@@ -13,7 +16,7 @@ class TemporadaExemploRepository implements TemporadaRepository {
   /// "Agora" coerente com os dados: dia seguinte ao último jogo da Rodada 3.
   static final agora = DateTime(2027, 2, 26, 10);
 
-  /// Só o Master tem exemplo; as outras categorias aparecem vazias.
+  /// Master com resultados de exemplo; Livre e Super Master só sorteados.
   @override
   Stream<DadosCalendario> observarCalendario(String temporadaId) => observar(temporadaId).map(
     (d) => DadosCalendario(
@@ -28,6 +31,7 @@ class TemporadaExemploRepository implements TemporadaRepository {
     final exemplo = montarTemporadaExemplo();
     if (temporadaId == exemplo.id) return Stream.value(exemplo);
     final c = Categoria.deTemporada(temporadaId) ?? Categoria.master;
+    if (c != Categoria.master) return Stream.value(montarCategoriaSorteada(c));
     return Stream.value(
       DadosTemporada(
         id: temporadaId,
@@ -44,16 +48,16 @@ class TemporadaExemploRepository implements TemporadaRepository {
 /// Os 10 clubes do Master 2027 (cores aproximadas das camisas; a Organização
 /// ajusta cor e escudo em Gestão › Times da temporada).
 const timesMaster2027 = [
-  Time(id: 'INT', nome: 'Inter', sigla: 'INT', cor: 0xFF0A3D91),
-  Time(id: 'FIO', nome: 'Fiorentina', sigla: 'FIO', cor: 0xFF5B2A86),
-  Time(id: 'SAM', nome: 'Sampdoria', sigla: 'SAM', cor: 0xFF1B5CC1),
-  Time(id: 'FOG', nome: 'Foggia', sigla: 'FOG', cor: 0xFFC8102E),
-  Time(id: 'BEN', nome: 'Benevento', sigla: 'BEN', cor: 0xFFD9A400),
-  Time(id: 'MIL', nome: 'Milan', sigla: 'MIL', cor: 0xFF9E1B22),
-  Time(id: 'UDI', nome: 'Udinese', sigla: 'UDI', cor: 0xFF5A5A5A),
-  Time(id: 'COM', nome: 'Como 1907', sigla: 'COM', cor: 0xFF2E6DB4),
-  Time(id: 'JUV', nome: 'Juventus', sigla: 'JUV', cor: 0xFF111111),
-  Time(id: 'SAS', nome: 'Sassuolo', sigla: 'SAS', cor: 0xFF00A752),
+  Time(id: 'INT', nome: 'Leoni Azzurri', sigla: 'LEO', cor: 0xFF0A3D91),
+  Time(id: 'FIO', nome: 'Gigli Viola', sigla: 'GIG', cor: 0xFF5B2A86),
+  Time(id: 'SAM', nome: 'Marinai Blu', sigla: 'MAR', cor: 0xFF1B5CC1),
+  Time(id: 'FOG', nome: 'Fiamme Rosse', sigla: 'FIA', cor: 0xFFC8102E),
+  Time(id: 'BEN', nome: 'Api Dorate', sigla: 'API', cor: 0xFFD9A400),
+  Time(id: 'MIL', nome: 'Lupi del Borgo', sigla: 'LUP', cor: 0xFF9E1B22),
+  Time(id: 'UDI', nome: 'Aquile Grigie', sigla: 'AQU', cor: 0xFF5A5A5A),
+  Time(id: 'COM', nome: 'Onde del Lago', sigla: 'OND', cor: 0xFF2E6DB4),
+  Time(id: 'JUV', nome: 'Corvi Neri', sigla: 'COR', cor: 0xFF111111),
+  Time(id: 'SAS', nome: 'Cipressi Verdi', sigla: 'CIP', cor: 0xFF00A752),
 ];
 
 /// Atletas com papel na história de exemplo (cartões e suspensões).
@@ -123,8 +127,11 @@ const _sobrenomes = [
 ];
 
 /// Elencos completos: 12 atletas (o nº 1 é o goleiro), técnico e dirigente.
-List<Pessoa> _elencos() {
-  final pessoas = <Pessoa>[..._destaques];
+List<Pessoa> _elencos([List<Time> times = timesMaster2027]) {
+  final pessoas = <Pessoa>[
+    for (final p in _destaques)
+      if (times.any((t) => t.id == p.timeId)) p,
+  ];
   var k = 0;
   String proximoNome() {
     final n = '${_nomes[k % _nomes.length]} ${_sobrenomes[(k * 7 + 3) % _sobrenomes.length]}';
@@ -132,7 +139,7 @@ List<Pessoa> _elencos() {
     return n;
   }
 
-  for (final t in timesMaster2027) {
+  for (final t in times) {
     final ocupados = {
       for (final p in _destaques)
         if (p.timeId == t.id && p.numero != null) p.numero!,
@@ -165,6 +172,69 @@ List<Pessoa> _elencos() {
     }
   }
   return pessoas;
+}
+
+/// Os 8 times do Livre 2027 (nomes fictícios).
+const timesLivre2027 = [
+  Time(id: 'FAL', nome: "Falchi d'Arno", sigla: 'FAL', cor: 0xFF1F4E79),
+  Time(id: 'VOL', nome: 'Volpi Rosse', sigla: 'VOL', cor: 0xFFB3261E),
+  Time(id: 'DEL', nome: 'Delfini Blu', sigla: 'DEL', cor: 0xFF1565C0),
+  Time(id: 'ORS', nome: 'Orsi Bruni', sigla: 'ORS', cor: 0xFF6D4C41),
+  Time(id: 'CER', nome: 'Cervi Bianchi', sigla: 'CER', cor: 0xFF78909C),
+  Time(id: 'GRI', nome: 'Grifoni Verdi', sigla: 'GRI', cor: 0xFF2E7D32),
+  Time(id: 'STE', nome: 'Stelle del Colle', sigla: 'STE', cor: 0xFFF9A825),
+  Time(id: 'PAN', nome: 'Pantere Nere', sigla: 'PAN', cor: 0xFF212121),
+];
+
+/// Os 6 times do Super Master 2027 (nomes fictícios).
+const timesSuperMaster2027 = [
+  Time(id: 'QUE', nome: 'Querce Antiche', sigla: 'QUE', cor: 0xFF33691E),
+  Time(id: 'LDP', nome: 'Leoni di Pietra', sigla: 'LDP', cor: 0xFF8D6E63),
+  Time(id: 'TDB', nome: 'Torri del Borgo', sigla: 'TDB', cor: 0xFF5D4037),
+  Time(id: 'CAV', nome: 'Cavalieri Bianchi', sigla: 'CAV', cor: 0xFF90A4AE),
+  Time(id: 'GUF', nome: 'Gufi Saggi', sigla: 'GUF', cor: 0xFF4527A0),
+  Time(id: 'ULI', nome: "Ulivi d'Argento", sigla: 'ULI', cor: 0xFF9E9D24),
+];
+
+/// Times-padrão da categoria.
+List<Time> timesPadrao(Categoria c) => switch (c) {
+  Categoria.master => timesMaster2027,
+  Categoria.livre => timesLivre2027,
+  Categoria.superMaster => timesSuperMaster2027,
+};
+
+/// Livre e Super Master de demonstração: elencos fictícios e os dois turnos
+/// já sorteados nas datas oficiais, ainda sem resultados. O mata-mata aparece
+/// pelas datas reservadas (os confrontos saem da classificação).
+DadosTemporada montarCategoriaSorteada(
+  Categoria c, {
+  List<Time>? times,
+  Parametros? parametros,
+  bool demonstracao = true,
+}) {
+  final lista = times ?? timesPadrao(c);
+  final ids = [for (final t in lista) t.id];
+  final horarios = horariosDe(c);
+  // Sorteio fixo: a mesma tabela em todos os celulares.
+  final rng = Random(2027 + c.index);
+  return DadosTemporada(
+    id: c.temporadaId,
+    demonstracao: demonstracao,
+    nome: c.titulo,
+    local: 'Arena Gugu',
+    times: lista,
+    pessoas: _elencos(lista),
+    partidas: [
+      for (final turno in [1, 2])
+        ...const GerarCalendario()(
+          turno: turno,
+          times: ids,
+          horarios: horarios[turno]!,
+          sorteio: rng,
+        ),
+    ],
+    parametros: parametros ?? const Parametros(),
+  );
 }
 
 /// Calendário pelo método do círculo: 10 times, 9 rodadas, só ida (art. 16).

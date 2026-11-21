@@ -86,7 +86,7 @@ class _ImportarState extends State<_Importar> {
         const Text(
           'Uma linha por pessoa, com as colunas nesta ordem:\n'
           'Time · Número · Nome · Posição · Função\n\n'
-          '• Time: sigla (SAM) ou nome (Sampdoria)\n'
+          '• Time: sigla (MAR) ou nome (Marinai Blu)\n'
           '• Posição: Goleiro ou Linha\n'
           '• Função: Atleta, Técnico ou Dirigente (dirigente com número também é atleta)\n\n'
           'Selecione as linhas no Excel ou no Google Planilhas, copie e cole abaixo. '

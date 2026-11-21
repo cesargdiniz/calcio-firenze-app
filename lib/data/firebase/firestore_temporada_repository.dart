@@ -60,7 +60,31 @@ class FirestoreTemporadaRepository implements TemporadaRepository {
         porId[t.id] = t;
       }
       final listaTimes = porId.values.toList();
-      if (categoria == Categoria.master && pessoas!.isEmpty && partidas!.isEmpty) {
+      if (categoria != Categoria.master && pessoas!.isEmpty && partidas!.isEmpty) {
+        // Livre e Super Master sem elencos nem jogos: times fictícios e os
+        // dois turnos já sorteados (com cor e escudo salvos na Gestão).
+        final salvos = {for (final t in times!) t.id: t};
+        final demo = montarCategoriaSorteada(
+          categoria,
+          times: [for (final t in timesPadrao(categoria)) salvos[t.id] ?? t],
+          parametros: parametros,
+        );
+        saida.add(
+          DadosTemporada(
+            id: demo.id,
+            nome: demo.nome,
+            local: demo.local,
+            times: demo.times,
+            pessoas: demo.pessoas,
+            partidas: demo.partidas,
+            parametros: parametros!,
+            patrocinador: patrocinador,
+            sorteios: sorteios,
+            drafts: drafts,
+            demonstracao: true,
+          ),
+        );
+      } else if (categoria == Categoria.master && pessoas!.isEmpty && partidas!.isEmpty) {
         final exemplo = montarTemporadaExemplo();
         saida.add(
           DadosTemporada(

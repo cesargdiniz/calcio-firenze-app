@@ -71,7 +71,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Vincular ao elenco'), findsOneWidget);
 
-    await tester.tap(find.text('Sampdoria'));
+    await tester.tap(find.text('Marinai Blu'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('RAFAEL SOUZA'), 200);
     await tester.ensureVisible(find.text('RAFAEL SOUZA'));
@@ -96,7 +96,7 @@ void main() {
       usuarios: {'u1': _rafael(StatusVinculo.aprovado)},
     );
     expect(find.text('Olá, Rafael'), findsOneWidget);
-    expect(find.text('Atleta · Sampdoria'), findsOneWidget);
+    expect(find.text('Atleta · Marinai Blu'), findsOneWidget);
     expect(find.text('1 amarelo'), findsOneWidget);
     expect(find.text('Liberado'), findsOneWidget);
     expect(find.text('Cartão amarelo'), findsOneWidget);

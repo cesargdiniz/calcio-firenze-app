@@ -94,7 +94,7 @@ void main() {
     tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Importar 1 time')).onPressed!();
     await tester.pumpAndSettle();
 
-    expect(find.text('Elenco importado: Sampdoria.'), findsOneWidget);
+    expect(find.text('Elenco importado: Marinai Blu.'), findsOneWidget);
     final d = gestao.temporada.dados;
     expect(d.demonstracao, isFalse);
     expect(d.pessoas.where((p) => p.timeId == 'SAM'), hasLength(13));
@@ -107,10 +107,10 @@ void main() {
       sessao: _org,
       organizacao: {'org1'},
     );
-    await tester.enterText(find.byType(TextField), 'Sampdoria Firenze');
+    await tester.enterText(find.byType(TextField), 'Marinai Blu Firenze');
     await tester.ensureVisible(find.text('Salvar'));
     await tester.tap(find.text('Salvar'));
     await tester.pumpAndSettle();
-    expect(gestao.temporada.dados.times.firstWhere((t) => t.id == 'SAM').nome, 'Sampdoria Firenze');
+    expect(gestao.temporada.dados.times.firstWhere((t) => t.id == 'SAM').nome, 'Marinai Blu Firenze');
   });
 }

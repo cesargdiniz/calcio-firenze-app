@@ -11,24 +11,24 @@ class TituloTemporada {
 /// Campeões de cada categoria, da temporada mais recente para a mais antiga.
 const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
   Categoria.master: [
-    TituloTemporada(2025, 'Inter'),
-    TituloTemporada(2024, 'Sampdoria'),
-    TituloTemporada(2023, 'Foggia'),
-    TituloTemporada(2022, 'Brasil'),
-    TituloTemporada(2021, 'Juventus'),
+    TituloTemporada(2025, 'Leoni Azzurri'),
+    TituloTemporada(2024, 'Marinai Blu'),
+    TituloTemporada(2023, 'Fiamme Rosse'),
+    TituloTemporada(2022, 'Api Dorate'),
+    TituloTemporada(2021, 'Corvi Neri'),
   ],
   Categoria.livre: [
-    TituloTemporada(2025, 'Foggia'),
-    TituloTemporada(2024, 'Roma'),
-    TituloTemporada(2023, 'Napoli'),
-    TituloTemporada(2022, 'Fiorentina'),
-    TituloTemporada(2021, 'Milan'),
+    TituloTemporada(2025, 'Grifoni Verdi'),
+    TituloTemporada(2024, 'Orsi Bruni'),
+    TituloTemporada(2023, 'Delfini Blu'),
+    TituloTemporada(2022, 'Volpi Rosse'),
+    TituloTemporada(2021, "Falchi d'Arno"),
   ],
   Categoria.superMaster: [
-    TituloTemporada(2025, 'Foggia'),
-    TituloTemporada(2024, 'Sport Belém'),
-    TituloTemporada(2023, 'Atlético Mineiro'),
-    TituloTemporada(2022, 'Bayern de Munique'),
+    TituloTemporada(2025, 'Cavalieri Bianchi'),
+    TituloTemporada(2024, 'Torri del Borgo'),
+    TituloTemporada(2023, 'Leoni di Pietra'),
+    TituloTemporada(2022, 'Querce Antiche'),
   ],
 };
 
