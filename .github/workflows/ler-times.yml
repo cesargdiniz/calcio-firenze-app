@@ -1,0 +1,25 @@
+name: Ler times (temporário)
+on:
+  push:
+    branches: [claude/ler-times]
+jobs:
+  ler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - env:
+          CONTA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$CONTA" > "$RUNNER_TEMP/c.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/c.json"
+          npm init -y >/dev/null && npm i firebase-admin@13 --no-audit --no-fund >/dev/null
+          node -e '
+          const {initializeApp}=require("firebase-admin/app");const {getFirestore}=require("firebase-admin/firestore");
+          initializeApp();const db=getFirestore();
+          (async()=>{for(const t of (await db.collection("temporadas").get()).docs){
+            const times=(await t.ref.collection("times").get()).docs.map(d=>d.id+"="+d.get("nome")+(d.get("escudo")||d.get("escudoUrl")?" [escudo]":""));
+            const np=(await t.ref.collection("pessoas").count().get()).data().count;
+            const nj=(await t.ref.collection("partidas").count().get()).data().count;
+            console.log(t.id,"| times:",times.join(", ")||"(nenhum)","| pessoas:",np,"| partidas:",nj);}})();'
+          rm -f "$RUNNER_TEMP/c.json"
