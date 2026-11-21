@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../domain/entities/campeoes.dart';
-import '../../campeoes/campeoes_screen.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/compartilhar/compartilhar_imagem.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -42,16 +40,6 @@ class ClassificacaoScreen extends StatefulWidget {
 class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
   /// Tabela inteira ou a estatística escolhida, como imagem.
   void _compartilhar(Painel painel) {
-    if (_campeoes) {
-      compartilharComoImagem(
-        context,
-        titulo: 'Campeões',
-        subtitulo: 'Calcio Firenze · ${painel.categoria.nome}',
-        conteudo: ListaCampeoes(categoria: painel.categoria),
-        nomeArquivo: 'calcio-${painel.categoria.name}-campeoes.png',
-      );
-      return;
-    }
     final turno = painel.turno == Painel.geral ? 'Geral' : '${painel.turno}º Turno';
     final competicao = '${painel.categoria.nome} 2027 · $turno';
     final arquivo = 'calcio-${painel.categoria.name}-${painel.turno == Painel.geral ? 'geral' : 't${painel.turno}'}';
@@ -82,9 +70,6 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
   }
 
   bool _estatisticas = false;
-
-  /// Mostrando a lista de campeões da categoria.
-  bool _campeoes = false;
   _Categoria _categoria = _Categoria.artilharia;
 
   @override
@@ -93,27 +78,17 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
       padding: AppSpacing.tela,
       children: [
         CabecalhoTela(
-          _campeoes ? 'Campeões' : (_estatisticas ? 'Estatísticas' : 'Classificação'),
+          _estatisticas ? 'Estatísticas' : 'Classificação',
           acao: BotaoCompartilhar(onPressed: () => _compartilhar(painel)),
-          subtitulo: _campeoes
-              ? 'Calcio Firenze · ${painel.categoria.nome}'
-              : painel.turno == Painel.geral
+          subtitulo: painel.turno == Painel.geral
               ? (_estatisticas ? 'Temporada inteira' : 'Geral · os dois turnos somados')
               : (_estatisticas
                     ? '${painel.turno}º Turno'
                     : 'Fase classificatória · ${painel.turno}º Turno'),
         ),
         const SizedBox(height: AppSpacing.md),
-        SeletorTurno(
-          painel: painel,
-          campeoes: _campeoes,
-          onCampeoes: () => setState(() => _campeoes = true),
-          onTurno: () => setState(() => _campeoes = false),
-        ),
+        SeletorTurno(painel: painel),
         const SizedBox(height: AppSpacing.sm),
-        if (_campeoes)
-          ListaCampeoes(categoria: painel.categoria)
-        else ...[
         Wrap(
           spacing: AppSpacing.sm,
           children: [
@@ -165,7 +140,6 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
                 style: AppTextStyles.pequeno,
               ),
             ),
-        ],
         ],
       ],
     ),
@@ -445,40 +419,20 @@ class _Legenda extends StatelessWidget {
 /// Botões 1º Turno, 2º Turno e Geral da Tabela.
 class SeletorTurno extends StatelessWidget {
   final Painel painel;
-
-  /// Botão "Campeões" ativo (só aparece com [onCampeoes]).
-  final bool campeoes;
-  final VoidCallback? onCampeoes;
-
-  /// Chamado ao escolher um turno (sai da lista de campeões).
-  final VoidCallback? onTurno;
-
-  const SeletorTurno({
-    super.key,
-    required this.painel,
-    this.campeoes = false,
-    this.onCampeoes,
-    this.onTurno,
-  });
+  const SeletorTurno({super.key, required this.painel});
 
   @override
   Widget build(BuildContext context) {
     final controller = context.read<TorcedorController>();
     return Wrap(
       spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
       children: [
         for (final (t, rotulo) in [(1, '1º Turno'), (2, '2º Turno'), (Painel.geral, 'Geral')])
           ChipFiltro(
             rotulo,
-            ativo: !campeoes && painel.turno == t,
-            onTap: () {
-              controller.escolherTurno(t);
-              onTurno?.call();
-            },
+            ativo: painel.turno == t,
+            onTap: () => controller.escolherTurno(t),
           ),
-        if (onCampeoes != null && campeoesDe(painel.categoria).isNotEmpty)
-          ChipFiltro('Campeões', ativo: campeoes, onTap: onCampeoes),
       ],
     );
   }
