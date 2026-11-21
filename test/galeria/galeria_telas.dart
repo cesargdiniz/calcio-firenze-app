@@ -24,6 +24,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:calcio_firenze/modules/torcedor/screens/time_screen.dart';
 
 /// Tamanho da tela capturada. O padrão é um celular comum, a 2x. Para as
 /// capturas da App Store (iPhone de 6,9", 1320 × 2868):
@@ -332,7 +333,7 @@ void main() {
     });
     _tela('08t tela do time', (t) async {
       await _abrir(t, '/torcedor/tabela');
-      await t.tap(find.bySemanticsLabel('Ver Leoni Azzurri').first);
+      await t.tap(find.byType(EscudoClicavel).first);
       await t.pumpAndSettle();
       await _capturar(t, '08t_tela_do_time');
     });

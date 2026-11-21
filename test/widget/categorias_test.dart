@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'apoio.dart';
+import 'package:calcio_firenze/modules/torcedor/screens/time_screen.dart';
 
 const _org = Sessao(uid: 'org1', email: 'livre@exemplo.com');
 const _marcos = Sessao(uid: 'u1', email: 'marcos@exemplo.com');
@@ -174,10 +175,10 @@ void main() {
 
   testWidgets('toque no escudo da Tabela abre a tela do time', (tester) async {
     await abrirApp(tester, inicio: '/torcedor/tabela');
-    await tester.tap(find.bySemanticsLabel('Ver Leoni Azzurri').first);
+    await tester.tap(find.byType(EscudoClicavel).first);
     await tester.pumpAndSettle();
     expect(find.text('Destaques da temporada'), findsOneWidget);
-    expect(find.textContaining('campeão (2025)'), findsOneWidget);
+    expect(find.text('Títulos'), findsOneWidget);
     expect(find.text('Artilheiro'), findsOneWidget);
     expect(find.text('Mais indisciplinado'), findsOneWidget);
   });
