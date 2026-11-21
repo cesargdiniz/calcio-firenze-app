@@ -1,0 +1,38 @@
+# Publica os serviços do Firebase (notificações) e as regras do Firestore.
+# Precisa do plano Blaze e dos papéis Editor, Administrador do Cloud
+# Functions e Usuário da conta de serviço na conta FIREBASE_SERVICE_ACCOUNT.
+name: Firebase - serviços e regras
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'functions/**'
+      - 'firebase/firestore.rules'
+      - 'firebase.json'
+      - '.github/workflows/functions.yml'
+  workflow_dispatch:
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instala e testa
+        working-directory: functions
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+      - name: Publica
+        env:
+          CONTA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$CONTA" > "$RUNNER_TEMP/conta.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/conta.json"
+          trap 'rm -f "$RUNNER_TEMP/conta.json"' EXIT
+          npx -y firebase-tools@latest deploy --only functions,firestore:rules \
+            --project calcio-firenze --non-interactive --force

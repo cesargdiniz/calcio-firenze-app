@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/organizacao_repository.dart';
 import '../domain/repositories/preferencias_repository.dart';
+import '../domain/repositories/push_repository.dart';
 import '../domain/repositories/temporada_repository.dart';
 import '../domain/repositories/usuario_repository.dart';
 import '../domain/usecases/montar_painel.dart';
@@ -12,6 +15,7 @@ import '../domain/usecases/montar_situacao.dart';
 import '../modules/categoria/categoria_controller.dart';
 import '../modules/organizacao/organizacao_controller.dart';
 import '../modules/participante/participante_controller.dart';
+import '../modules/push/sincronizador_push.dart';
 import '../modules/torcedor/torcedor_controller.dart';
 import '../shared/compartilhar/saida_imagem.dart';
 import '../shared/pdf/saida_pdf.dart';
@@ -33,6 +37,7 @@ class CalcioApp extends StatefulWidget {
   final SaidaPdf saidaPdf;
   final SaidaImagem saidaImagem;
   final SeletorImagem seletorImagem;
+  final PushRepository push;
   final String initialLocation;
 
   const CalcioApp({
@@ -48,6 +53,7 @@ class CalcioApp extends StatefulWidget {
     this.saidaImagem = const SaidaImagemDoAparelho(),
     this.saidaPdf = const SaidaPdfDoAparelho(),
     this.seletorImagem = const SeletorImagemDoAparelho(),
+    this.push = const PushDesligado(),
     this.initialLocation = '/',
   });
 
@@ -58,9 +64,26 @@ class CalcioApp extends StatefulWidget {
 class _CalcioAppState extends State<CalcioApp> {
   late final GoRouter _router = criarRouter(initialLocation: widget.initialLocation);
   late final CategoriaController _categoria = CategoriaController(widget.preferencias)..iniciar();
+  late final SincronizadorPush _sincronizador = SincronizadorPush(
+    widget.push,
+    widget.auth,
+    widget.usuarios,
+    _categoria.observar(),
+  );
+  StreamSubscription<String>? _rotas;
+
+  @override
+  void initState() {
+    super.initState();
+    _sincronizador.iniciar();
+    // Toque na notificação abre o jogo ou a tela do aviso.
+    _rotas = widget.push.rotasAbertas.listen(_router.go);
+  }
 
   @override
   void dispose() {
+    _rotas?.cancel();
+    _sincronizador.encerrar();
     _router.dispose();
     _categoria.close();
     super.dispose();

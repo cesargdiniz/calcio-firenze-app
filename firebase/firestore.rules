@@ -59,6 +59,18 @@ service cloud.firestore {
         allow delete: if organizacaoDe(t);
       }
       match /partidas/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
+
+      // Notificações pedidas pelo app da Organização ao encerrar uma súmula.
+      // O serviço do Firebase (functions/) envia e marca como enviado.
+      match /avisosPush/{id} {
+        allow read: if false;
+        allow create: if organizacaoDe(t)
+          && request.resource.data.keys().hasOnly(['topico', 'titulo', 'corpo', 'rota', 'criadoEm'])
+          && request.resource.data.topico is string
+          && request.resource.data.titulo is string
+          && request.resource.data.corpo is string;
+        allow update, delete: if false;
+      }
       match /decisoes/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
       match /ajustes/{id}   { allow read: if true; allow write: if organizacaoDe(t); }
 

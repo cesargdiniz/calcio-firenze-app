@@ -1,5 +1,6 @@
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../entities/aviso_push.dart';
 import '../entities/categoria.dart';
 import '../entities/temporada.dart';
 import '../entities/usuario.dart';
@@ -48,6 +49,9 @@ abstract interface class GestaoRepository {
 
   /// Cria ou substitui partidas (calendário, agenda e súmula).
   Future<void> salvarPartidas(String temporadaId, List<Partida> partidas);
+
+  /// Grava notificações para o serviço do Firebase enviar aos celulares.
+  Future<void> enviarAvisos(String temporadaId, List<AvisoPush> avisos);
 
   Future<void> excluirPartidas(String temporadaId, List<String> ids);
 
