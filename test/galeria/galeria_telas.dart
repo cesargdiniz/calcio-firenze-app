@@ -316,8 +316,10 @@ void main() {
         categoria: 'livre-2027',
         dados: montarCategoriaSorteada(Categoria.livre, demonstracao: false),
       );
-      await _tocar(t, '1º Turno');
       await _capturar(t, '05L_livre_jogos_1t');
+      await t.tap(find.byKey(const Key('seletor-fase')));
+      await t.pumpAndSettle();
+      await _capturar(t, '05L_livre_menu_fases');
       await _tocar(t, 'Eliminatórias T1');
       await _capturar(t, '05L_livre_eliminatorias_1t');
     });
@@ -328,7 +330,6 @@ void main() {
         categoria: 'super-master-2027',
         dados: montarCategoriaSorteada(Categoria.superMaster, demonstracao: false),
       );
-      await _tocar(t, '1º Turno');
       await _capturar(t, '05S_super_master_jogos_1t');
     });
     _tela('08t tela do time', (t) async {

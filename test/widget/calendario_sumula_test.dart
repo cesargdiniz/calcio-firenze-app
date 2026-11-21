@@ -41,10 +41,12 @@ void main() {
       organizacao: {'org1'},
       dados: _real(),
     );
-    for (final t in ['1º Turno', 'Eliminatórias T1', '2º Turno', 'Eliminatórias T2']) {
+    expect(find.text('Rodada 1'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('seletor-fase')));
+    await tester.pumpAndSettle();
+    for (final t in ['Eliminatórias T1', '2º Turno', 'Eliminatórias T2']) {
       expect(find.text(t), findsOneWidget);
     }
-    expect(find.text('Rodada 1'), findsOneWidget);
     await tester.tap(find.text('Eliminatórias T1'));
     await tester.pumpAndSettle();
     expect(find.text('Rodada 1'), findsNothing);

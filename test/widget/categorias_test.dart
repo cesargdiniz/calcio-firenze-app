@@ -153,7 +153,10 @@ void main() {
 
   testWidgets('Jogos separa turnos e eliminatórias, com as datas reservadas', (tester) async {
     await abrirApp(tester, inicio: '/torcedor/jogos');
-    for (final t in ['1º Turno', 'Eliminatórias T1', '2º Turno', 'Eliminatórias T2']) {
+    expect(find.text('1º Turno'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('seletor-fase')));
+    await tester.pumpAndSettle();
+    for (final t in ['Eliminatórias T1', '2º Turno', 'Eliminatórias T2']) {
       expect(find.text(t), findsOneWidget);
     }
     await tester.tap(find.text('Eliminatórias T2'));
