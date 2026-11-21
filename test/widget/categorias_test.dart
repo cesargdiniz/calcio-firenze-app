@@ -183,6 +183,19 @@ void main() {
     expect(find.text('Mais indisciplinado'), findsOneWidget);
   });
 
+  testWidgets('campeões acompanham a troca de categoria no seletor', (tester) async {
+    await abrirApp(tester, inicio: '/torcedor');
+    await tester.tap(find.byTooltip('Campeões'));
+    await tester.pumpAndSettle();
+    expect(find.text('Calcio Firenze · Master'), findsOneWidget);
+    expect(find.text('2021'), findsOneWidget);
+
+    await _trocarPara(tester, 'Super Master');
+    expect(find.text('Calcio Firenze · Super Master'), findsOneWidget);
+    expect(find.text('2021'), findsNothing);
+    expect(find.text('Bayern de Munique'), findsOneWidget);
+  });
+
   testWidgets('organizador informa a categoria no primeiro acesso e fica só nela', (
     tester,
   ) async {

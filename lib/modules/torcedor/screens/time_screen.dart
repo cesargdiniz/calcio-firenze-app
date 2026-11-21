@@ -1,6 +1,8 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/usecases/montar_painel.dart';
+import '../../categoria/categoria_controller.dart';
 import '../../../domain/usecases/perfil_do_time.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
@@ -45,7 +47,14 @@ class TimeScreen extends StatelessWidget {
     final p = perfilDoTime(painel, timeId);
     final c = p.campanha;
     String juntos(List<String> nomes) => nomes.join(' · ');
-    return Scaffold(
+    // Trocou a categoria no seletor do topo: este time não é mais dela.
+    return BlocListener<CategoriaController, CategoriaStatus>(
+      listener: (context, status) {
+        if (status is CategoriaEscolhida && status.categoria != painel.categoria) {
+          Navigator.of(context).maybePop();
+        }
+      },
+      child: Scaffold(
       backgroundColor: AppColors.fundo,
       appBar: AppBar(backgroundColor: AppColors.fundo, surfaceTintColor: AppColors.fundo),
       body: ListView(
@@ -125,6 +134,7 @@ class TimeScreen extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

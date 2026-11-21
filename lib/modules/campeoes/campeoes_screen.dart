@@ -1,7 +1,9 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../domain/entities/campeoes.dart';
 import '../../domain/entities/categoria.dart';
+import '../categoria/categoria_controller.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
@@ -35,13 +37,22 @@ class CampeoesScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.fundo,
     appBar: AppBar(backgroundColor: AppColors.fundo, surfaceTintColor: AppColors.fundo),
-    body: ListView(
-      padding: AppSpacing.tela,
-      children: [
-        CabecalhoTela('Campeões', subtitulo: 'Calcio Firenze · ${categoria.nome}'),
-        const SizedBox(height: AppSpacing.md),
-        ListaCampeoes(categoria: categoria),
-      ],
+    // Acompanha a troca de categoria no seletor do topo.
+    body: BlocBuilder<CategoriaController, CategoriaStatus>(
+      builder: (context, status) {
+        final atual = status is CategoriaEscolhida ? status.categoria : categoria;
+        return ListView(
+          padding: AppSpacing.tela,
+          children: [
+            CabecalhoTela('Campeões', subtitulo: 'Calcio Firenze · ${atual.nome}'),
+            const SizedBox(height: AppSpacing.md),
+            if (campeoesDe(atual).isEmpty)
+              const Text('Ainda sem campeões registrados.', style: AppTextStyles.corpo)
+            else
+              ListaCampeoes(categoria: atual),
+          ],
+        );
+      },
     ),
   );
 }
