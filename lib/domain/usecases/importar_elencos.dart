@@ -30,7 +30,7 @@ class ResultadoImportacao {
 ///
 /// Uma linha por pessoa, colunas nesta ordem (tabulação, ponto e vírgula ou
 /// vírgula): **Time · Número · Nome · Posição · Função**.
-/// - Time: sigla (SAM) ou nome (Sampdoria).
+/// - Time: sigla (MAR) ou nome (Marinai Blu).
 /// - Posição: "Goleiro"/"G" ou "Linha"/"L" (vazio = linha).
 /// - Função: "Atleta" (padrão), "Técnico" ou "Dirigente". Dirigente com
 ///   número é também atleta.
@@ -53,7 +53,7 @@ class ImportarElencos {
     Time? acharTime(String s) {
       final n = norm(s);
       for (final t in times) {
-        if (norm(t.sigla) == n || norm(t.nome) == n) return t;
+        if (norm(t.sigla) == n || norm(t.nome) == n || norm(t.id) == n) return t;
       }
       return null;
     }

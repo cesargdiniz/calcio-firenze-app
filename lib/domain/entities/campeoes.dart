@@ -11,11 +11,11 @@ class TituloTemporada {
 /// Campeões de cada categoria, da temporada mais recente para a mais antiga.
 const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
   Categoria.master: [
-    TituloTemporada(2025, 'Inter'),
-    TituloTemporada(2024, 'Sampdoria'),
-    TituloTemporada(2023, 'Foggia'),
+    TituloTemporada(2025, 'Leoni Azzurri'),
+    TituloTemporada(2024, 'Marinai Blu'),
+    TituloTemporada(2023, 'Fiamme Rosse'),
     TituloTemporada(2022, 'Brasil'),
-    TituloTemporada(2021, 'Juventus'),
+    TituloTemporada(2021, 'Corvi Neri'),
   ],
   Categoria.livre: [
     TituloTemporada(2025, 'Foggia'),

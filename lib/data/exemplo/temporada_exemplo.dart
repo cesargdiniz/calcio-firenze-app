@@ -44,16 +44,16 @@ class TemporadaExemploRepository implements TemporadaRepository {
 /// Os 10 clubes do Master 2027 (cores aproximadas das camisas; a Organização
 /// ajusta cor e escudo em Gestão › Times da temporada).
 const timesMaster2027 = [
-  Time(id: 'INT', nome: 'Inter', sigla: 'INT', cor: 0xFF0A3D91),
-  Time(id: 'FIO', nome: 'Fiorentina', sigla: 'FIO', cor: 0xFF5B2A86),
-  Time(id: 'SAM', nome: 'Sampdoria', sigla: 'SAM', cor: 0xFF1B5CC1),
-  Time(id: 'FOG', nome: 'Foggia', sigla: 'FOG', cor: 0xFFC8102E),
-  Time(id: 'BEN', nome: 'Benevento', sigla: 'BEN', cor: 0xFFD9A400),
-  Time(id: 'MIL', nome: 'Milan', sigla: 'MIL', cor: 0xFF9E1B22),
-  Time(id: 'UDI', nome: 'Udinese', sigla: 'UDI', cor: 0xFF5A5A5A),
-  Time(id: 'COM', nome: 'Como 1907', sigla: 'COM', cor: 0xFF2E6DB4),
-  Time(id: 'JUV', nome: 'Juventus', sigla: 'JUV', cor: 0xFF111111),
-  Time(id: 'SAS', nome: 'Sassuolo', sigla: 'SAS', cor: 0xFF00A752),
+  Time(id: 'INT', nome: 'Leoni Azzurri', sigla: 'LEO', cor: 0xFF0A3D91),
+  Time(id: 'FIO', nome: 'Gigli Viola', sigla: 'GIG', cor: 0xFF5B2A86),
+  Time(id: 'SAM', nome: 'Marinai Blu', sigla: 'MAR', cor: 0xFF1B5CC1),
+  Time(id: 'FOG', nome: 'Fiamme Rosse', sigla: 'FIA', cor: 0xFFC8102E),
+  Time(id: 'BEN', nome: 'Api Dorate', sigla: 'API', cor: 0xFFD9A400),
+  Time(id: 'MIL', nome: 'Lupi del Borgo', sigla: 'LUP', cor: 0xFF9E1B22),
+  Time(id: 'UDI', nome: 'Aquile Grigie', sigla: 'AQU', cor: 0xFF5A5A5A),
+  Time(id: 'COM', nome: 'Onde del Lago', sigla: 'OND', cor: 0xFF2E6DB4),
+  Time(id: 'JUV', nome: 'Corvi Neri', sigla: 'COR', cor: 0xFF111111),
+  Time(id: 'SAS', nome: 'Cipressi Verdi', sigla: 'CIP', cor: 0xFF00A752),
 ];
 
 /// Atletas com papel na história de exemplo (cartões e suspensões).
