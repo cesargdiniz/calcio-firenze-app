@@ -31,7 +31,7 @@ void main() {
     expect(find.byKey(const Key('voltar')), findsNothing);
   });
 
-  testWidgets('quem organiza edita o jogo a partir do detalhe público', (tester) async {
+  testWidgets('nem quem organiza lança súmula pelo detalhe público', (tester) async {
     final dados = montarTemporadaExemplo(demonstracao: false);
     final jogo = dados.partidas.firstWhere((p) => p.encerrada);
     await abrirApp(
@@ -41,9 +41,8 @@ void main() {
       organizacao: {'org1'},
       dados: dados,
     );
-    await tester.tap(find.text('Editar placar e súmula'));
-    await tester.pumpAndSettle();
-    expect(find.text('Agenda'), findsOneWidget);
-    expect(find.text('Editar placar e súmula'), findsOneWidget);
+    // Súmula e placar só pela área da Organização.
+    expect(find.text('Editar placar e súmula'), findsNothing);
+    expect(find.text('Lançar placar e súmula'), findsNothing);
   });
 }
