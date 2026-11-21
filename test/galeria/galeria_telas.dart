@@ -330,6 +330,12 @@ void main() {
       await _tocar(t, '1º Turno');
       await _capturar(t, '05S_super_master_jogos_1t');
     });
+    _tela('08t tela do time', (t) async {
+      await _abrir(t, '/torcedor/tabela');
+      await t.tap(find.bySemanticsLabel('Ver Leoni Azzurri').first);
+      await t.pumpAndSettle();
+      await _capturar(t, '08t_tela_do_time');
+    });
     _tela('03 início', (t) async {
       await _abrir(t, '/torcedor');
       await _capturar(t, '03_torcedor_inicio');
