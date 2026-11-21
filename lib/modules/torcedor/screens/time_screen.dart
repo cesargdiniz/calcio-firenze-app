@@ -56,7 +56,7 @@ class TimeScreen extends StatelessWidget {
           Text(p.time.nome, textAlign: TextAlign.center, style: AppTextStyles.tituloTela),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '${painel.categoria.nome} · ${painel.nomeTemporada}',
+            painel.nomeTemporada,
             textAlign: TextAlign.center,
             style: AppTextStyles.pequeno,
           ),
