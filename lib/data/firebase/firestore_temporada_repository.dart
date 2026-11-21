@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:calcio_regras/calcio_regras.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../domain/entities/aviso_push.dart';
 import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
@@ -338,6 +339,22 @@ class FirestoreGestaoRepository implements GestaoRepository {
       }
       await lote.commit();
     }
+  }
+
+  @override
+  Future<void> enviarAvisos(String temporadaId, List<AvisoPush> avisos) async {
+    final col = _col(temporadaId, 'avisosPush');
+    final lote = _db.batch();
+    for (final a in avisos) {
+      lote.set(col.doc(), {
+        'topico': a.topico,
+        'titulo': a.titulo,
+        'corpo': a.corpo,
+        'rota': a.rota,
+        'criadoEm': FieldValue.serverTimestamp(),
+      });
+    }
+    await lote.commit();
   }
 
   @override

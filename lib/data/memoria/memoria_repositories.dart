@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:calcio_regras/calcio_regras.dart';
 
+import '../../domain/entities/aviso_push.dart';
 import '../../domain/usecases/calendario_geral.dart';
 import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
@@ -193,6 +194,13 @@ class MemoriaGestaoRepository implements GestaoRepository {
   final _mudouMovimentacoes = StreamController<void>.broadcast();
 
   List<Movimentacao> get movimentacoes => List.unmodifiable(_movimentacoes);
+
+  /// Notificações gravadas (nos testes, para conferir o que seria enviado).
+  final List<AvisoPush> avisos = [];
+
+  @override
+  Future<void> enviarAvisos(String temporadaId, List<AvisoPush> avisos) async =>
+      this.avisos.addAll(avisos);
 
   Stream<List<Usuario>> _porStatus(String temporadaId, StatusVinculo s) async* {
     List<Usuario> filtrar() => [

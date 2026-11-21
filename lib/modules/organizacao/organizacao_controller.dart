@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:calcio_regras/calcio_regras.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/categoria.dart';
@@ -11,6 +12,7 @@ import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/organizacao_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
+import '../../domain/usecases/avisos_push.dart';
 import '../../domain/usecases/gerar_calendario.dart';
 import '../../domain/usecases/movimentacoes.dart';
 import '../categoria/categoria_controller.dart';
@@ -315,7 +317,20 @@ class OrganizacaoController extends Cubit<OrgStatus> {
     await _gestao.salvarPartidas(d.id, novos);
   }
 
-  Future<void> salvarPartida(Partida p) => _gestao.salvarPartidas(_dados!.id, [p]);
+  /// Salva a partida e, ao encerrar a súmula, pede as notificações de
+  /// resultado e de suspensão (nunca na temporada de exemplo).
+  Future<void> salvarPartida(Partida p) async {
+    final antes = _dados!;
+    await _gestao.salvarPartidas(antes.id, [p]);
+    if (antes.demonstracao) return;
+    try {
+      final avisos = avisosDoEncerramento(antes: antes, partida: p, agora: DateTime.now());
+      if (avisos.isNotEmpty) await _gestao.enviarAvisos(antes.id, avisos);
+    } catch (e) {
+      // A súmula já está salva; sem aviso, o resultado continua no app.
+      debugPrint('Avisos do encerramento: $e');
+    }
+  }
 
   /// Resultado do sorteio do art. 42 (feito fora do app) para um grupo de
   /// times empatados em todos os critérios: [ordem] é a ordem sorteada, do
