@@ -8,7 +8,7 @@ void main() {
   final montar = MontarSumulaImpressa(agora: () => TemporadaExemploRepository.agora);
   final proximoDoComo = dados.partidas.firstWhere((p) => !p.encerrada && p.envolve('COM'));
 
-  TimeSumulaImpresso monza(SumulaImpressa s) => s.mandante.sigla == 'COM' ? s.mandante : s.visitante;
+  TimeSumulaImpresso monza(SumulaImpressa s) => s.mandante.sigla == 'OND' ? s.mandante : s.visitante;
 
   test('lista os atletas em ordem alfabética, com técnico à parte e sem placar', () {
     final s = montar(dados, proximoDoComo.id);
