@@ -523,7 +523,7 @@ void main() {
     _tela('32 nova movimentação', (t) async {
       await org(t, '/organizacao/gestao/movimentacoes/nova');
       await _tocar(t, 'Troca de goleiro');
-      await _tocar(t, 'MAR');
+      await _tocar(t, 'SAM');
       await _capturar(t, '32_org_nova_movimentacao');
       await _rolar(t);
       await _capturar(t, '33_org_nova_movimentacao_continuacao');
@@ -538,7 +538,7 @@ void main() {
     });
     _tela('36 nova decisão', (t) async {
       await org(t, '/organizacao/gestao/decisoes/nova');
-      await _tocar(t, 'OND');
+      await _tocar(t, 'COM');
       await _capturar(t, '36_org_nova_decisao');
       await _rolar(t);
       await _capturar(t, '37_org_nova_decisao_continuacao');

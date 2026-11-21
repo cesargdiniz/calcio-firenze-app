@@ -33,7 +33,7 @@ void main() {
   });
 
   test('time por nome e separador ponto e vírgula', () {
-    final r = importar('Marinai Blu;7;Rafael Souza;L;Atleta', times);
+    final r = importar('Sampdoria;7;Rafael Souza;L;Atleta', times);
     expect(r.times.single.time.id, 'SAM');
     expect(r.times.single.pessoas.single.id, 'sam-7');
   });

@@ -10,7 +10,7 @@ void main() {
 
   test('dirigente, técnico e títulos do time', () {
     final p = perfilDoTime(painel, 'INT');
-    expect(p.time.nome, 'Leoni Azzurri');
+    expect(p.time.nome, 'Inter');
     expect(p.titulos, [2025]);
     expect(p.dirigentes, isNotEmpty);
     expect(p.tecnico, isNotNull);
