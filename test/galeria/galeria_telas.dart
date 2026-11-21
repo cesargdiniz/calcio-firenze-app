@@ -308,6 +308,28 @@ void main() {
       await _abrir(t, '/torcedor', push: _PushPerguntando());
       await _capturar(t, '03p_pedido_notificacoes');
     });
+    _tela('05L livre jogos sorteados', (t) async {
+      await _abrir(
+        t,
+        '/torcedor/jogos',
+        categoria: 'livre-2027',
+        dados: montarCategoriaSorteada(Categoria.livre, demonstracao: false),
+      );
+      await _tocar(t, '1º Turno');
+      await _capturar(t, '05L_livre_jogos_1t');
+      await _tocar(t, 'Eliminatórias 1ºT');
+      await _capturar(t, '05L_livre_eliminatorias_1t');
+    });
+    _tela('05S super master jogos sorteados', (t) async {
+      await _abrir(
+        t,
+        '/torcedor/jogos',
+        categoria: 'super-master-2027',
+        dados: montarCategoriaSorteada(Categoria.superMaster, demonstracao: false),
+      );
+      await _tocar(t, '1º Turno');
+      await _capturar(t, '05S_super_master_jogos_1t');
+    });
     _tela('03 início', (t) async {
       await _abrir(t, '/torcedor');
       await _capturar(t, '03_torcedor_inicio');
