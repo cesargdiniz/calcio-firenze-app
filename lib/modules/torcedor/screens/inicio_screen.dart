@@ -44,7 +44,7 @@ class InicioScreen extends StatelessWidget {
               IconButton(
                 tooltip: 'Trocar de perfil',
                 onPressed: () => context.push('/entrar'),
-                icon: const Icon(Icons.switch_account_outlined, color: AppColors.texto2),
+                icon: const Icon(Icons.swap_horiz_rounded, color: AppColors.texto2),
               ),
             ],
           ),
