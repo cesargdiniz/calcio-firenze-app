@@ -380,6 +380,13 @@ void main() {
         await _capturar(t, arquivo);
       }
     });
+    _tela('09c escalação do campeão', (t) async {
+      await _abrir(t, '/torcedor/campeoes');
+      await _capturar(t, '09b_campeoes');
+      await t.tap(find.text('Foggia').first);
+      await t.pumpAndSettle();
+      await _capturar(t, '09c_escalacao_campeao');
+    });
     _tela('09 suspensos', (t) async {
       await _abrir(t, '/torcedor/suspensos');
       await _capturar(t, '09_torcedor_suspensos');
