@@ -518,7 +518,8 @@ void main() {
     _tela('29b campeões na gestão', (t) async {
       await org(t, '/organizacao/gestao/campeoes');
       await _capturar(t, '29b_org_campeoes');
-      await org(t, '/organizacao/gestao/campeoes/2023');
+      await t.tap(find.text('2023 · Foggia'));
+      await t.pumpAndSettle();
       await _capturar(t, '29c_org_editar_campeao');
       await _rolar(t, 700);
       await _capturar(t, '29d_org_editar_campeao_elenco');
