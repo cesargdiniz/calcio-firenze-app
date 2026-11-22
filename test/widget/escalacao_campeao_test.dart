@@ -58,6 +58,29 @@ void main() {
     expect(master.every((t) => t.elenco.isNotEmpty && t.cor != null), isTrue);
   });
 
+  test('Livre: Foggia 2025 com campinho; Napoli 2023 só com o elenco', () {
+    final livre = campeoesDe(Categoria.livre);
+    final foggia = livre.firstWhere((t) => t.ano == 2025);
+    expect(foggia.titulares.map((j) => j.numero), [1, 3, 4, 8, 10, 9]);
+    expect(foggia.reservas, hasLength(7));
+    final napoli = livre.firstWhere((t) => t.ano == 2023);
+    expect(napoli.elenco, hasLength(14));
+    expect(napoli.titulares, isEmpty);
+  });
+
+  testWidgets('sem titulares, o painel mostra o elenco numa lista', (t) async {
+    await t.pumpWidget(
+      const MaterialApp(home: Scaffold(body: SingleChildScrollView(
+        child: ListaCampeoes(categoria: Categoria.livre),
+      ))),
+    );
+    await t.tap(find.text('Napoli'));
+    await t.pumpAndSettle();
+    expect(find.text('Elenco (14)'), findsOneWidget);
+    expect(find.textContaining('Frhancys Harrison'), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('tocar no campeão abre o campinho com titulares e reservas', (t) async {
     await t.pumpWidget(
       const MaterialApp(home: Scaffold(body: SingleChildScrollView(

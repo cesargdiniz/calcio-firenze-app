@@ -66,33 +66,13 @@ class EscalacaoCampeao extends StatelessWidget {
                 ),
               )
             else ...[
-              // Sem titulares informados: o elenco por posição.
-              const Text('Elenco', style: AppTextStyles.tituloSecao),
+              // Sem titulares informados: o elenco numa lista só.
+              Text('Elenco (${titulo.elenco.length})', style: AppTextStyles.tituloSecao),
               const SizedBox(height: AppSpacing.sm),
-              for (final p in PosicaoCampeao.values)
-                if (titulo.elenco.where((j) => j.posicao == p).toList() case final daPosicao
-                    when daPosicao.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 96,
-                          child: Text(
-                            daPosicao.length == 1 ? p.nome : p.plural,
-                            style: AppTextStyles.rotulo.copyWith(color: AppColors.texto2),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            daPosicao.map((j) => j.nome).join(', '),
-                            style: AppTextStyles.nome,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              Text(
+                titulo.elenco.map((j) => j.nome).join(', '),
+                style: AppTextStyles.nome.copyWith(height: 1.5),
+              ),
             ],
             if (titulo.premios.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
