@@ -36,6 +36,11 @@ class Painel {
 
   /// Elencos da temporada (atletas, técnicos e dirigentes).
   final List<Pessoa> pessoas;
+
+  /// Posição de cada time ao fim de cada rodada da fase classificatória,
+  /// por turno: `evolucao[turno][rodada - 1][timeId]`. Só vai até a última
+  /// rodada com jogo encerrado.
+  final Map<int, List<Map<String, int>>> evolucao;
   final List<LinhaClassificacao> tabela;
 
   /// Goleadores do turno, do que mais marcou para o que menos marcou.
@@ -79,6 +84,7 @@ class Painel {
 
   const Painel({
     this.pessoas = const [],
+    this.evolucao = const {},
     this.categoria = Categoria.master,
     this.turno = 1,
     this.turnoAtual = 1,
@@ -137,6 +143,36 @@ class MontarPainel {
   }
 
   /// [turno] nulo: o turno em andamento. [Painel.geral]: os dois somados.
+  /// Classificação do turno ao fim de cada rodada já disputada.
+  List<Map<String, int>> _evolucao(
+    DadosTemporada d,
+    List<Partida> partidas,
+    int turno,
+    Iterable<String> times,
+  ) {
+    final doTurno = [
+      for (final p in partidas)
+        if (p.turno == turno && p.fase == Fase.classificatoria && p.rodada != null) p,
+    ];
+    final ultima = doTurno
+        .where((p) => p.encerrada)
+        .fold<int>(0, (m, p) => p.rodada! > m ? p.rodada! : m);
+    return [
+      for (var r = 1; r <= ultima; r++)
+        {
+          for (final (i, l) in classificacaoDoTurno(
+            turno: turno,
+            times: times,
+            partidas: doTurno.where((p) => p.rodada! <= r),
+            ajustes: d.ajustes,
+            ordemSorteio: d.ordemSorteio(turno),
+            params: d.parametros,
+          ).indexed)
+            l.timeId: i + 1,
+        },
+    ];
+  }
+
   Painel call(DadosTemporada d, {int? turno}) {
     final times = {for (final t in d.times) t.id: t};
     final pessoas = {for (final p in d.pessoas) p.id: p};
@@ -234,6 +270,10 @@ class MontarPainel {
       times: times,
       nomes: {for (final p in d.pessoas) p.id: p.nome},
       pessoas: d.pessoas,
+      evolucao: {
+        for (final turno in const [1, 2])
+          turno: _evolucao(d, partidas, turno, times.keys),
+      },
       tabela: tabela,
       artilharia: artilharia(partidas, turno: turnoStats),
       melhoresDaPartida: melhoresDaPartida(partidas, turno: turnoStats),

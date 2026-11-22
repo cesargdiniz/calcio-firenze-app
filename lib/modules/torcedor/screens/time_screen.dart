@@ -9,6 +9,7 @@ import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
+import '../widgets/grafico_evolucao.dart';
 
 /// Abre a tela do time (toque no escudo).
 void abrirTime(BuildContext context, Painel painel, String timeId) => Navigator.of(context).push(
@@ -47,6 +48,9 @@ class TimeScreen extends StatelessWidget {
     final p = perfilDoTime(painel, timeId);
     final c = p.campanha;
     String juntos(List<String> nomes) => nomes.join(' · ');
+    // Gráfico do turno escolhido na Tabela (na visão geral, o turno atual).
+    final turnoGrafico = painel.turno == Painel.geral ? painel.turnoAtual : painel.turno;
+    final rodadasGrafico = painel.evolucao[turnoGrafico] ?? const <Map<String, int>>[];
     // Trocou a categoria no seletor do topo: este time não é mais dela.
     return BlocListener<CategoriaController, CategoriaStatus>(
       listener: (context, status) {
@@ -98,6 +102,22 @@ class TimeScreen extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: AppSpacing.lg),
+          TituloSecao('Evolução na tabela · $turnoGraficoº turno'),
+          if (rodadasGrafico.isEmpty)
+            const Text(
+              'Aparece depois que a 1ª rodada for disputada.',
+              style: AppTextStyles.corpo,
+            )
+          else
+            Cartao(
+              child: GraficoEvolucao(
+                posicoes: rodadasGrafico,
+                times: painel.times.values.toList(),
+                destaque: timeId,
+                rodadas: painel.categoria.rodadas,
+              ),
+            ),
           const SizedBox(height: AppSpacing.lg),
           const TituloSecao('Destaques da temporada'),
           Cartao(

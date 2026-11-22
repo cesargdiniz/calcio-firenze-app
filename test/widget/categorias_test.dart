@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'apoio.dart';
 import 'package:calcio_firenze/modules/torcedor/screens/time_screen.dart';
+import 'package:calcio_firenze/modules/torcedor/widgets/grafico_evolucao.dart';
 
 const _org = Sessao(uid: 'org1', email: 'livre@exemplo.com');
 const _marcos = Sessao(uid: 'u1', email: 'marcos@exemplo.com');
@@ -182,6 +183,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Destaques da temporada'), findsOneWidget);
     expect(find.text('Títulos'), findsOneWidget);
+    expect(find.text('Evolução na tabela · 1º turno'), findsOneWidget);
+    expect(find.byType(GraficoEvolucao), findsOneWidget);
     expect(find.text('Artilheiro'), findsOneWidget);
     expect(find.text('Mais indisciplinado'), findsOneWidget);
   });

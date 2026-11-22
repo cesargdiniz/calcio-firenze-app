@@ -32,4 +32,19 @@ void main() {
       }
     }
   });
+
+  test('evolução: posição de cada time ao fim de cada rodada jogada', () {
+    final evo = painel.evolucao[1]!;
+    expect(evo, isNotEmpty);
+    for (final rodada in evo) {
+      expect(rodada.keys.toSet(), {for (final t in d.times) t.id});
+      expect(rodada.values.toSet(), {for (var i = 1; i <= d.times.length; i++) i});
+    }
+    // A última rodada jogada bate com a tabela do 1º turno.
+    final tabela = MontarPainel(agora: () => TemporadaExemploRepository.agora)(d, turno: 1).tabela;
+    for (final (i, l) in tabela.indexed) {
+      expect(evo.last[l.timeId], i + 1);
+    }
+    expect(painel.evolucao[2], isEmpty);
+  });
 }
