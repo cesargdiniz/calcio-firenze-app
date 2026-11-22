@@ -63,6 +63,11 @@ void main() {
     final foggia = livre.firstWhere((t) => t.ano == 2025);
     expect(foggia.titulares.map((j) => j.numero), [1, 3, 4, 8, 10, 9]);
     expect(foggia.reservas, hasLength(7));
+    final roma = livre.firstWhere((t) => t.ano == 2024);
+    expect(roma.titulares.map((j) => j.noCampo), [
+      'Gabriel Luz', 'Alex Nascimento', 'Cabeludo', 'Topeira', 'Lucas Gabriel', 'Marcola', //
+    ]);
+    expect(roma.reservas, hasLength(7));
     final napoli = livre.firstWhere((t) => t.ano == 2023);
     expect(napoli.elenco, hasLength(14));
     expect(napoli.titulares, isEmpty);
