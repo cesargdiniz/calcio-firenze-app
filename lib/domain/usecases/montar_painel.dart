@@ -17,6 +17,18 @@ class ItemSuspenso {
   const ItemSuspenso(this.pessoa, this.time, this.motivo, this.retorno);
 }
 
+/// Suspensão já cumprida, para o histórico da tela "Suspensos".
+class ItemCumprido {
+  final Pessoa pessoa;
+  final Time time;
+  final String motivo;
+
+  /// Onde terminou de cumprir: "Rodada 3", "Semifinais".
+  final String cumpriuEm;
+
+  const ItemCumprido(this.pessoa, this.time, this.motivo, this.cumpriuEm);
+}
+
 class ItemPendurado {
   final Pessoa pessoa;
   final Time time;
@@ -64,6 +76,9 @@ class Painel {
   final List<ItemSuspenso> suspensos;
   final List<ItemPendurado> pendurados;
 
+  /// Suspensões já cumpridas, da mais recente para a mais antiga.
+  final List<ItemCumprido> cumpridas;
+
   /// Categoria da temporada (o Master também mostra as datas da Copa).
   final Categoria categoria;
 
@@ -90,6 +105,7 @@ class Painel {
     this.turnoAtual = 1,
     this.rebaixados = const [],
     this.demonstracao = false,
+    this.cumpridas = const [],
     required this.nomeTemporada,
     required this.local,
     required this.times,
@@ -259,7 +275,25 @@ class MontarPainel {
       }
     }
 
+    // Cumpridas: todos os jogos da suspensão já encerrados.
+    final porId = {for (final p in partidas) p.id: p};
+    final cumpridas = <(DateTime, ItemCumprido)>[];
+    for (final s in motor.suspensoes) {
+      if (s.partidasACumprir.isEmpty || s.semData > 0) continue;
+      final jogos = [for (final id in s.partidasACumprir) ?porId[id]];
+      if (jogos.length != s.partidasACumprir.length || !jogos.every((p) => p.encerrada)) continue;
+      final ultima = jogos.reduce((a, b) => a.inicio.isAfter(b.inicio) ? a : b);
+      final time = times[s.timeId];
+      if (time == null) continue;
+      cumpridas.add((
+        ultima.inicio,
+        ItemCumprido(pessoaOuAnonima(s.pessoaId, s.timeId), time, motivo(s), Etapa.de(ultima).rotulo),
+      ));
+    }
+    cumpridas.sort((a, b) => b.$1.compareTo(a.$1));
+
     return Painel(
+      cumpridas: [for (final (_, c) in cumpridas) c],
       categoria: d.categoria,
       turno: t,
       turnoAtual: atual,

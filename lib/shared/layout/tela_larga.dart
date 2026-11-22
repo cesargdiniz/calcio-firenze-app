@@ -28,6 +28,14 @@ abstract final class TelaLarga {
   static bool menuLateral(BuildContext context) =>
       _ligado && MediaQuery.sizeOf(context).width >= larguraJanela;
 
+  /// O app está no layout de computador, olhando a janela inteira (não a
+  /// área em que o widget está). Para folhas e diálogos.
+  static bool computador(BuildContext context) {
+    if (!_ligado) return false;
+    final v = View.of(context);
+    return v.physicalSize.width / v.devicePixelRatio >= larguraJanela;
+  }
+
   /// A tela tem espaço para o layout em colunas. Dentro das áreas com menu
   /// lateral, a largura vista é a do conteúdo, sem o menu.
   static bool de(BuildContext context) =>
@@ -51,6 +59,9 @@ class PaginaLarga extends StatelessWidget {
   final String? subtitulo;
   final Widget? acao;
 
+  /// Acima do título (ex.: botão "Voltar").
+  final Widget? antes;
+
   /// Filtros e seletores logo abaixo do título, na largura toda.
   final List<Widget> topo;
   final List<Widget> principal;
@@ -62,6 +73,7 @@ class PaginaLarga extends StatelessWidget {
     required this.titulo,
     this.subtitulo,
     this.acao,
+    this.antes,
     this.topo = const [],
     required this.principal,
     this.lateral = const [],
@@ -90,6 +102,7 @@ class PaginaLarga extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                ?antes,
                 CabecalhoLargo(titulo, subtitulo: subtitulo, acao: acao),
                 for (final t in topo) ...[const SizedBox(height: AppSpacing.lg), t],
                 const SizedBox(height: AppSpacing.xl),
@@ -184,5 +197,26 @@ class BlocoLargo extends StatelessWidget {
         ],
       ),
     ),
+  );
+}
+
+/// Cartões lado a lado, quantos couberem com pelo menos [minimo] px cada.
+class GradeLarga extends StatelessWidget {
+  final List<Widget> children;
+  final double minimo;
+  final double espaco;
+  const GradeLarga({super.key, required this.children, this.minimo = 320, this.espaco = 16});
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) {
+      final colunas = math.max(1, ((box.maxWidth + espaco) / (minimo + espaco)).floor());
+      final largura = (box.maxWidth - espaco * (colunas - 1)) / colunas;
+      return Wrap(
+        spacing: espaco,
+        runSpacing: espaco,
+        children: [for (final c in children) SizedBox(width: largura, child: c)],
+      );
+    },
   );
 }

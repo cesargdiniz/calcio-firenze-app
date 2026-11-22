@@ -42,6 +42,26 @@ class CampeoesScreen extends StatelessWidget {
     body: BlocBuilder<CategoriaController, CategoriaStatus>(
       builder: (context, status) {
         final atual = status is CategoriaEscolhida ? status.categoria : categoria;
+        if (TelaLarga.de(context)) {
+          // No computador, as três categorias lado a lado.
+          return PaginaLarga(
+            titulo: 'Campeões',
+            subtitulo: 'Calcio Firenze · todas as categorias',
+            principal: [
+              GradeLarga(
+                minimo: 280,
+                children: [
+                  for (final c in Categoria.values)
+                    if (campeoesDe(c).isNotEmpty)
+                      BlocoLargo(
+                        titulo: c == atual ? '${c.nome} · em exibição' : c.nome,
+                        child: ListaCampeoes(categoria: c),
+                      ),
+                ],
+              ),
+            ],
+          );
+        }
         return ListView(
           padding: TelaLarga.margens(context),
           children: [

@@ -13,6 +13,7 @@ import '../../../shared/widgets/escudo.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import 'pedidos_screen.dart';
+import '../../../shared/layout/folha.dart';
 import '../../../shared/layout/tela_larga.dart';
 
 /// O3/O4 · Súmula: lançamento depois do jogo e encerramento.
@@ -129,32 +130,17 @@ class _SumulaState extends State<_Sumula> {
   }
 
   Future<void> _adicionarGol() async {
-    final g = await showModalBottomSheet<Gol>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (_) => _FormGol(partida: p, dados: widget.dados),
-    );
+    final g = await abrirFolha<Gol>(context, (_) => _FormGol(partida: p, dados: widget.dados));
     if (g != null) setState(() => _gols.add(g));
   }
 
   Future<void> _adicionarCartao() async {
-    final c = await showModalBottomSheet<CartaoAplicado>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (_) => _FormCartao(partida: p, dados: widget.dados, jaLancados: _cartoes),
-    );
+    final c = await abrirFolha<CartaoAplicado>(context, (_) => _FormCartao(partida: p, dados: widget.dados, jaLancados: _cartoes));
     if (c != null) setState(() => _cartoes.add(c));
   }
 
   Future<void> _escolherMelhor() async {
-    final m = await showModalBottomSheet<MelhorDaPartida>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (_) => _FormMelhor(partida: p, dados: widget.dados, atual: _melhor),
-    );
+    final m = await abrirFolha<MelhorDaPartida>(context, (_) => _FormMelhor(partida: p, dados: widget.dados, atual: _melhor));
     if (m != null) setState(() => _melhor = m);
   }
 
@@ -723,29 +709,33 @@ class _Folha extends StatelessWidget {
     required this.children,
   });
 
+  Widget _conteudo(ScrollController? rolagem, {double topo = 0}) => Column(
+    children: [
+      Expanded(
+        child: ListView(
+          controller: rolagem,
+          padding: EdgeInsets.fromLTRB(24, topo, 24, 16),
+          children: [
+            Text(titulo, style: AppTextStyles.tituloSecao.copyWith(fontSize: 20)),
+            const SizedBox(height: AppSpacing.md),
+            ...children,
+          ],
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        child: FilledButton(onPressed: pronto ? onConfirmar : null, child: Text(botao)),
+      ),
+    ],
+  );
+
   @override
-  Widget build(BuildContext context) => DraggableScrollableSheet(
+  Widget build(BuildContext context) => FolhaLateral.ativa(context)
+      ? _conteudo(null, topo: 24)
+      : DraggableScrollableSheet(
     expand: false,
     initialChildSize: 0.85,
     maxChildSize: 0.95,
-    builder: (context, rolagem) => Column(
-      children: [
-        Expanded(
-          child: ListView(
-            controller: rolagem,
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-            children: [
-              Text(titulo, style: AppTextStyles.tituloSecao.copyWith(fontSize: 20)),
-              const SizedBox(height: AppSpacing.md),
-              ...children,
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-          child: FilledButton(onPressed: pronto ? onConfirmar : null, child: Text(botao)),
-        ),
-      ],
-    ),
+    builder: (context, rolagem) => _conteudo(rolagem),
   );
 }

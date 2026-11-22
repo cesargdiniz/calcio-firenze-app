@@ -9,6 +9,10 @@ on:
         description: 'Capturas no tamanho da App Store (iPhone com Dynamic Island, tela média: 1206 x 2622)'
         type: boolean
         default: false
+      computador:
+        description: 'Capturas no layout de computador do site (1440 x 900), no branch galeria-computador'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -24,8 +28,14 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Capturar no layout de computador
+        if: ${{ inputs.computador == true }}
+        run: >
+          flutter test test/galeria/galeria_telas.dart --update-goldens
+          --dart-define=TELA_COMPUTADOR=true --dart-define=TELA_LARGURA=1440
+          --dart-define=TELA_ALTURA=900 --dart-define=TELA_DENSIDADE=1
       - name: Capturar no tamanho padrão
-        if: ${{ inputs.loja != true }}
+        if: ${{ inputs.loja != true && inputs.computador != true }}
         run: flutter test test/galeria/galeria_telas.dart --update-goldens
       - name: Capturar no tamanho da App Store
         if: ${{ inputs.loja == true }}
@@ -47,4 +57,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -q --allow-empty -m "Capturas das telas (${GITHUB_SHA::7})"
-          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}" galeria-telas-capturas
+          RAMO=galeria-telas-capturas
+          if [ "${{ inputs.computador }}" = "true" ]; then RAMO=galeria-computador; fi
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}" HEAD:$RAMO

@@ -73,9 +73,102 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
   bool _estatisticas = false;
   _Categoria _categoria = _Categoria.artilharia;
 
+  /// No computador: a tabela (ou a estatística escolhida) e, ao lado, o
+  /// resumo das estatísticas do turno.
+  Widget _larga(BuildContext context, Painel painel) {
+    final org = GoRouterState.of(context).uri.path.startsWith('/organizacao');
+    return PaginaLarga(
+      titulo: _estatisticas ? 'Estatísticas' : 'Classificação',
+      subtitulo: painel.turno == Painel.geral
+          ? '${painel.categoria.nome} · geral, os dois turnos somados'
+          : '${painel.categoria.nome} · ${painel.turno}º Turno',
+      acao: BotaoCompartilhar(onPressed: () => _compartilhar(painel)),
+      topo: [
+        Wrap(
+          spacing: AppSpacing.lg,
+          runSpacing: AppSpacing.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            SeletorTurno(painel: painel),
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                ChipFiltro(
+                  'Classificação',
+                  ativo: !_estatisticas,
+                  onTap: () => setState(() => _estatisticas = false),
+                ),
+                ChipFiltro(
+                  'Estatísticas',
+                  ativo: _estatisticas,
+                  onTap: () => setState(() => _estatisticas = true),
+                ),
+              ],
+            ),
+          ],
+        ),
+        if (_estatisticas)
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final c in _Categoria.values)
+                ChipFiltro(c.rotulo, ativo: c == _categoria, onTap: () => setState(() => _categoria = c)),
+            ],
+          ),
+      ],
+      principal: [
+        if (_estatisticas)
+          _Estatistica(painel: painel, categoria: _categoria)
+        else ...[
+          if (org) SorteiosDaTabela(painel: painel),
+          BlocoLargo(
+            titulo: painel.turno == Painel.geral
+                ? 'Classificação geral'
+                : 'Classificação · ${painel.turno}º Turno',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TabelaClassificacao(painel: painel, linhas: painel.tabela),
+                const SizedBox(height: AppSpacing.md),
+                ..._legendas(painel),
+                if (painel.tabela.any((l) => l.aguardaSorteio))
+                  const Padding(
+                    padding: EdgeInsets.only(top: AppSpacing.sm),
+                    child: Text(
+                      '* Empate em todos os critérios: decidido por sorteio (art. 42).',
+                      style: AppTextStyles.pequeno,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ],
+      lateral: [
+        for (final c in const [
+          _Categoria.artilharia,
+          _Categoria.melhorDaPartida,
+          _Categoria.cartoes,
+          _Categoria.ataque,
+        ])
+          if (!_estatisticas || c != _categoria)
+            BlocoLargo(
+              titulo: c.rotulo,
+              acao: 'Ver tudo',
+              onAcao: () => setState(() {
+                _estatisticas = true;
+                _categoria = c;
+              }),
+              child: _Estatistica(painel: painel, categoria: c, limite: 5),
+            ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) => ComPainel(
-    builder: (context, painel) => ListView(
+    builder: (context, painel) => TelaLarga.de(context) ? _larga(context, painel) : ListView(
       padding: TelaLarga.margens(context),
       children: [
         CabecalhoTela(

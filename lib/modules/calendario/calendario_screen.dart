@@ -6,6 +6,7 @@ import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/usecases/calendario_geral.dart';
 import '../../shared/format.dart';
 import '../../shared/pdf/saida_pdf.dart';
+import '../../shared/layout/tela_larga.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
@@ -76,6 +77,14 @@ class _CalendarioState extends State<_Calendario> {
 
   @override
   Widget build(BuildContext context) {
+    if (TelaLarga.de(context)) {
+      return _CalendarioLargo(
+        jogos: widget.jogos,
+        filtro: _filtro,
+        onFiltro: (c) => setState(() => _filtro = c),
+        voltarPara: widget.voltarPara,
+      );
+    }
     final hoje = DateTime.now();
     final inicioHoje = DateTime(hoje.year, hoje.month, hoje.day);
     final daCompeticao = [
@@ -285,4 +294,295 @@ class AtalhoCalendario extends StatelessWidget {
       ],
     ),
   );
+}
+
+
+/// Calendário no computador: dois meses em grade, lado a lado, com o número
+/// de jogos de cada competição por dia e os feriados.
+class _CalendarioLargo extends StatefulWidget {
+  final List<JogoDoCalendario> jogos;
+  final Competicao? filtro;
+  final ValueChanged<Competicao?> onFiltro;
+  final String voltarPara;
+
+  const _CalendarioLargo({
+    required this.jogos,
+    required this.filtro,
+    required this.onFiltro,
+    required this.voltarPara,
+  });
+
+  @override
+  State<_CalendarioLargo> createState() => _CalendarioLargoState();
+}
+
+class _CalendarioLargoState extends State<_CalendarioLargo> {
+  static const _ano = 2027;
+
+  /// Primeiro mês do par em exibição (1, 3, 5 ... 11).
+  late int _mes = _parInicial();
+
+  static int _parInicial() {
+    final hoje = DateTime.now();
+    if (hoje.year != _ano) return 1;
+    return hoje.month.isOdd ? hoje.month : hoje.month - 1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final porDia = <DateTime, Map<Competicao, int>>{};
+    for (final j in widget.jogos) {
+      if (j.ehDraft || (widget.filtro != null && j.competicao != widget.filtro)) continue;
+      final d = DateTime(j.inicio.year, j.inicio.month, j.inicio.day);
+      final m = porDia.putIfAbsent(d, () => {});
+      m[j.competicao] = (m[j.competicao] ?? 0) + 1;
+    }
+    final feriados = {
+      for (final f in feriados2027) DateTime(f.data.year, f.data.month, f.data.day): f,
+    };
+    Widget seta(IconData icone, String rotulo, int? destino) => IconButton.outlined(
+      tooltip: rotulo,
+      onPressed: destino == null ? null : () => setState(() => _mes = destino),
+      icon: Icon(icone),
+    );
+    return PaginaLarga(
+      antes: context.canPop() ? BotaoVoltar(rotulo: 'Voltar', rota: widget.voltarPara) : null,
+      titulo: 'Calendário completo',
+      subtitulo: 'Todas as categorias e a Copa · temporada $_ano',
+      acao: OutlinedButton.icon(
+        onPressed: () => abrirCalendarioPdf(context, widget.jogos),
+        icon: const Icon(Icons.download_rounded),
+        label: const Text('Baixar PDF do ano'),
+      ),
+      topo: [
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            ChipFiltro('Todas', ativo: widget.filtro == null, onTap: () => widget.onFiltro(null)),
+            for (final c in Competicao.values)
+              ChipFiltro(c.nome, ativo: widget.filtro == c, onTap: () => widget.onFiltro(c)),
+          ],
+        ),
+        Wrap(
+          spacing: AppSpacing.lg,
+          runSpacing: AppSpacing.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            for (final c in Competicao.values)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _Selo(c, c.sigla),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(c.nome, style: AppTextStyles.corpo),
+                ],
+              ),
+            DecoratedBox(
+              decoration: const BoxDecoration(color: AppColors.cinzaSuave, borderRadius: AppRadius.botao),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Como ler: ', style: AppTextStyles.corpo.copyWith(fontWeight: FontWeight.w700)),
+                    const _Selo(Competicao.master, 'M 3'),
+                    Text(' = 3 jogos do Master nesse dia', style: AppTextStyles.corpo),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            seta(Icons.chevron_left_rounded, 'Meses anteriores', _mes > 1 ? _mes - 2 : null),
+            SizedBox(
+              width: 260,
+              child: Text(
+                '${_meses[_mes - 1]} e ${_meses[_mes]} de $_ano',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.tituloSecao,
+              ),
+            ),
+            seta(Icons.chevron_right_rounded, 'Próximos meses', _mes < 11 ? _mes + 2 : null),
+            const Spacer(),
+            const _LegendaFeriado(),
+          ],
+        ),
+      ],
+      principal: [
+        GradeLarga(
+          minimo: 460,
+          espaco: AppSpacing.xl,
+          children: [
+            for (final m in [_mes, _mes + 1])
+              _GradeMes(ano: _ano, mes: m, porDia: porDia, feriados: feriados),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _Selo extends StatelessWidget {
+  final Competicao competicao;
+  final String texto;
+  const _Selo(this.competicao, this.texto);
+
+  @override
+  Widget build(BuildContext context) {
+    final cor = corDa(competicao);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cor.withValues(alpha: 0.12),
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        child: Text(
+          texto,
+          style: AppTextStyles.rotulo.copyWith(fontSize: 11, color: cor, fontWeight: FontWeight.w800),
+        ),
+      ),
+    );
+  }
+}
+
+class _LegendaFeriado extends StatelessWidget {
+  const _LegendaFeriado();
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 14,
+        height: 14,
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.vermelho, width: 1.5),
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
+        ),
+      ),
+      const SizedBox(width: AppSpacing.xs),
+      const Text('Feriado oficial', style: AppTextStyles.corpo),
+      const SizedBox(width: AppSpacing.lg),
+      Container(
+        width: 14,
+        height: 14,
+        decoration: const BoxDecoration(
+          color: AppColors.vermelhoSuave,
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
+      ),
+      const SizedBox(width: AppSpacing.xs),
+      const Text('Facultativo ou a confirmar', style: AppTextStyles.corpo),
+    ],
+  );
+}
+
+class _GradeMes extends StatelessWidget {
+  final int ano;
+  final int mes;
+  final Map<DateTime, Map<Competicao, int>> porDia;
+  final Map<DateTime, Feriado> feriados;
+
+  const _GradeMes({
+    required this.ano,
+    required this.mes,
+    required this.porDia,
+    required this.feriados,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primeiro = DateTime(ano, mes);
+    final dias = DateTime(ano, mes + 1, 0).day;
+    final vazios = primeiro.weekday - 1; // a semana começa na segunda
+    final celulas = <Widget>[
+      for (final d in const ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'])
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Text(d, style: AppTextStyles.rotulo.copyWith(color: AppColors.texto2)),
+          ),
+        ),
+      for (var i = 0; i < vazios; i++) const SizedBox.shrink(),
+      for (var d = 1; d <= dias; d++) _celula(DateTime(ano, mes, d)),
+    ];
+    final linhas = <TableRow>[];
+    for (var i = 0; i < celulas.length; i += 7) {
+      final fim = i + 7 > celulas.length ? celulas.length : i + 7;
+      linhas.add(
+        TableRow(
+          children: [
+            for (var k = i; k < fim; k++) Padding(padding: const EdgeInsets.all(3), child: celulas[k]),
+            for (var k = fim; k < i + 7; k++) const SizedBox.shrink(),
+          ],
+        ),
+      );
+    }
+    return BlocoLargo(
+      titulo: '${_meses[mes - 1]} $ano',
+      child: Table(children: linhas),
+    );
+  }
+
+  Widget _celula(DateTime dia) {
+    final feriado = feriados[dia];
+    final jogos = porDia[dia] ?? const {};
+    final domingo = dia.weekday == DateTime.sunday;
+    final rotulo = [
+      if (feriado != null) feriado.nome,
+      for (final MapEntry(key: c, value: n) in jogos.entries)
+        '$n ${n == 1 ? 'jogo' : 'jogos'} ${c == Competicao.copaMaster ? 'da' : 'do'} ${c.nome}',
+    ];
+    return Semantics(
+      label: '${dia.day}${rotulo.isEmpty ? '' : ': ${rotulo.join(', ')}'}',
+      excludeSemantics: true,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 76),
+        padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+        decoration: BoxDecoration(
+          color: feriado != null && !feriado.oficial ? AppColors.vermelhoSuave : AppColors.cartao,
+          borderRadius: AppRadius.botao,
+          border: Border.all(
+            color: feriado != null && feriado.oficial ? AppColors.vermelho : AppColors.linha,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${dia.day}',
+              style: AppTextStyles.nome.copyWith(
+                fontSize: 13,
+                color: feriado != null
+                    ? AppColors.vermelho
+                    : (domingo ? AppColors.dica : AppColors.tinta),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: [
+                for (final MapEntry(key: c, value: n) in jogos.entries) _Selo(c, '${c.sigla} $n'),
+              ],
+            ),
+            if (feriado != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  feriado.nome,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.pequeno.copyWith(color: AppColors.vermelho, fontWeight: FontWeight.w700),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }

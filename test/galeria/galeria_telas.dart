@@ -25,6 +25,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:calcio_firenze/modules/torcedor/screens/time_screen.dart';
+import 'package:calcio_firenze/shared/layout/tela_larga.dart';
 
 /// Tamanho da tela capturada. O padrão é um celular comum, a 2x. Para as
 /// capturas da App Store (iPhone de 6,9", 1320 × 2868):
@@ -183,8 +184,16 @@ void _tela(String nome, Future<void> Function(WidgetTester tester) corpo) {
   });
 }
 
+/// Capturas no layout de computador (o site em janela larga):
+///
+///   flutter test test/galeria/galeria_telas.dart --update-goldens \
+///     --dart-define=TELA_COMPUTADOR=true --dart-define=TELA_LARGURA=1440 \
+///     --dart-define=TELA_ALTURA=900 --dart-define=TELA_DENSIDADE=1
+const bool _computador = bool.fromEnvironment('TELA_COMPUTADOR');
+
 void main() {
   setUpAll(_carregarFontes);
+  if (_computador) TelaLarga.forcar = true;
 
   final exemplo = montarTemporadaExemplo();
   final encerrado = exemplo.partidas.where((p) => p.encerrada).last;

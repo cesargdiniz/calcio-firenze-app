@@ -22,16 +22,20 @@ import '../../../shared/layout/tela_larga.dart';
 
 /// O9 · Organização · Jogos: calendário do turno e acesso à súmula.
 class OrgJogosScreen extends StatelessWidget {
-  const OrgJogosScreen({super.key});
+  /// Jogo aberto ao lado (computador), marcado na lista.
+  final String? selecionado;
+  const OrgJogosScreen({super.key, this.selecionado});
 
   @override
-  Widget build(BuildContext context) =>
-      ComOrg(builder: (context, o) => _Jogos(key: ValueKey(o.dados.id), o: o));
+  Widget build(BuildContext context) => ComOrg(
+    builder: (context, o) => _Jogos(key: ValueKey(o.dados.id), o: o, selecionado: selecionado),
+  );
 }
 
 class _Jogos extends StatefulWidget {
   final OrgPronta o;
-  const _Jogos({super.key, required this.o});
+  final String? selecionado;
+  const _Jogos({super.key, required this.o, this.selecionado});
 
   @override
   State<_Jogos> createState() => _JogosState();
@@ -180,12 +184,21 @@ class _JogosState extends State<_Jogos> {
             ),
           if (etapa != null) TituloSecao(etapa.rotulo),
           for (final p in daEtapa) ...[
-            CardJogo(
-              partida: p,
-              mandante: o.time(p.mandanteId)!,
-              visitante: o.time(p.visitanteId)!,
-              local: p.local ?? o.dados.local,
-              onTap: () => context.go('/organizacao/jogos/${p.id}'),
+            DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                borderRadius: AppRadius.cartao,
+                border: p.id == widget.selecionado
+                    ? Border.all(color: AppColors.verde, width: 2)
+                    : null,
+              ),
+              child: CardJogo(
+                partida: p,
+                mandante: o.time(p.mandanteId)!,
+                visitante: o.time(p.visitanteId)!,
+                local: p.local ?? o.dados.local,
+                onTap: () => context.go('/organizacao/jogos/${p.id}'),
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
           ],
