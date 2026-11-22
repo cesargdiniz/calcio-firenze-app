@@ -54,7 +54,10 @@ void main() {
     await abrir(t, '/organizacao/gestao/campeoes/2023');
     expect(find.text('Editar campeão'), findsOneWidget);
     expect(find.text('Foggia'), findsWidgets);
-    expect(find.text('Toupeira'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) => w is TextField && w.controller?.text == 'Toupeira'),
+      findsOneWidget,
+    );
     expect(t.takeException(), isNull);
   });
 }
