@@ -58,12 +58,42 @@ class EscalacaoCampeao extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 360),
-                child: _Campo(titulo: titulo),
-              ),
-            ),
+            if (titulo.titulares.isNotEmpty)
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  child: _Campo(titulo: titulo),
+                ),
+              )
+            else ...[
+              // Sem titulares informados: o elenco por posição.
+              const Text('Elenco', style: AppTextStyles.tituloSecao),
+              const SizedBox(height: AppSpacing.sm),
+              for (final p in PosicaoCampeao.values)
+                if (titulo.elenco.where((j) => j.posicao == p).toList() case final daPosicao
+                    when daPosicao.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 96,
+                          child: Text(
+                            daPosicao.length == 1 ? p.nome : p.plural,
+                            style: AppTextStyles.rotulo.copyWith(color: AppColors.texto2),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            daPosicao.map((j) => j.nome).join(', '),
+                            style: AppTextStyles.nome,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+            ],
             if (titulo.premios.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
               Text('Premiações de ${titulo.ano}', style: AppTextStyles.tituloSecao),
@@ -89,7 +119,7 @@ class EscalacaoCampeao extends StatelessWidget {
                   ),
                 ),
             ],
-            if (reservas.isNotEmpty) ...[
+            if (reservas.isNotEmpty && titulo.titulares.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
               Text('Reservas (${reservas.length})', style: AppTextStyles.tituloSecao),
               const SizedBox(height: AppSpacing.sm),

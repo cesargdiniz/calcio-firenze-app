@@ -82,6 +82,10 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
         JogadorCampeao('Hélio', _a),
         JogadorCampeao('Alexandre Soberano', _a),
       ],
+      premios: [
+        PremioTemporada('Melhor jogador', 'Paulinho'),
+        PremioTemporada('Artilheiro', 'Paulinho'),
+      ],
     ),
     TituloTemporada(
       2023,
@@ -109,7 +113,28 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
       ],
     ),
     TituloTemporada(2022, 'Brasil'),
-    TituloTemporada(2021, 'Juventus'),
+    // Titulares ainda não informados: o painel mostra o elenco por posição.
+    TituloTemporada(
+      2021,
+      'Juventus',
+      elenco: [
+        JogadorCampeao('Santana', _g),
+        JogadorCampeao('Ivo Barbosa', _z),
+        JogadorCampeao('Antonio Marcos', _z),
+        JogadorCampeao('Robledo', _z),
+        JogadorCampeao('Sagica', _z),
+        JogadorCampeao('Jhovan', _m),
+        JogadorCampeao('Tarik Toda', _m),
+        JogadorCampeao('Henrique Bezerra', _m),
+        JogadorCampeao('Renato Caja', _a),
+        JogadorCampeao('Daniel Diniz', _a),
+        JogadorCampeao('Marcilio Guerreiro', _a),
+      ],
+      premios: [
+        PremioTemporada('Melhor jogador', 'Daniel Diniz'),
+        PremioTemporada('Artilheiro', 'Daniel Diniz'),
+      ],
+    ),
   ],
   Categoria.livre: [
     TituloTemporada(2025, 'Foggia'),
