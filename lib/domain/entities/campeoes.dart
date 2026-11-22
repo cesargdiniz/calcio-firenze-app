@@ -156,7 +156,7 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
       cor: 0xFFFFDF00,
       corNumero: 0xFF009C3B,
       elenco: [
-        JogadorCampeao('Toupeira', _g, titular: true),
+        JogadorCampeao('Toupeira', _g, titular: true, numero: 1),
         JogadorCampeao('Olavo', _z, titular: true, numero: 5),
         JogadorCampeao('Maicon', _z, titular: true, numero: 4),
         JogadorCampeao('Cesar', _z),
