@@ -172,7 +172,7 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
       ],
       premios: [
         PremioTemporada('Melhor jogador', 'Macapá'),
-        PremioTemporada('Melhor goleiro', 'Toupeira'),
+        PremioTemporada('Melhor goleiro', 'Helielder', time: 'França'),
       ],
     ),
     TituloTemporada(
@@ -226,7 +226,33 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
         PremioTemporada('Melhor goleiro', 'Gustavo', time: 'Udinese'),
       ],
     ),
-    TituloTemporada(2024, 'Roma'),
+    TituloTemporada(
+      2024,
+      'Roma',
+      // Grená com número amarelo, as cores da Roma.
+      cor: 0xFF8E1F2F,
+      corNumero: 0xFFF4B43A,
+      elenco: [
+        JogadorCampeao('Gabriel Luz', _g, titular: true, numero: 1),
+        JogadorCampeao('Alex Nascimento', _z, titular: true, numero: 3),
+        JogadorCampeao('Cabeludo', _z, titular: true, numero: 4),
+        JogadorCampeao('Topeira', _m, titular: true, numero: 8),
+        JogadorCampeao('Lucas Gabriel', _m, titular: true, numero: 10),
+        JogadorCampeao('Marcelo Ferraz', _a, titular: true, numero: 9, curto: 'Marcola'),
+        JogadorCampeao('Jhovan', null),
+        JogadorCampeao('Matheus Rodovalho', null),
+        JogadorCampeao('Erick', null),
+        JogadorCampeao('Murilo', null),
+        JogadorCampeao('Felipe Alves', null),
+        JogadorCampeao('Carlos Newton', null),
+        JogadorCampeao('Bruno Fernandes', null),
+      ],
+      premios: [
+        PremioTemporada('Melhor jogador', 'Lucas Gabriel'),
+        PremioTemporada('Artilheiro', 'Lucas Gabriel'),
+        PremioTemporada('Melhor goleiro', 'Gabriel Luz'),
+      ],
+    ),
     // Titulares e premiações a confirmar: por ora, só o elenco.
     TituloTemporada(
       2023,
