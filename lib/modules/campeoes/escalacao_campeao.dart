@@ -74,9 +74,6 @@ class EscalacaoCampeao extends StatelessWidget {
                 style: AppTextStyles.nome.copyWith(height: 1.5),
               ),
             ],
-                    ),
-                  ),
-            ],
             if (titulo.premios.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
               Text('Premiações de ${titulo.ano}', style: AppTextStyles.tituloSecao),
