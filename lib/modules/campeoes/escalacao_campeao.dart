@@ -64,6 +64,31 @@ class EscalacaoCampeao extends StatelessWidget {
                 child: _Campo(titulo: titulo),
               ),
             ),
+            if (titulo.premios.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xl),
+              Text('Premiações de ${titulo.ano}', style: AppTextStyles.tituloSecao),
+              const SizedBox(height: AppSpacing.sm),
+              for (final p in titulo.premios)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.military_tech_rounded, color: AppColors.amarelo, size: 22),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          p.premio,
+                          style: AppTextStyles.rotulo.copyWith(color: AppColors.texto2),
+                        ),
+                      ),
+                      Text(
+                        p.time == null ? p.nome : '${p.nome} (${p.time})',
+                        style: AppTextStyles.nome,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
             if (reservas.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
               Text('Reservas (${reservas.length})', style: AppTextStyles.tituloSecao),
@@ -169,7 +194,7 @@ class _Jogador extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             child: Text(
-              j.nome,
+              j.noCampo,
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

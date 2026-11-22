@@ -19,14 +19,21 @@ void main() {
     expect(foggia.titulares.map((j) => j.numero), [1, 3, 6, 7, 10, 9]);
   });
 
+  test('Sampdoria 2024: titulares com número e nome curto, sete reservas', () {
+    final samp = campeoesDe(Categoria.master).firstWhere((t) => t.ano == 2024);
+    expect(samp.titulares.map((j) => '${j.numero} ${j.noCampo}'), [
+      '94 M Jr', '4 Marcelo', '100 Saymon', '10 Pedreiro', '20 Eddy', '9 Paulinho', //
+    ]);
+    expect(samp.titularesDe(PosicaoCampeao.zagueiro), hasLength(2));
+    expect(samp.reservas, hasLength(7));
+  });
+
   testWidgets('tocar no campeão abre o campinho com titulares e reservas', (t) async {
     await t.pumpWidget(
       const MaterialApp(home: Scaffold(body: SingleChildScrollView(
         child: ListaCampeoes(categoria: Categoria.master),
       ))),
     );
-    // Só quem tem elenco cadastrado abre a escalação.
-    expect(find.text('Toque para ver o elenco'), findsOneWidget);
     await t.tap(find.text('Foggia'));
     await t.pumpAndSettle();
     expect(find.text('Campeão Master 2023'), findsOneWidget);
@@ -35,6 +42,8 @@ void main() {
     expect(find.text('10'), findsOneWidget);
     expect(find.text('Reservas (8)'), findsOneWidget);
     expect(find.textContaining('Cleuby'), findsOneWidget);
+    expect(find.text('Premiações de 2023'), findsOneWidget);
+    expect(find.text('Carmona (Sampdoria)'), findsOneWidget);
     expect(t.takeException(), isNull);
   });
 }
