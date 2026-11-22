@@ -269,7 +269,7 @@ void main() {
     });
     _tela('05c calendário filtrado', (t) async {
       await _abrir(t, '/calendario');
-      await t.tap(find.text('Livre'));
+      await t.tap(find.text('Livre').first);
       await t.pumpAndSettle();
       await _capturar(t, '05c_calendario_livre');
     });
