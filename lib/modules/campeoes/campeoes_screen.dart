@@ -119,10 +119,7 @@ class _CartaoTemporada extends StatelessWidget {
               child: Text('${t.ano}', style: AppTextStyles.tituloSecao.copyWith(fontSize: 18)),
             ),
             Expanded(child: Text(t.campeao, style: AppTextStyles.nome)),
-            if (temElenco) ...[
-              const Text('Escalação', style: AppTextStyles.subtitulo),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.oliva),
-            ],
+            if (temElenco) const Icon(Icons.chevron_right_rounded, color: AppColors.oliva),
           ],
         ),
       ),
