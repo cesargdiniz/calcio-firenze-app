@@ -48,8 +48,8 @@ class TorcedorShell extends StatelessWidget {
             ativo: atalho == 0,
           ),
           AtalhoMenu(
-            Icons.event_note_outlined,
-            'Calendário completo',
+            Icons.event_outlined,
+            'Calendário',
             (c) => c.go('/torcedor/calendario'),
             ativo: atalho == 1,
           ),
