@@ -36,6 +36,15 @@
             "value": "no-cache"
           }
         ]
+      },
+      {
+        "source": "**/@(index.html|flutter_bootstrap.js|main.dart.js|flutter_service_worker.js|version.json)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
       }
     ]
   },
