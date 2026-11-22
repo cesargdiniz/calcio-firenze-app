@@ -8,6 +8,8 @@ import 'dart:io';
 import 'package:calcio_firenze/data/exemplo/temporada_exemplo.dart';
 import 'package:calcio_firenze/data/firebase/mapeadores.dart';
 import 'package:calcio_firenze/domain/entities/categoria.dart';
+import 'package:calcio_firenze/domain/entities/temporada.dart';
+import 'package:calcio_regras/calcio_regras.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,26 +24,35 @@ void main() {
   test('semente das três categorias', () {
     expect(DateTime(2027, 3, 1, 20, 30).timeZoneOffset, const Duration(hours: -3));
     final saida = <String, Object?>{};
-    // Master volta a zero com os 10 times reais (Livre e Super Master ficam).
-    const reais = {
-      'INT': ('Inter', 'INT'),
-      'FIO': ('Fiorentina', 'FIO'),
-      'SAM': ('Sampdoria', 'SAM'),
-      'FOG': ('Foggia', 'FOG'),
-      'BEN': ('Benevento', 'BEN'),
-      'MIL': ('Milan', 'MIL'),
-      'UDI': ('Udinese', 'UDI'),
-      'COM': ('Como 1907', 'COM'),
-      'JUV': ('Juventus', 'JUV'),
-      'SAS': ('Sassuolo', 'SAS'),
+    // Dirigentes do Master (lista da Organização), sem apagar nada.
+    const dirigentes = {
+      'UDI': 'Wendell',
+      'FOG': 'Netão',
+      'BEN': 'The Boa',
+      'SAS': 'Ferreira',
+      'MIL': 'Teen',
+      'INT': 'Carneiro',
+      'COM': 'Junior',
+      'SAM': 'Alex',
+      'FIO': 'Jhovan',
+      'JUV': 'Makoto',
     };
     saida[Categoria.master.temporadaId] = {
-      'times': {
-        for (final t in timesMaster2027)
-          t.id: {..._json(timeParaMapa(t))! as Map<String, dynamic>, 'nome': reais[t.id]!.$1, 'sigla': reais[t.id]!.$2},
+      'somenteGravar': true,
+      'pessoas': {
+        for (final e in dirigentes.entries)
+          '${e.key.toLowerCase()}-dirigente': _json(
+            pessoaParaMapa(
+              Pessoa(
+                id: '${e.key.toLowerCase()}-dirigente',
+                nome: e.value,
+                timeId: e.key,
+                funcao: Funcao.atleta,
+                dirigente: true,
+              ),
+            ),
+          ),
       },
-      'pessoas': <String, Object?>{},
-      'partidas': <String, Object?>{},
     };
     File(Platform.environment['SAIDA'] ?? 'semente.json').writeAsStringSync(jsonEncode(saida));
   });

@@ -6,7 +6,7 @@ name: Semear temporada de lançamento
 
 on:
   push:
-    branches: [claude/semear]
+    branches: [claude/dirigentes-master]
 
 jobs:
   semear:
@@ -42,8 +42,9 @@ jobs:
           (async()=>{
             for (const [temp,dados] of Object.entries(semente)) {
               const ref=db.collection("temporadas").doc(temp);
-              for (const col of ["times","pessoas","partidas","pagamentos","decisoes"]) {
-                const docs=(await ref.collection(col).get()).docs;
+              const cols=dados.somenteGravar?Object.keys(dados).filter(k=>k!=="somenteGravar"):["times","pessoas","partidas","pagamentos","decisoes"];
+              for (const col of cols) {
+                const docs=dados.somenteGravar?[]:(await ref.collection(col).get()).docs;
                 for (let i=0;i<docs.length;i+=400){const b=db.batch();docs.slice(i,i+400).forEach(d=>b.delete(d.ref));await b.commit();}
                 const novos=Object.entries(dados[col]||{});
                 for (let i=0;i<novos.length;i+=400){const b=db.batch();novos.slice(i,i+400).forEach(([id,m])=>b.set(ref.collection(col).doc(id),conv(m)));await b.commit();}
