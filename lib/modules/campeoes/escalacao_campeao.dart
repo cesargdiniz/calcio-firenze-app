@@ -66,32 +66,9 @@ class EscalacaoCampeao extends StatelessWidget {
             ),
             if (reservas.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
-              const Text('Reservas', style: AppTextStyles.tituloSecao),
+              Text('Reservas (${reservas.length})', style: AppTextStyles.tituloSecao),
               const SizedBox(height: AppSpacing.sm),
-              for (final p in PosicaoCampeao.values)
-                if (reservas.where((j) => j.posicao == p).toList() case final daPosicao
-                    when daPosicao.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 96,
-                          child: Text(
-                            daPosicao.length == 1 ? p.nome : p.plural,
-                            style: AppTextStyles.rotulo.copyWith(color: AppColors.texto2),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            daPosicao.map((j) => j.nome).join(', '),
-                            style: AppTextStyles.nome,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              Text(reservas.map((j) => j.nome).join(', '), style: AppTextStyles.nome.copyWith(height: 1.5)),
             ],
           ],
         ),
@@ -137,7 +114,7 @@ class _Campo extends StatelessWidget {
           }
         }
         return Semantics(
-          label: 'Titulares: ${titulo.titulares.map((j) => '${j.nome}, ${j.posicao.nome}').join('; ')}',
+          label: 'Titulares: ${titulo.titulares.map((j) => '${j.numero ?? ''} ${j.nome}, ${j.posicao?.nome ?? ''}').join('; ')}',
           excludeSemantics: true,
           child: ClipRRect(
             borderRadius: AppRadius.cartao,
@@ -162,6 +139,8 @@ class _Jogador extends StatelessWidget {
     final iniciais = partes.length > 1
         ? '${partes.first[0]}${partes.last[0]}'
         : j.nome.substring(0, j.nome.length < 2 ? j.nome.length : 2);
+    // Número da camisa; sem número, as iniciais.
+    final marca = j.numero?.toString() ?? iniciais.toUpperCase();
     return Column(
       children: [
         Container(
@@ -174,8 +153,11 @@ class _Jogador extends StatelessWidget {
             boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 6, offset: Offset(0, 2))],
           ),
           child: Text(
-            iniciais.toUpperCase(),
-            style: AppTextStyles.nome.copyWith(fontSize: 13, color: AppColors.tinta),
+            marca,
+            style: AppTextStyles.nome.copyWith(
+              fontSize: j.numero == null ? 13 : 16,
+              color: AppColors.tinta,
+            ),
           ),
         ),
         const SizedBox(height: 4),

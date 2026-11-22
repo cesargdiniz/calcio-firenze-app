@@ -12,13 +12,14 @@ enum PosicaoCampeao {
   const PosicaoCampeao(this.nome, this.plural);
 }
 
-/// Jogador do elenco campeão.
+/// Jogador do elenco campeão. Nos reservas a posição é opcional.
 class JogadorCampeao {
   final String nome;
-  final PosicaoCampeao posicao;
+  final PosicaoCampeao? posicao;
   final bool titular;
+  final int? numero;
 
-  const JogadorCampeao(this.nome, this.posicao, {this.titular = false});
+  const JogadorCampeao(this.nome, this.posicao, {this.titular = false, this.numero});
 }
 
 /// Campeão de uma temporada e, quando cadastrado, o elenco do título.
@@ -51,19 +52,20 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
       2023,
       'Foggia',
       elenco: [
-        JogadorCampeao('Toupeira', _g, titular: true),
-        JogadorCampeao('Cesar', _z, titular: true),
-        JogadorCampeao('Netão', _z, titular: true),
+        JogadorCampeao('Toupeira', _g, titular: true, numero: 1),
+        JogadorCampeao('Cesar', _z, titular: true, numero: 3),
+        JogadorCampeao('Netão', _z, titular: true, numero: 6),
         JogadorCampeao('Sagica', _z),
         JogadorCampeao('Rafael Melul', _z),
-        JogadorCampeao('Pedro Reis', _m, titular: true),
+        JogadorCampeao('Pedro Reis', _m, titular: true, numero: 7),
         JogadorCampeao('Clayton', _m),
-        JogadorCampeao('Klelio', _m, titular: true),
+        JogadorCampeao('Klelio', _m, titular: true, numero: 10),
         JogadorCampeao('Dudu', _m),
         JogadorCampeao('Erick Pamplona', _a),
-        JogadorCampeao('Daniel Diniz', _a, titular: true),
+        JogadorCampeao('Daniel Diniz', _a, titular: true, numero: 9),
         JogadorCampeao('Ceará', _a),
         JogadorCampeao('Marcílio', _a),
+        JogadorCampeao('Cleuby', null),
       ],
     ),
     TituloTemporada(2022, 'Brasil'),
