@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -104,7 +105,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   void _aoTerminar(AnimationStatus status) {
-    if (status == AnimationStatus.completed && mounted) context.go(_perfilSalvo ?? '/entrar');
+    if (status != AnimationStatus.completed || !mounted) return;
+    // No site, sempre a escolha do perfil (o navegador pode ser de outra
+    // pessoa, ou de quem alterna entre Torcedor e Organização). No celular,
+    // direto para o perfil guardado.
+    context.go(kIsWeb ? '/entrar' : (_perfilSalvo ?? '/entrar'));
   }
 
   @override
