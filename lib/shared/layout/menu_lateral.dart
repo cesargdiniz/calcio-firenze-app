@@ -37,6 +37,9 @@ class MenuLateral extends StatelessWidget {
   /// Ex.: "Torcedor · sem login".
   final String perfil;
 
+  /// Sai da conta (Participante e Organização). Nulo: sem login.
+  final Future<void> Function()? onSair;
+
   const MenuLateral({
     super.key,
     required this.itens,
@@ -45,6 +48,7 @@ class MenuLateral extends StatelessWidget {
     required this.perfil,
     this.atalhos = const [],
     this.categoria,
+    this.onSair,
   });
 
   @override
@@ -119,6 +123,18 @@ class MenuLateral extends StatelessWidget {
                       discreto: true,
                       onTap: () => context.push('/entrar'),
                     ),
+                    if (onSair != null)
+                      _Linha(
+                        icone: Icons.logout_rounded,
+                        rotulo: 'Sair',
+                        discreto: true,
+                        onTap: () async {
+                          // O menu some ao sair da conta: guarda o roteador antes.
+                          final rotas = GoRouter.of(context);
+                          await onSair!();
+                          rotas.go('/entrar');
+                        },
+                      ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
                       child: Text(perfil, style: AppTextStyles.pequeno),

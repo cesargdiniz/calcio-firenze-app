@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/repositories/preferencias_repository.dart';
+import '../../shared/layout/tela_larga.dart';
 import '../../shared/theme/app_colors.dart';
 
 /// Como cada forma do fundo entra em cena.
@@ -149,10 +150,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         child: ClipRect(
           child: SizedBox.expand(
             // O quadro do Figma cobre a tela inteira, em qualquer proporção.
+            // No computador (janela deitada) ele apareceria gigante: fica
+            // inteiro, no centro, na altura da janela.
             child: FittedBox(
-              fit: BoxFit.cover,
+              fit: TelaLarga.menuLateral(context) ? BoxFit.contain : BoxFit.cover,
               clipBehavior: Clip.hardEdge,
-              child: SizedBox.fromSize(
+              child: ClipRect(
+                child: SizedBox.fromSize(
                 size: _quadro,
                 child: AnimatedBuilder(
                   animation: _controle,
@@ -177,6 +181,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     );
                   },
                 ),
+              ),
               ),
             ),
           ),
