@@ -275,6 +275,11 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
         JogadorCampeao('Renato Pantoja', null),
         JogadorCampeao('Romeu', null),
       ],
+      premios: [
+        PremioTemporada('Melhor jogador', 'Alessandro Melul'),
+        PremioTemporada('Artilheiro', 'Lucas Gabriel', time: 'Juventus'),
+        PremioTemporada('Melhor goleiro', 'Gustavo'),
+      ],
     ),
     TituloTemporada(2022, 'Fiorentina'),
     TituloTemporada(2021, 'Milan'),
