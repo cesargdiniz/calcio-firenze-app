@@ -16,6 +16,7 @@ import '../avisos.dart';
 import '../participante_controller.dart';
 import '../widgets/pendencia_card.dart';
 import '../../torcedor/screens/time_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// Entrega o estado "pronto" às telas do Participante.
 class ComParticipante extends StatelessWidget {
@@ -45,8 +46,102 @@ class ParticipanteInicioScreen extends StatelessWidget {
       final rodada = s.proximoJogo?.rodada;
       final avisos = avisosDoParticipante(p).length;
 
+      final botaoAvisos = IconButton(
+        tooltip: avisos == 0 ? 'Avisos' : 'Avisos ($avisos)',
+        onPressed: () => context.go('/participante/avisos'),
+        icon: Badge(
+          isLabelVisible: avisos > 0,
+          backgroundColor: AppColors.vermelho,
+          label: Text('$avisos'),
+          child: const Icon(Icons.notifications_none_rounded, color: AppColors.tinta),
+        ),
+      );
+      final situacao = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(child: Text('Cartões no turno', style: AppTextStyles.rotulo)),
+              Etiqueta(
+                s.amarelosNoCiclo == 1 ? '1 amarelo' : '${s.amarelosNoCiclo} amarelos',
+                cor: AppColors.amareloEscuro,
+                fundo: AppColors.amareloSuave,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  rodada == null ? 'Próximo jogo' : 'Rodada $rodada',
+                  style: AppTextStyles.rotulo,
+                ),
+              ),
+              _SituacaoEtiqueta(p),
+            ],
+          ),
+          ..._alertas(p, rodada),
+        ],
+      );
+      final pendencias = <Widget>[
+        if (s.pendencias.isEmpty)
+          const Text('Nenhuma pendência. Tudo em dia.', style: AppTextStyles.corpo)
+        else ...[
+          for (final x in s.pendencias) PendenciaCard(x),
+          const Text(
+            'O pagamento é feito à Organização, fora do app. Depois de confirmado, '
+            'a pendência aparece como quitada.',
+            style: AppTextStyles.pequeno,
+          ),
+        ],
+      ];
+      final proximo = s.proximoJogo != null && painel != null
+          ? CardJogo(
+              onTapTime: (id) => abrirTime(context, painel, id),
+              partida: s.proximoJogo!,
+              mandante: painel.time(s.proximoJogo!.mandanteId),
+              visitante: painel.time(s.proximoJogo!.visitanteId),
+              local: painel.local,
+              onTap: () => context.go('/participante/jogos/${s.proximoJogo!.id}'),
+            )
+          : null;
+
+      if (TelaLarga.de(context)) {
+        return PaginaLarga(
+          titulo: 'Olá, $primeiroNome',
+          subtitulo: '${p.papel.rotulo} · ${s.time.nome}',
+          acao: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (painel != null) BotaoCampeoes(categoria: painel.categoria),
+              botaoAvisos,
+            ],
+          ),
+          principal: [
+            BlocoLargo(titulo: 'Minha situação', child: situacao),
+            BlocoLargo(
+              titulo: 'Pendências',
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: pendencias),
+            ),
+          ],
+          lateral: [
+            if (proximo != null) BlocoLargo(titulo: 'Próximo jogo', child: proximo),
+            BlocoLargo(
+              titulo: 'Avisos',
+              acao: 'Abrir',
+              onAcao: () => context.go('/participante/avisos'),
+              child: Text(
+                avisos == 0 ? 'Nenhum aviso novo.' : (avisos == 1 ? '1 aviso.' : '$avisos avisos.'),
+                style: AppTextStyles.corpo,
+              ),
+            ),
+          ],
+        );
+      }
+
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           Row(
             children: [
@@ -65,71 +160,14 @@ class ParticipanteInicioScreen extends StatelessWidget {
                 ),
               ),
               if (painel != null) BotaoCampeoes(categoria: painel.categoria),
-              IconButton(
-                tooltip: avisos == 0 ? 'Avisos' : 'Avisos ($avisos)',
-                onPressed: () => context.go('/participante/avisos'),
-                icon: Badge(
-                  isLabelVisible: avisos > 0,
-                  backgroundColor: AppColors.vermelho,
-                  label: Text('$avisos'),
-                  child: const Icon(Icons.notifications_none_rounded, color: AppColors.tinta),
-                ),
-              ),
+              botaoAvisos,
             ],
           ),
           const TituloSecao('Minha situação'),
-          Cartao(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Expanded(child: Text('Cartões no turno', style: AppTextStyles.rotulo)),
-                    Etiqueta(
-                      s.amarelosNoCiclo == 1 ? '1 amarelo' : '${s.amarelosNoCiclo} amarelos',
-                      cor: AppColors.amareloEscuro,
-                      fundo: AppColors.amareloSuave,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        rodada == null ? 'Próximo jogo' : 'Rodada $rodada',
-                        style: AppTextStyles.rotulo,
-                      ),
-                    ),
-                    _SituacaoEtiqueta(p),
-                  ],
-                ),
-                ..._alertas(p, rodada),
-              ],
-            ),
-          ),
+          Cartao(child: situacao),
           const TituloSecao('Pendências'),
-          if (s.pendencias.isEmpty)
-            const Text('Nenhuma pendência. Tudo em dia.', style: AppTextStyles.corpo)
-          else ...[
-            for (final x in s.pendencias) PendenciaCard(x),
-            const Text(
-              'O pagamento é feito à Organização, fora do app. Depois de confirmado, '
-              'a pendência aparece como quitada.',
-              style: AppTextStyles.pequeno,
-            ),
-          ],
-          if (s.proximoJogo != null && painel != null) ...[
-            const TituloSecao('Próximo jogo'),
-            CardJogo(
-              onTapTime: (id) => abrirTime(context, painel, id),
-              partida: s.proximoJogo!,
-              mandante: painel.time(s.proximoJogo!.mandanteId),
-              visitante: painel.time(s.proximoJogo!.visitanteId),
-              local: painel.local,
-              onTap: () => context.go('/participante/jogos/${s.proximoJogo!.id}'),
-            ),
-          ],
+          ...pendencias,
+          if (proximo != null) ...[const TituloSecao('Próximo jogo'), proximo],
         ],
       );
     },

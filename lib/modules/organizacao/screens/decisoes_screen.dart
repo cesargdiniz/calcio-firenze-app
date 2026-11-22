@@ -13,6 +13,7 @@ import '../../../shared/widgets/escudo.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import 'pedidos_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 const _rotaLista = '/organizacao/gestao/decisoes';
 
@@ -84,7 +85,7 @@ class DecisoesScreen extends StatelessWidget {
         );
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           const VoltarGestao(),
           CabecalhoTela(
@@ -234,7 +235,7 @@ class EditarDecisaoScreen extends StatelessWidget {
           : null;
       if (indisponivel != null) {
         return ListView(
-          padding: AppSpacing.tela,
+          padding: TelaLarga.margens(context),
           children: [
             const VoltarGestao(rotulo: 'Decisões e punições', rota: _rotaLista),
             Text(indisponivel, style: AppTextStyles.corpo),
@@ -667,6 +668,6 @@ class _FormularioState extends State<_Formulario> {
       );
     }
 
-    return ListView(padding: AppSpacing.tela, children: filhos);
+    return ListView(padding: TelaLarga.margens(context), children: filhos);
   }
 }

@@ -3,7 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../shared/layout/menu_lateral.dart';
+import '../../shared/layout/tela_larga.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/widgets/coluna_larga.dart';
 import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
@@ -30,18 +33,51 @@ class OrganizacaoShell extends StatelessWidget {
   final StatefulNavigationShell navegacao;
   const OrganizacaoShell({super.key, required this.navegacao});
 
+  static const _itens = [
+    ItemMenu(Icons.home_outlined, 'Início'),
+    ItemMenu(Icons.calendar_month_outlined, 'Jogos'),
+    ItemMenu(Icons.style_outlined, 'Disciplina'),
+    ItemMenu(Icons.bar_chart_rounded, 'Tabela'),
+    ItemMenu(Icons.tune_rounded, 'Gestão'),
+  ];
+
+  void _ir(int i) => navegacao.goBranch(i, initialLocation: i == navegacao.currentIndex);
+
   @override
   Widget build(BuildContext context) => BlocBuilder<OrganizacaoController, OrgStatus>(
     builder: (context, status) => switch (status) {
+      OrgPronta(:final categoria, :final categorias) when TelaLarga.menuLateral(context) =>
+        _AlinharCategoria(
+          categoria: categoria,
+          child: ComMenuLateral(
+            menu: MenuLateral(
+              itens: _itens,
+              selecionado: navegacao.currentIndex,
+              onSelecionar: _ir,
+              categoria: BarraCategoria(
+                atual: categoria,
+                opcoes: categorias,
+                noMenu: true,
+                onEscolher: context.read<OrganizacaoController>().escolherCategoria,
+              ),
+              perfil: 'Organização · ${categoria.nome}',
+            ),
+            conteudo: navegacao,
+          ),
+        ),
       OrgCarregando() => const Scaffold(
         body: Center(child: CircularProgressIndicator(color: AppColors.verde)),
       ),
-      OrgSemLogin() => const LoginScreen(
-        titulo: 'Entrar como Organização',
-        subtitulo: 'Acesso restrito a quem organiza o campeonato.',
+      OrgSemLogin() => const ColunaCentral(
+        child: LoginScreen(
+          titulo: 'Entrar como Organização',
+          subtitulo: 'Acesso restrito a quem organiza o campeonato.',
+        ),
       ),
-      OrgSemAcesso(:final sessao) => _SemAcesso(uid: sessao.uid, email: sessao.email),
-      OrgSemCategoria(:final sessao) => _InformarCategoria(email: sessao.email),
+      OrgSemAcesso(:final sessao) => ColunaCentral(
+        child: _SemAcesso(uid: sessao.uid, email: sessao.email),
+      ),
+      OrgSemCategoria(:final sessao) => ColunaCentral(child: _InformarCategoria(email: sessao.email)),
       OrgFalha(:final mensagem, :final detalhe) => Scaffold(
         body: Center(
           child: Padding(
@@ -93,14 +129,9 @@ class OrganizacaoShell extends StatelessWidget {
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: navegacao.currentIndex,
-          onDestinationSelected: (i) =>
-              navegacao.goBranch(i, initialLocation: i == navegacao.currentIndex),
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Início'),
-            NavigationDestination(icon: Icon(Icons.calendar_month_outlined), label: 'Jogos'),
-            NavigationDestination(icon: Icon(Icons.style_outlined), label: 'Disciplina'),
-            NavigationDestination(icon: Icon(Icons.bar_chart_rounded), label: 'Tabela'),
-            NavigationDestination(icon: Icon(Icons.tune_rounded), label: 'Gestão'),
+          onDestinationSelected: _ir,
+          destinations: [
+            for (final i in _itens) NavigationDestination(icon: Icon(i.icone), label: i.rotulo),
           ],
         ),
       ),

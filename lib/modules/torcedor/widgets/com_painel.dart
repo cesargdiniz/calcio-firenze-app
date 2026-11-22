@@ -6,6 +6,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../torcedor_controller.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// Resolve carregando / falha uma vez só e entrega o [Painel] pronto às telas.
 class ComPainel extends StatelessWidget {
@@ -20,7 +21,7 @@ class ComPainel extends StatelessWidget {
       ),
       TorcedorFalha(:final mensagem) => Center(
         child: Padding(
-          padding: AppSpacing.tela,
+          padding: TelaLarga.margens(context),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

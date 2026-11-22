@@ -9,10 +9,21 @@ import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// O6 · Organização · Gestão
 class GestaoScreen extends StatelessWidget {
-  const GestaoScreen({super.key});
+  /// Rota aberta ao lado (computador), para marcar a seção.
+  final String? rotaAtual;
+  const GestaoScreen({super.key, this.rotaAtual});
+
+  bool _aberta(String rota) {
+    final atual = rotaAtual;
+    if (atual == null) return false;
+    // Na raiz, o computador mostra os times.
+    if (atual == '/organizacao/gestao') return rota.endsWith('/times');
+    return atual.startsWith(rota);
+  }
 
   @override
   Widget build(BuildContext context) => ComOrg(
@@ -29,13 +40,16 @@ class GestaoScreen extends StatelessWidget {
       );
 
       Widget item(String texto, {required String rota}) => ListTile(
+        selected: _aberta(rota),
+        selectedTileColor: AppColors.verdeSuave,
+        selectedColor: AppColors.verde,
         title: Text(texto, style: AppTextStyles.rotulo),
         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.dica),
         onTap: () => context.go(rota),
       );
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           CabecalhoTela('Gestão', subtitulo: o.dados.nome),
           const SizedBox(height: AppSpacing.md),

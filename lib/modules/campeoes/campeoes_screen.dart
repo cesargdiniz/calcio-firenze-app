@@ -8,6 +8,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
+import '../../shared/layout/tela_larga.dart';
 
 /// Botão de troféu do Início: abre os campeões da categoria. Some nas
 /// categorias sem histórico.
@@ -41,8 +42,28 @@ class CampeoesScreen extends StatelessWidget {
     body: BlocBuilder<CategoriaController, CategoriaStatus>(
       builder: (context, status) {
         final atual = status is CategoriaEscolhida ? status.categoria : categoria;
+        if (TelaLarga.de(context)) {
+          // No computador, as três categorias lado a lado.
+          return PaginaLarga(
+            titulo: 'Campeões',
+            subtitulo: 'Calcio Firenze · todas as categorias',
+            principal: [
+              GradeLarga(
+                minimo: 280,
+                children: [
+                  for (final c in Categoria.values)
+                    if (campeoesDe(c).isNotEmpty)
+                      BlocoLargo(
+                        titulo: c == atual ? '${c.nome} · em exibição' : c.nome,
+                        child: ListaCampeoes(categoria: c),
+                      ),
+                ],
+              ),
+            ],
+          );
+        }
         return ListView(
-          padding: AppSpacing.tela,
+          padding: TelaLarga.margens(context),
           children: [
             CabecalhoTela('Campeões', subtitulo: 'Calcio Firenze · ${atual.nome}'),
             const SizedBox(height: AppSpacing.md),

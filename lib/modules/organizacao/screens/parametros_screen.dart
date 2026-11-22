@@ -10,6 +10,7 @@ import '../../../shared/widgets/basicos.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import 'pedidos_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// Um valor ajustável do regulamento.
 class _Campo {
@@ -198,7 +199,7 @@ class _FormularioState extends State<_Formulario> {
 
   @override
   Widget build(BuildContext context) => ListView(
-    padding: AppSpacing.tela,
+    padding: TelaLarga.margens(context),
     children: [
       const VoltarGestao(),
       CabecalhoTela('Regulamento e parâmetros', subtitulo: widget.titulo),

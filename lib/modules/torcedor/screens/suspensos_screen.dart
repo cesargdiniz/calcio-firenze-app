@@ -4,12 +4,14 @@ import '../../../domain/entities/temporada.dart';
 import '../../../domain/entities/etapa.dart';
 import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/compartilhar/compartilhar_imagem.dart';
+import '../../../shared/format.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 import '../widgets/com_painel.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// T4 · Torcedor · Suspensos. Mostra quem NÃO joga a próxima rodada.
 class SuspensosScreen extends StatelessWidget {
@@ -29,8 +31,6 @@ class _Suspensos extends StatefulWidget {
 }
 
 class _SuspensosState extends State<_Suspensos> {
-  bool _verPendurados = false;
-
   /// Suspensos e pendurados da próxima etapa, como imagem.
   void _compartilhar(Painel p) {
     final etapa = p.proximaEtapa;
@@ -67,70 +67,126 @@ class _SuspensosState extends State<_Suspensos> {
     );
   }
 
+  /// 0: suspensos, 1: pendurados, 2: histórico.
+  int _aba = 0;
+
+  List<Widget> _filtros(Painel p) => [
+    ChipFiltro('Suspensos (${p.suspensos.length})', ativo: _aba == 0, onTap: () => setState(() => _aba = 0)),
+    ChipFiltro('Pendurados (${p.pendurados.length})', ativo: _aba == 1, onTap: () => setState(() => _aba = 1)),
+    ChipFiltro('Histórico (${p.cumpridas.length})', ativo: _aba == 2, onTap: () => setState(() => _aba = 2)),
+  ];
+
+  List<Widget> _lista(Painel p) => switch (_aba) {
+    0 when p.suspensos.isEmpty => const [
+      ListaVazia(
+        titulo: 'Ninguém suspenso',
+        texto: 'Todos os atletas podem jogar a próxima rodada. '
+            'A lista aparece aqui quando houver suspensões.',
+      ),
+    ],
+    0 => [
+      for (final s in p.suspensos)
+        _Linha(
+          pessoa: s.pessoa,
+          time: s.time,
+          detalhe: s.motivo,
+          lateral: s.retorno ?? '',
+          corLateral: AppColors.vermelho,
+        ),
+    ],
+    1 when p.pendurados.isEmpty => const [
+      ListaVazia(
+        titulo: 'Ninguém pendurado',
+        texto: 'Nenhum atleta está a um amarelo da suspensão.',
+      ),
+    ],
+    1 => [
+      for (final x in p.pendurados)
+        _Linha(
+          pessoa: x.pessoa,
+          time: x.time,
+          detalhe: '${x.amarelos} amarelos',
+          lateral: 'Pendurado',
+          corLateral: AppColors.amareloEscuro,
+        ),
+    ],
+    _ when p.cumpridas.isEmpty => const [
+      ListaVazia(
+        titulo: 'Nenhuma suspensão cumprida',
+        texto: 'As suspensões já cumpridas ficam guardadas aqui, rodada a rodada.',
+      ),
+    ],
+    _ => [
+      for (final c in p.cumpridas)
+        _Linha(
+          pessoa: c.pessoa,
+          time: c.time,
+          detalhe: c.motivo,
+          lateral: 'Cumpriu: ${c.cumpriuEm}',
+          corLateral: AppColors.texto2,
+        ),
+    ],
+  };
+
   @override
   Widget build(BuildContext context) {
     final p = widget.painel;
     final etapa = p.proximaEtapa;
+    final subtitulo = switch (etapa) {
+      null => 'Sem jogos marcados',
+      Etapa(turno: 0) => 'Para a ${etapa.rotulo}',
+      _ => 'Para ${etapa.rotulo} · ${etapa.turno}º Turno',
+    };
+    final compartilhar = BotaoCompartilhar(onPressed: () => _compartilhar(p));
+    if (TelaLarga.de(context)) {
+      return PaginaLarga(
+        titulo: 'Suspensos',
+        subtitulo: '${p.categoria.nome} · $subtitulo',
+        acao: compartilhar,
+        topo: [Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: _filtros(p))],
+        principal: [
+          Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: _lista(p)),
+        ],
+        lateral: [
+          if (etapa != null)
+            BlocoLargo(
+              titulo: 'Jogos · ${etapa.rotulo}',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final j in p.proximosJogos)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                      child: Row(
+                        children: [
+                          Escudo(p.time(j.mandanteId), tamanho: 24),
+                          const SizedBox(width: AppSpacing.xs),
+                          Escudo(p.time(j.visitanteId), tamanho: 24),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Text(
+                              '${p.time(j.mandanteId).nome} × ${p.time(j.visitanteId).nome}',
+                              style: AppTextStyles.corpo,
+                            ),
+                          ),
+                          Text(dataHoraJogo(j.inicio), style: AppTextStyles.pequeno),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+        ],
+      );
+    }
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
-        CabecalhoTela(
-          'Suspensos',
-          acao: BotaoCompartilhar(onPressed: () => _compartilhar(p)),
-          subtitulo: switch (etapa) {
-            null => 'Sem jogos marcados',
-            Etapa(turno: 0) => 'Para a ${etapa.rotulo}',
-            _ => 'Para ${etapa.rotulo} · ${etapa.turno}º Turno',
-          },
-        ),
+        CabecalhoTela('Suspensos', acao: compartilhar, subtitulo: subtitulo),
         const SizedBox(height: AppSpacing.md),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            ChipFiltro(
-              'Suspensos (${p.suspensos.length})',
-              ativo: !_verPendurados,
-              onTap: () => setState(() => _verPendurados = false),
-            ),
-            ChipFiltro(
-              'Pendurados (${p.pendurados.length})',
-              ativo: _verPendurados,
-              onTap: () => setState(() => _verPendurados = true),
-            ),
-          ],
-        ),
+        Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: _filtros(p)),
         const SizedBox(height: AppSpacing.lg),
-        if (!_verPendurados && p.suspensos.isEmpty)
-          const ListaVazia(
-            titulo: 'Ninguém suspenso',
-            texto:
-                'Todos os atletas podem jogar a próxima rodada. '
-                'A lista aparece aqui quando houver suspensões.',
-          ),
-        if (_verPendurados && p.pendurados.isEmpty)
-          const ListaVazia(
-            titulo: 'Ninguém pendurado',
-            texto: 'Nenhum atleta está a um amarelo da suspensão.',
-          ),
-        if (!_verPendurados)
-          for (final s in p.suspensos)
-            _Linha(
-              pessoa: s.pessoa,
-              time: s.time,
-              detalhe: s.motivo,
-              lateral: s.retorno ?? '',
-              corLateral: AppColors.vermelho,
-            ),
-        if (_verPendurados)
-          for (final x in p.pendurados)
-            _Linha(
-              pessoa: x.pessoa,
-              time: x.time,
-              detalhe: '${x.amarelos} amarelos',
-              lateral: 'Pendurado',
-              corLateral: AppColors.amareloEscuro,
-            ),
+        ..._lista(p),
       ],
     );
   }

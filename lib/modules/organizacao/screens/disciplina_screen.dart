@@ -11,6 +11,7 @@ import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// O5 · Organização · Disciplina: pendências calculadas das súmulas.
 class DisciplinaScreen extends StatelessWidget {
@@ -70,8 +71,105 @@ class _DisciplinaState extends State<_Disciplina> {
     final lista = _quitadas ? quitadas : abertas;
     final total = abertas.fold(0, (s, p) => s + p.valor);
 
+    if (TelaLarga.de(context)) {
+      // Total em aberto por time, do maior para o menor.
+      final porTime = <String, int>{};
+      for (final x in abertas) {
+        porTime[x.timeId] = (porTime[x.timeId] ?? 0) + x.valor;
+      }
+      final ordem = porTime.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+      return PaginaLarga(
+        titulo: 'Disciplina',
+        subtitulo: abertas.isEmpty
+            ? 'Nenhuma pendência em aberto'
+            : '${abertas.length} em aberto · ${reais(total)}',
+        topo: [
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              ChipFiltro(
+                'Em aberto (${abertas.length})',
+                ativo: !_quitadas,
+                onTap: () => setState(() => _quitadas = false),
+              ),
+              ChipFiltro(
+                'Quitadas (${quitadas.length})',
+                ativo: _quitadas,
+                onTap: () => setState(() => _quitadas = true),
+              ),
+            ],
+          ),
+          if (d.demonstracao)
+            const Text(
+              'Temporada de exemplo: as quitações só valem depois que os jogos reais forem gerados.',
+              style: AppTextStyles.pequeno,
+            ),
+        ],
+        principal: [
+          if (lista.isEmpty)
+            ListaVazia(
+              titulo: _quitadas ? 'Nenhuma quitação' : 'Tudo em dia',
+              texto: _quitadas
+                  ? 'As pendências marcadas como pagas aparecem aqui.'
+                  : 'Cartões das súmulas encerradas geram pendências aqui.',
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final x in lista)
+                  _CartaoPendencia(
+                    pendencia: x,
+                    nome: nomes[x.pessoaId] ?? x.pessoaId,
+                    time: widget.o.time(x.timeId),
+                    agora: agora,
+                    salvando: _salvando.contains(x.id),
+                    onAlternar: d.demonstracao ? null : () => _alternar(x),
+                  ),
+              ],
+            ),
+        ],
+        lateral: [
+          BlocoLargo(
+            titulo: 'Em aberto por time',
+            child: ordem.isEmpty
+                ? const Text('Todos os times em dia.', style: AppTextStyles.corpo)
+                : Column(
+                    children: [
+                      for (final MapEntry(key: id, value: valor) in ordem)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                          child: Row(
+                            children: [
+                              if (widget.o.time(id) case final t?) ...[
+                                Escudo(t, tamanho: 24),
+                                const SizedBox(width: AppSpacing.sm),
+                              ],
+                              Expanded(
+                                child: Text(widget.o.time(id)?.nome ?? id, style: AppTextStyles.nome),
+                              ),
+                              Text(reais(valor), style: AppTextStyles.corpo),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+          ),
+          BlocoLargo(
+            titulo: 'Como funciona',
+            child: Text(
+              'Amarelo ${reais(d.parametros.valorAmarelo)} · vermelho ${reais(d.parametros.valorVermelho)}. '
+              'A quitação vence antes do próximo jogo do time; quem não quitar fica impedido.',
+              style: AppTextStyles.corpo,
+            ),
+          ),
+        ],
+      );
+    }
+
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         CabecalhoTela(
           'Disciplina',

@@ -14,6 +14,7 @@ import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 import '../widgets/pendencia_card.dart';
 import 'participante_inicio_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// P2 · Participante · Meu time
 class MeuTimeScreen extends StatelessWidget {
@@ -25,9 +26,55 @@ class MeuTimeScreen extends StatelessWidget {
       final t = p.time;
       final proximo = t.proximoJogo;
       final nomes = {for (final l in t.elenco) l.pessoa.id: l.pessoa.nome};
+      final subtitulo = proximo == null
+          ? 'Sem jogo marcado'
+          : 'Próximo: ${proximo.rodada != null ? 'Rodada ${proximo.rodada} · ' : ''}'
+                '${dataHoraJogo(proximo.inicio)}';
+      final contagens = Column(
+        children: [
+          _Contagem('Suspensos', t.contar(SituacaoAtleta.suspenso), AppColors.vermelho),
+          _Contagem('Impedidos por pendência', t.contar(SituacaoAtleta.impedido), AppColors.vermelho),
+          _Contagem('Pendurados', t.contar(SituacaoAtleta.pendurado), AppColors.amareloEscuro),
+          if (p.papel.veTime)
+            _Contagem(
+              'Com pendência a pagar',
+              t.contar(SituacaoAtleta.pendencia),
+              AppColors.amareloEscuro,
+            ),
+        ],
+      );
+      final elenco = Column(children: [for (final l in t.elenco) _LinhaAtleta(l)]);
+
+      if (TelaLarga.de(context)) {
+        return PaginaLarga(
+          titulo: t.time.nome,
+          subtitulo: subtitulo,
+          acao: Escudo(t.time, tamanho: 72),
+          topo: [if (p.papel == Papel.dirigente) const _TrocarEscudo()],
+          principal: [
+            BlocoLargo(titulo: 'Elenco · ${t.elenco.length} pessoas', child: elenco),
+          ],
+          lateral: [
+            BlocoLargo(titulo: 'Antes da rodada', child: contagens),
+            if (p.papel.veTime)
+              BlocoLargo(
+                titulo: 'Pendências do time',
+                child: t.pendenciasDoTime.isEmpty
+                    ? const Text('Nenhuma pendência.', style: AppTextStyles.corpo)
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final x in t.pendenciasDoTime)
+                            PendenciaCard(x, nome: nomes[x.pessoaId] ?? x.pessoaId),
+                        ],
+                      ),
+              ),
+          ],
+        );
+      }
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           Row(
             children: [
@@ -38,13 +85,7 @@ class MeuTimeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(t.time.nome, style: AppTextStyles.tituloTela.copyWith(fontSize: 24)),
-                    Text(
-                      proximo == null
-                          ? 'Sem jogo marcado'
-                          : 'Próximo: ${proximo.rodada != null ? 'Rodada ${proximo.rodada} · ' : ''}'
-                                '${dataHoraJogo(proximo.inicio)}',
-                      style: AppTextStyles.subtitulo,
-                    ),
+                    Text(subtitulo, style: AppTextStyles.subtitulo),
                   ],
                 ),
               ),
@@ -52,29 +93,7 @@ class MeuTimeScreen extends StatelessWidget {
           ),
           if (p.papel == Papel.dirigente) const _TrocarEscudo(),
           const TituloSecao('Antes da rodada'),
-          Cartao(
-            child: Column(
-              children: [
-                _Contagem('Suspensos', t.contar(SituacaoAtleta.suspenso), AppColors.vermelho),
-                _Contagem(
-                  'Impedidos por pendência',
-                  t.contar(SituacaoAtleta.impedido),
-                  AppColors.vermelho,
-                ),
-                _Contagem(
-                  'Pendurados',
-                  t.contar(SituacaoAtleta.pendurado),
-                  AppColors.amareloEscuro,
-                ),
-                if (p.papel.veTime)
-                  _Contagem(
-                    'Com pendência a pagar',
-                    t.contar(SituacaoAtleta.pendencia),
-                    AppColors.amareloEscuro,
-                  ),
-              ],
-            ),
-          ),
+          Cartao(child: contagens),
           if (p.papel.veTime && t.pendenciasDoTime.isNotEmpty) ...[
             const TituloSecao('Pendências do time'),
             for (final x in t.pendenciasDoTime)
@@ -83,7 +102,7 @@ class MeuTimeScreen extends StatelessWidget {
           const TituloSecao('Elenco'),
           Cartao(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-            child: Column(children: [for (final l in t.elenco) _LinhaAtleta(l)]),
+            child: elenco,
           ),
         ],
       );

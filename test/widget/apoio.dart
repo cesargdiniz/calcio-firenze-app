@@ -31,9 +31,11 @@ Future<MemoriaGestaoRepository> abrirApp(
   String? perfilSalvo,
   Map<String, List<Categoria>>? organizacaoPorCategoria,
   List<DadosTemporada> outrasTemporadas = const [],
+  Size tela = const Size(414, 896),
+  double densidade = 3,
 }) async {
-  tester.view.physicalSize = const Size(414 * 3, 896 * 3);
-  tester.view.devicePixelRatio = 3;
+  tester.view.physicalSize = tela * densidade;
+  tester.view.devicePixelRatio = densidade;
   addTearDown(tester.view.reset);
 
   final repoUsuarios = MemoriaUsuarioRepository(usuarios);

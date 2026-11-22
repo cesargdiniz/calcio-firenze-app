@@ -6,6 +6,7 @@ import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../avisos.dart';
 import 'participante_inicio_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// P5 · Participante · Avisos de pendência e suspensão
 class AvisosScreen extends StatelessWidget {
@@ -18,7 +19,7 @@ class AvisosScreen extends StatelessWidget {
       final meus = avisos.where((a) => !a.doTime).toList();
       final doTime = avisos.where((a) => a.doTime).toList();
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           const BotaoVoltar(rotulo: 'Início', rota: '/participante'),
           CabecalhoTela(

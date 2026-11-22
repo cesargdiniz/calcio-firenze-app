@@ -11,6 +11,7 @@ import '../../../shared/widgets/basicos.dart';
 import '../avisos.dart';
 import '../participante_controller.dart';
 import 'participante_inicio_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// P3 · Participante · Perfil
 class PerfilScreen extends StatelessWidget {
@@ -65,7 +66,7 @@ class PerfilScreen extends StatelessWidget {
       );
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           const CabecalhoTela('Perfil'),
           const SizedBox(height: AppSpacing.lg),

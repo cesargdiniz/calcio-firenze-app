@@ -37,6 +37,15 @@ void main() {
     expect(painel.pendurados.map((p) => p.pessoa.nome).toSet(), {'Fábio Costa', 'Tiago Moura'});
   });
 
+  test('histórico: só suspensões cumpridas, em rodadas já jogadas', () {
+    for (final c in painel.cumpridas) {
+      expect(['Rodada 1', 'Rodada 2', 'Rodada 3'], contains(c.cumpriuEm));
+    }
+    // Quem ainda cumpre na Rodada 4 não está no histórico dessa suspensão.
+    final ricardo = painel.cumpridas.where((c) => c.pessoa.nome == 'Ricardo Alves');
+    expect(ricardo.every((c) => c.motivo != 'Decisão da Organização · 2 jogos'), isTrue);
+  });
+
   group('turnos', () {
     test('sem escolha, segue o turno em andamento', () {
       expect(painel.turno, 1);

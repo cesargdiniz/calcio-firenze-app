@@ -1,7 +1,10 @@
 import 'package:calcio_regras/calcio_regras.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
+import '../domain/entities/categoria.dart';
 import '../modules/calendario/calendario_screen.dart';
+import '../modules/campeoes/campeoes_screen.dart';
 import '../modules/entrada/entrada_screen.dart';
 import '../modules/entrada/splash_screen.dart';
 import '../modules/organizacao/organizacao_shell.dart';
@@ -28,6 +31,7 @@ import '../modules/torcedor/screens/jogo_detalhe_screen.dart';
 import '../modules/torcedor/screens/jogos_screen.dart';
 import '../modules/torcedor/screens/suspensos_screen.dart';
 import '../modules/torcedor/torcedor_shell.dart';
+import '../shared/layout/lista_e_detalhe.dart';
 
 GoRoute _jogos(String base) => GoRoute(
   path: base,
@@ -51,10 +55,27 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
 
     // Torcedor: sem login.
     StatefulShellRoute.indexedStack(
-      builder: (_, _, navegacao) => TorcedorShell(navegacao: navegacao),
+      builder: (_, estado, navegacao) =>
+          TorcedorShell(navegacao: navegacao, rota: estado.uri.path),
       branches: [
         StatefulShellBranch(
-          routes: [GoRoute(path: '/torcedor', builder: (_, _) => const InicioScreen())],
+          routes: [
+            GoRoute(
+              path: '/torcedor',
+              builder: (_, _) => const InicioScreen(),
+              routes: [
+                // Atalhos do menu lateral do computador.
+                GoRoute(
+                  path: 'campeoes',
+                  builder: (_, _) => const CampeoesScreen(categoria: Categoria.master),
+                ),
+                GoRoute(
+                  path: 'calendario',
+                  builder: (_, _) => const CalendarioScreen(voltarPara: '/torcedor'),
+                ),
+              ],
+            ),
+          ],
         ),
         StatefulShellBranch(routes: [_jogos('/torcedor/jogos')]),
         StatefulShellBranch(
@@ -107,9 +128,21 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
         ),
         StatefulShellBranch(
           routes: [
+            // No computador: lista de jogos à esquerda, jogo e súmula à direita.
+            ShellRoute(
+              builder: (_, estado, filho) => ListaEDetalhe(
+                lista: OrgJogosScreen(selecionado: _idDoJogo(estado.uri.path)),
+                detalhe: filho,
+              ),
+              routes: [
             GoRoute(
               path: '/organizacao/jogos',
-              builder: (_, _) => const OrgJogosScreen(),
+              builder: (context, _) => ListaEDetalhe.noDetalhe(context)
+                  ? const DetalheVazio(
+                      icone: Icons.sports_soccer_outlined,
+                      texto: 'Escolha um jogo na lista para ver os detalhes e lançar a súmula.',
+                    )
+                  : const OrgJogosScreen(),
               routes: [
                 GoRoute(
                   path: ':id',
@@ -126,6 +159,8 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
                 ),
               ],
             ),
+              ],
+            ),
           ],
         ),
         StatefulShellBranch(
@@ -140,9 +175,18 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
         ),
         StatefulShellBranch(
           routes: [
+            // No computador: seções à esquerda, a seção aberta à direita.
+            ShellRoute(
+              builder: (_, estado, filho) => ListaEDetalhe(
+                larguraLista: 340,
+                lista: GestaoScreen(rotaAtual: estado.uri.path),
+                detalhe: filho,
+              ),
+              routes: [
             GoRoute(
               path: '/organizacao/gestao',
-              builder: (_, _) => const GestaoScreen(),
+              builder: (context, _) =>
+                  ListaEDetalhe.noDetalhe(context) ? const TimesScreen() : const GestaoScreen(),
               routes: [
                 GoRoute(path: 'pedidos', builder: (_, _) => const PedidosScreen()),
                 GoRoute(path: 'elencos', builder: (_, _) => const ImportarElencosScreen()),
@@ -176,9 +220,15 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
                 ),
               ],
             ),
+              ],
+            ),
           ],
         ),
       ],
     ),
   ],
 );
+
+/// Id do jogo aberto na área da Organização (para marcar na lista).
+String? _idDoJogo(String rota) =>
+    RegExp(r'^/organizacao/jogos/([^/]+)').firstMatch(rota)?.group(1);

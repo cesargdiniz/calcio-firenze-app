@@ -8,6 +8,7 @@ import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/logo_calcio.dart';
 import '../organizacao_shell.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// O1 · Organização · Início
 class OrgInicioScreen extends StatelessWidget {
@@ -21,7 +22,7 @@ class OrgInicioScreen extends StatelessWidget {
       final elencos = d.demonstracao ? 0 : d.pessoas.map((p) => p.timeId).toSet().length;
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           Row(
             children: [

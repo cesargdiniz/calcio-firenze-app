@@ -14,6 +14,7 @@ import '../../../shared/widgets/escudo.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import 'pedidos_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 const _rotaLista = '/organizacao/gestao/movimentacoes';
 
@@ -27,7 +28,7 @@ class MovimentacoesScreen extends StatelessWidget {
       final demo = o.dados.demonstracao;
       final lista = [...o.movimentacoes]..sort((a, b) => b.data.compareTo(a.data));
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           const VoltarGestao(),
           CabecalhoTela(
@@ -177,7 +178,7 @@ class NovaMovimentacaoScreen extends StatelessWidget {
   Widget build(BuildContext context) => ComOrg(
     builder: (context, o) => o.dados.demonstracao
         ? ListView(
-            padding: AppSpacing.tela,
+            padding: TelaLarga.margens(context),
             children: const [
               VoltarGestao(rotulo: 'Movimentações', rota: _rotaLista),
               Text(
@@ -523,6 +524,6 @@ class _FormularioState extends State<_Formulario> {
         ),
       );
 
-    return ListView(padding: AppSpacing.tela, children: filhos);
+    return ListView(padding: TelaLarga.margens(context), children: filhos);
   }
 }

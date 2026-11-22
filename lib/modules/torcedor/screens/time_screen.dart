@@ -10,6 +10,7 @@ import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 import '../widgets/grafico_evolucao.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// Abre a tela do time (toque no escudo).
 void abrirTime(BuildContext context, Painel painel, String timeId) => Navigator.of(context).push(
@@ -51,30 +52,7 @@ class TimeScreen extends StatelessWidget {
     // Gráfico do turno escolhido na Tabela (na visão geral, o turno atual).
     final turnoGrafico = painel.turno == Painel.geral ? painel.turnoAtual : painel.turno;
     final rodadasGrafico = painel.evolucao[turnoGrafico] ?? const <Map<String, int>>[];
-    // Trocou a categoria no seletor do topo: este time não é mais dela.
-    return BlocListener<CategoriaController, CategoriaStatus>(
-      listener: (context, status) {
-        if (status is CategoriaEscolhida && status.categoria != painel.categoria) {
-          Navigator.of(context).maybePop();
-        }
-      },
-      child: Scaffold(
-      backgroundColor: AppColors.fundo,
-      appBar: AppBar(backgroundColor: AppColors.fundo, surfaceTintColor: AppColors.fundo),
-      body: ListView(
-        padding: AppSpacing.tela,
-        children: [
-          Center(child: Escudo(p.time, tamanho: 96)),
-          const SizedBox(height: AppSpacing.md),
-          Text(p.time.nome, textAlign: TextAlign.center, style: AppTextStyles.tituloTela),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            painel.nomeTemporada,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.pequeno,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Cartao(
+    final info = Cartao(
             child: Column(
               children: [
                 _Linha(
@@ -101,26 +79,16 @@ class TimeScreen extends StatelessWidget {
                   ),
               ],
             ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          TituloSecao('Evolução na tabela · $turnoGraficoº turno'),
-          if (rodadasGrafico.isEmpty)
-            const Text(
-              'Aparece depois que a 1ª rodada for disputada.',
-              style: AppTextStyles.corpo,
-            )
-          else
-            Cartao(
-              child: GraficoEvolucao(
-                posicoes: rodadasGrafico,
-                times: painel.times.values.toList(),
-                destaque: timeId,
-                rodadas: painel.categoria.rodadas,
-              ),
-            ),
-          const SizedBox(height: AppSpacing.lg),
-          const TituloSecao('Destaques da temporada'),
-          Cartao(
+          );
+    final grafico = rodadasGrafico.isEmpty
+        ? const Text('Aparece depois que a 1ª rodada for disputada.', style: AppTextStyles.corpo)
+        : GraficoEvolucao(
+            posicoes: rodadasGrafico,
+            times: painel.times.values.toList(),
+            destaque: timeId,
+            rodadas: painel.categoria.rodadas,
+          );
+    final destaques = Cartao(
             child: Column(
               children: [
                 _Linha(
@@ -151,7 +119,52 @@ class TimeScreen extends StatelessWidget {
                 ),
               ],
             ),
+          );
+    final largo = TelaLarga.de(context);
+    // Trocou a categoria no seletor do topo: este time não é mais dela.
+    return BlocListener<CategoriaController, CategoriaStatus>(
+      listener: (context, status) {
+        if (status is CategoriaEscolhida && status.categoria != painel.categoria) {
+          Navigator.of(context).maybePop();
+        }
+      },
+      child: Scaffold(
+      backgroundColor: AppColors.fundo,
+      appBar: AppBar(backgroundColor: AppColors.fundo, surfaceTintColor: AppColors.fundo),
+      body: largo
+          ? PaginaLarga(
+              titulo: p.time.nome,
+              subtitulo: painel.nomeTemporada,
+              acao: Escudo(p.time, tamanho: 72),
+              principal: [
+                BlocoLargo(titulo: 'Evolução na tabela · $turnoGraficoº turno', child: grafico),
+              ],
+              lateral: [
+                info,
+                const Text('Destaques da temporada', style: AppTextStyles.tituloSecao),
+                destaques,
+              ],
+            )
+          : ListView(
+        padding: TelaLarga.margens(context),
+        children: [
+          Center(child: Escudo(p.time, tamanho: 96)),
+          const SizedBox(height: AppSpacing.md),
+          Text(p.time.nome, textAlign: TextAlign.center, style: AppTextStyles.tituloTela),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            painel.nomeTemporada,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.pequeno,
           ),
+          const SizedBox(height: AppSpacing.lg),
+          info,
+          const SizedBox(height: AppSpacing.lg),
+          TituloSecao('Evolução na tabela · $turnoGraficoº turno'),
+          if (rodadasGrafico.isEmpty) grafico else Cartao(child: grafico),
+          const SizedBox(height: AppSpacing.lg),
+          const TituloSecao('Destaques da temporada'),
+          destaques,
         ],
       ),
     ),

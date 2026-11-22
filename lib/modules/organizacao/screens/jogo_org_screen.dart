@@ -17,6 +17,7 @@ import '../../../shared/pdf/saida_pdf.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import 'pedidos_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// Jogo na visão da Organização: agenda (data, hora, local) e súmula.
 class JogoOrgScreen extends StatelessWidget {
@@ -51,7 +52,7 @@ class JogoOrgScreen extends StatelessWidget {
       final nomes = {for (final x in o.dados.pessoas) x.id: x.nome};
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           const VoltarGestao(rotulo: 'Jogos', rota: '/organizacao/jogos'),
           CardJogo(

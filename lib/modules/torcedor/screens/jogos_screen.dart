@@ -9,12 +9,14 @@ import '../../../domain/usecases/montar_painel.dart';
 import '../../../shared/compartilhar/compartilhar_imagem.dart';
 import '../../calendario/calendario_screen.dart';
 import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/card_jogo.dart';
 import '../../../shared/widgets/datas_copa.dart';
 import '../widgets/com_painel.dart';
 import 'time_screen.dart';
 import '../../../shared/widgets/seletor_fase.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// T2 · Torcedor · Jogos
 class JogosScreen extends StatelessWidget {
@@ -134,44 +136,95 @@ class _JogosState extends State<_Jogos> {
     final criadas = _criadas(painel);
     final datasPendentes = _eliminatorias &&
         datasMataMata(painel.categoria, _turno).any((d) => !criadas.contains(d.fase));
+    final compartilhar = _copa || etapa != null || datasPendentes
+        ? BotaoCompartilhar(onPressed: () => _compartilhar(painel, etapa, jogos))
+        : null;
+    final seletor = SeletorFase(
+      atual: (turno: _turno, eliminatorias: _eliminatorias),
+      onEscolher: (f) => _escolher(f.turno, eliminatorias: f.eliminatorias),
+    );
+    final chips = [
+      for (final e in etapas)
+        ChipFiltro(
+          e.curto,
+          ativo: e == etapa,
+          onTap: () => setState(() {
+            _etapa = e;
+            _copa = false;
+          }),
+        ),
+      if (temCopa) ChipFiltro('Copa', ativo: _copa, onTap: () => setState(() => _copa = true)),
+    ];
+    Widget card(Partida p) => CardJogo(
+      onTapTime: (id) => abrirTime(context, painel, id),
+      partida: p,
+      mandante: painel.time(p.mandanteId),
+      visitante: painel.time(p.visitanteId),
+      local: painel.local,
+      onTap: () => context.go('${widget.rotaBase}/${p.id}'),
+    );
+    if (TelaLarga.de(context)) {
+      return PaginaLarga(
+        titulo: 'Jogos',
+        subtitulo: '${painel.categoria.nome} · calendário e resultados',
+        acao: compartilhar,
+        topo: [
+          Wrap(
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              seletor,
+              if (etapas.length > 1 || temCopa)
+                Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: chips),
+            ],
+          ),
+        ],
+        principal: [
+          if (_copa)
+            const DatasCopa()
+          else if (etapa != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(etapa.rotulo, style: AppTextStyles.tituloSecao.copyWith(fontSize: 22)),
+                const SizedBox(height: AppSpacing.lg),
+                GradeLarga(children: [for (final p in jogos) card(p)]),
+              ],
+            )
+          else if (!_eliminatorias)
+            ListaVazia(
+              icone: Icons.event_outlined,
+              titulo: 'Sem jogos no $_turnoº turno',
+              texto: 'As datas já estão no calendário completo; os confrontos aparecem aqui '
+                  'quando a Organização sortear o turno.',
+            ),
+          if (datasPendentes) _datas(painel),
+        ],
+        lateral: [
+          if (!_eliminatorias) _datas(painel),
+          const AtalhoCalendario(),
+        ],
+      );
+    }
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         CabecalhoTela(
           'Jogos',
-          acao: _copa || etapa != null || datasPendentes
-              ? BotaoCompartilhar(onPressed: () => _compartilhar(painel, etapa, jogos))
-              : null,
+          acao: compartilhar,
         ),
         const SizedBox(height: AppSpacing.md),
         const AtalhoCalendario(),
         const SizedBox(height: AppSpacing.md),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: SeletorFase(
-            atual: (turno: _turno, eliminatorias: _eliminatorias),
-            onEscolher: (f) => _escolher(f.turno, eliminatorias: f.eliminatorias),
-          ),
-        ),
+        Align(alignment: Alignment.centerLeft, child: seletor),
         const SizedBox(height: AppSpacing.md),
         if (etapas.length > 1 || temCopa) ...[
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                for (final e in etapas) ...[
-                  ChipFiltro(
-                    e.curto,
-                    ativo: e == etapa,
-                    onTap: () => setState(() {
-                      _etapa = e;
-                      _copa = false;
-                    }),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                ],
-                if (temCopa)
-                  ChipFiltro('Copa', ativo: _copa, onTap: () => setState(() => _copa = true)),
+                for (final c in chips) ...[c, const SizedBox(width: AppSpacing.sm)],
               ],
             ),
           ),
@@ -187,17 +240,7 @@ class _JogosState extends State<_Jogos> {
             texto: 'As datas já estão no calendário completo; os confrontos aparecem aqui '
                 'quando a Organização sortear o turno.',
           ),
-        for (final p in jogos) ...[
-          CardJogo(
-              onTapTime: (id) => abrirTime(context, painel, id),
-            partida: p,
-            mandante: painel.time(p.mandanteId),
-            visitante: painel.time(p.visitanteId),
-            local: painel.local,
-            onTap: () => context.go('${widget.rotaBase}/${p.id}'),
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
+        for (final p in jogos) ...[card(p), const SizedBox(height: AppSpacing.md)],
         if (datasPendentes) _datas(painel),
       ],
     );

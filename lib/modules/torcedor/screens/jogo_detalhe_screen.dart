@@ -9,6 +9,7 @@ import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../widgets/com_painel.dart';
 import 'time_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// S3 · Jogo · Detalhe
 class JogoDetalheScreen extends StatelessWidget {
@@ -30,7 +31,7 @@ class JogoDetalheScreen extends StatelessWidget {
       final nomes = painel.nomes;
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           BotaoVoltar(rotulo: 'Jogos', rota: voltarPara),
           Cartao(

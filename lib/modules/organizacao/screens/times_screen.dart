@@ -15,6 +15,7 @@ import '../../../shared/widgets/escudo.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import 'pedidos_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// O7 · Gestão · Times da temporada
 class TimesScreen extends StatelessWidget {
@@ -25,7 +26,7 @@ class TimesScreen extends StatelessWidget {
     builder: (context, o) {
       final times = [...o.dados.times]..sort((a, b) => a.nome.compareTo(b.nome));
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           const VoltarGestao(),
           CabecalhoTela(
@@ -217,7 +218,7 @@ class _EditarTimeState extends State<_EditarTime> {
       escudo: _escudo,
     );
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         const VoltarGestao(rotulo: 'Times da temporada', rota: '/organizacao/gestao/times'),
         Row(
