@@ -26,7 +26,7 @@ void main() {
       ))),
     );
     // Só quem tem elenco cadastrado abre a escalação.
-    expect(find.text('Escalação'), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
     await t.tap(find.text('Foggia'));
     await t.pumpAndSettle();
     expect(find.text('Campeão Master 2023'), findsOneWidget);
