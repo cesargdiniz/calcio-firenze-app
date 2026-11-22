@@ -9,6 +9,7 @@ import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
 import '../../shared/layout/tela_larga.dart';
+import 'escalacao_campeao.dart';
 
 /// Botão de troféu do Início: abre os campeões da categoria. Some nas
 /// categorias sem histórico.
@@ -88,7 +89,7 @@ class ListaCampeoes extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       for (final t in campeoesDe(categoria)) ...[
-        _CartaoTemporada(t),
+        _CartaoTemporada(t, categoria),
         const SizedBox(height: AppSpacing.sm),
       ],
     ],
@@ -97,24 +98,34 @@ class ListaCampeoes extends StatelessWidget {
 
 class _CartaoTemporada extends StatelessWidget {
   final TituloTemporada t;
-  const _CartaoTemporada(this.t);
+  final Categoria categoria;
+  const _CartaoTemporada(this.t, this.categoria);
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    label: '${t.ano}, campeão ${t.campeao}',
-    excludeSemantics: true,
-    child: Cartao(
-      child: Row(
-        children: [
-          const Icon(Icons.emoji_events_rounded, color: AppColors.amarelo, size: 26),
-          const SizedBox(width: AppSpacing.md),
-          SizedBox(
-            width: 52,
-            child: Text('${t.ano}', style: AppTextStyles.tituloSecao.copyWith(fontSize: 18)),
-          ),
-          Expanded(child: Text(t.campeao, style: AppTextStyles.nome)),
-        ],
+  Widget build(BuildContext context) {
+    final temElenco = t.elenco.isNotEmpty;
+    return Semantics(
+      button: temElenco,
+      label: '${t.ano}, campeão ${t.campeao}${temElenco ? '. Ver escalação' : ''}',
+      excludeSemantics: true,
+      child: Cartao(
+        onTap: temElenco ? () => abrirEscalacao(context, categoria, t) : null,
+        child: Row(
+          children: [
+            const Icon(Icons.emoji_events_rounded, color: AppColors.amarelo, size: 26),
+            const SizedBox(width: AppSpacing.md),
+            SizedBox(
+              width: 52,
+              child: Text('${t.ano}', style: AppTextStyles.tituloSecao.copyWith(fontSize: 18)),
+            ),
+            Expanded(child: Text(t.campeao, style: AppTextStyles.nome)),
+            if (temElenco) ...[
+              const Text('Escalação', style: AppTextStyles.subtitulo),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.oliva),
+            ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
