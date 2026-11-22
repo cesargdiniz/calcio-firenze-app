@@ -163,7 +163,11 @@ class _Campo extends StatelessWidget {
                 left: l.dx * box.maxWidth - 55,
                 top: y * box.maxHeight - 22,
                 width: 110,
-                child: _Jogador(j),
+                child: _Jogador(
+                  j,
+                  camisa: Color(titulo.cor ?? 0xFF008E44),
+                  numero: Color(titulo.corNumero ?? 0xFFFFFFFF),
+                ),
               ),
             );
           }
@@ -186,7 +190,9 @@ class _Campo extends StatelessWidget {
 
 class _Jogador extends StatelessWidget {
   final JogadorCampeao j;
-  const _Jogador(this.j);
+  final Color camisa;
+  final Color numero;
+  const _Jogador(this.j, {required this.camisa, required this.numero});
 
   @override
   Widget build(BuildContext context) {
@@ -203,15 +209,16 @@ class _Jogador extends StatelessWidget {
           height: 40,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: j.posicao == PosicaoCampeao.goleiro ? AppColors.amarelo : Colors.white,
+            color: camisa,
             shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
             boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 6, offset: Offset(0, 2))],
           ),
           child: Text(
             marca,
             style: AppTextStyles.nome.copyWith(
               fontSize: j.numero == null ? 13 : 16,
-              color: AppColors.tinta,
+              color: numero,
             ),
           ),
         ),
