@@ -9,6 +9,7 @@ import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
 import '../../shared/layout/tela_larga.dart';
+import 'campeoes_controller.dart';
 import 'escalacao_campeao.dart';
 
 /// Botão de troféu do Início: abre os campeões da categoria. Some nas
@@ -19,7 +20,8 @@ class BotaoCampeoes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (campeoesDe(categoria).isEmpty) return const SizedBox.shrink();
+    final titulos = context.select((CampeoesController c) => c.de(categoria));
+    if (titulos.isEmpty) return const SizedBox.shrink();
     return IconButton(
       tooltip: 'Campeões',
       onPressed: () => Navigator.of(context).push(
@@ -43,6 +45,7 @@ class CampeoesScreen extends StatelessWidget {
     body: BlocBuilder<CategoriaController, CategoriaStatus>(
       builder: (context, status) {
         final atual = status is CategoriaEscolhida ? status.categoria : categoria;
+        final campeoes = context.watch<CampeoesController>();
         if (TelaLarga.de(context)) {
           // No computador, as três categorias lado a lado.
           return PaginaLarga(
@@ -53,10 +56,10 @@ class CampeoesScreen extends StatelessWidget {
                 minimo: 280,
                 children: [
                   for (final c in Categoria.values)
-                    if (campeoesDe(c).isNotEmpty)
+                    if (campeoes.de(c).isNotEmpty)
                       BlocoLargo(
                         titulo: c == atual ? '${c.nome} · em exibição' : c.nome,
-                        child: ListaCampeoes(categoria: c),
+                        child: ListaCampeoes(categoria: c, titulos: campeoes.de(c)),
                       ),
                 ],
               ),
@@ -68,10 +71,10 @@ class CampeoesScreen extends StatelessWidget {
           children: [
             CabecalhoTela('Campeões', subtitulo: 'Calcio Firenze · ${atual.nome}'),
             const SizedBox(height: AppSpacing.md),
-            if (campeoesDe(atual).isEmpty)
+            if (campeoes.de(atual).isEmpty)
               const Text('Ainda sem campeões registrados.', style: AppTextStyles.corpo)
             else
-              ListaCampeoes(categoria: atual),
+              ListaCampeoes(categoria: atual, titulos: campeoes.de(atual)),
           ],
         );
       },
@@ -82,13 +85,16 @@ class CampeoesScreen extends StatelessWidget {
 /// Os campeões da categoria, do mais recente ao mais antigo.
 class ListaCampeoes extends StatelessWidget {
   final Categoria categoria;
-  const ListaCampeoes({super.key, required this.categoria});
+
+  /// Títulos a mostrar. Sem eles, a lista que vem no app.
+  final List<TituloTemporada>? titulos;
+  const ListaCampeoes({super.key, required this.categoria, this.titulos});
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      for (final t in campeoesDe(categoria)) ...[
+      for (final t in titulos ?? campeoesDe(categoria)) ...[
         _CartaoTemporada(t, categoria),
         const SizedBox(height: AppSpacing.sm),
       ],

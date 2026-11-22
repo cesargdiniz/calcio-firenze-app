@@ -294,3 +294,34 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
 };
 
 List<TituloTemporada> campeoesDe(Categoria c) => campeoesPorCategoria[c] ?? const [];
+
+/// Quantos titulares cada posição tem no campinho (goleiro e 2-2-1).
+const titularesPorPosicao = {
+  PosicaoCampeao.goleiro: 1,
+  PosicaoCampeao.zagueiro: 2,
+  PosicaoCampeao.meia: 2,
+  PosicaoCampeao.ataque: 1,
+};
+
+/// O que impede gravar o título, ou nulo se está tudo certo. Sem titulares
+/// também vale: o painel mostra só a lista do elenco.
+String? problemaDoTitulo(TituloTemporada t, {Iterable<int> outrosAnos = const []}) {
+  if (t.ano < 1990 || t.ano > 2100) return 'Informe o ano do título.';
+  if (outrosAnos.contains(t.ano)) return 'Já existe um campeão em ${t.ano}.';
+  if (t.campeao.trim().isEmpty) return 'Informe o time campeão.';
+  if (t.elenco.any((j) => j.nome.trim().isEmpty)) return 'Há jogador sem nome no elenco.';
+  if (t.premios.any((p) => p.premio.trim().isEmpty || p.nome.trim().isEmpty)) {
+    return 'Complete ou apague os prêmios em branco.';
+  }
+  final titulares = t.titulares;
+  if (titulares.isEmpty) return null;
+  if (titulares.any((j) => j.posicao == null)) return 'Todo titular precisa de posição.';
+  for (final MapEntry(key: p, value: n) in titularesPorPosicao.entries) {
+    final tem = t.titularesDe(p).length;
+    if (tem != n) {
+      return 'Os titulares precisam ser 1 goleiro, 2 zagueiros, 2 meias e 1 atacante '
+          '(há $tem ${tem == 1 ? p.nome.toLowerCase() : p.plural.toLowerCase()}).';
+    }
+  }
+  return null;
+}

@@ -22,6 +22,9 @@ import '../shared/compartilhar/saida_imagem.dart';
 import '../shared/pdf/saida_pdf.dart';
 import '../shared/seletor_imagem.dart';
 import '../shared/theme/app_theme.dart';
+import '../data/memoria/memoria_repositories.dart';
+import '../domain/repositories/campeoes_repository.dart';
+import '../modules/campeoes/campeoes_controller.dart';
 import 'router.dart';
 import '../shared/widgets/coluna_larga.dart';
 
@@ -40,6 +43,9 @@ class CalcioApp extends StatefulWidget {
   final SaidaImagem saidaImagem;
   final SeletorImagem seletorImagem;
   final PushRepository push;
+
+  /// Campeões gravados pela Organização. Sem ele (testes), só os do app.
+  final CampeoesRepository? campeoes;
   final String initialLocation;
 
   const CalcioApp({
@@ -56,6 +62,7 @@ class CalcioApp extends StatefulWidget {
     this.saidaPdf = const SaidaPdfDoAparelho(),
     this.seletorImagem = const SeletorImagemDoAparelho(),
     this.push = const PushDesligado(),
+    this.campeoes,
     this.initialLocation = '/',
   });
 
@@ -105,6 +112,10 @@ class _CalcioAppState extends State<CalcioApp> {
     child: MultiBlocProvider(
       providers: [
         BlocProvider.value(value: _categoria),
+        BlocProvider(
+          create: (_) =>
+              CampeoesController(widget.campeoes ?? MemoriaCampeoesRepository())..iniciar(),
+        ),
         BlocProvider(
           create: (_) =>
               TorcedorController(widget.temporada, widget.montarPainel, _categoria)..iniciar(),
