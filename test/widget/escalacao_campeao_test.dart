@@ -65,9 +65,9 @@ void main() {
     expect(foggia.reservas, hasLength(7));
     final roma = livre.firstWhere((t) => t.ano == 2024);
     expect(roma.titulares.map((j) => j.noCampo), [
-      'Gabriel Luz', 'Alex Nascimento', 'Cabeludo', 'Topeira', 'Lucas Gabriel', 'Marcola', //
+      'Gabriel Luz', 'Alex Nascimento', 'Cabeludo', 'Toupeira', 'Lucas Gabriel', 'Marcola', //
     ]);
-    expect(roma.reservas, hasLength(7));
+    expect(roma.reservas, hasLength(8));
     final napoli = livre.firstWhere((t) => t.ano == 2023);
     expect(napoli.elenco, hasLength(14));
     expect(napoli.titulares.map((j) => j.noCampo), [
