@@ -113,21 +113,21 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
       ],
     ),
     TituloTemporada(2022, 'Brasil'),
-    // Titulares ainda não informados: o painel mostra o elenco por posição.
     TituloTemporada(
       2021,
       'Juventus',
       elenco: [
-        JogadorCampeao('Santana', _g),
+        JogadorCampeao('Santana', _g, titular: true),
+        JogadorCampeao('Sagica', _z, titular: true),
+        JogadorCampeao('Robledo', _z, titular: true),
         JogadorCampeao('Ivo Barbosa', _z),
         JogadorCampeao('Antonio Marcos', _z),
-        JogadorCampeao('Robledo', _z),
-        JogadorCampeao('Sagica', _z),
+        JogadorCampeao('Tárik Toda', _m, titular: true),
+        // Atacante de origem; no time titular jogou no meio.
+        JogadorCampeao('Renato Cajá', _m, titular: true),
         JogadorCampeao('Jhovan', _m),
-        JogadorCampeao('Tarik Toda', _m),
         JogadorCampeao('Henrique Bezerra', _m),
-        JogadorCampeao('Renato Caja', _a),
-        JogadorCampeao('Daniel Diniz', _a),
+        JogadorCampeao('Daniel Diniz', _a, titular: true),
         JogadorCampeao('Marcilio Guerreiro', _a),
       ],
       premios: [

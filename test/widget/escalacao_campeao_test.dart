@@ -28,25 +28,17 @@ void main() {
     expect(samp.reservas, hasLength(7));
   });
 
-  test('Juventus 2021: elenco sem titulares, prêmios de Daniel Diniz', () {
+  test('Juventus 2021: Santana, Sagica e Robledo, Tárik e Renato Cajá, Daniel Diniz', () {
     final juve = campeoesDe(Categoria.master).firstWhere((t) => t.ano == 2021);
     expect(juve.elenco, hasLength(11));
-    expect(juve.titulares, isEmpty);
+    expect(juve.titulares.map((j) => j.nome), [
+      'Santana', 'Sagica', 'Robledo', 'Tárik Toda', 'Renato Cajá', 'Daniel Diniz', //
+    ]);
+    expect(juve.titularesDe(PosicaoCampeao.meia), hasLength(2));
+    expect(juve.reservas.map((j) => j.nome), [
+      'Ivo Barbosa', 'Antonio Marcos', 'Jhovan', 'Henrique Bezerra', 'Marcilio Guerreiro', //
+    ]);
     expect(juve.premios.map((p) => p.nome).toSet(), {'Daniel Diniz'});
-  });
-
-  testWidgets('sem titulares, o painel lista o elenco por posição', (t) async {
-    await t.pumpWidget(
-      const MaterialApp(home: Scaffold(body: SingleChildScrollView(
-        child: ListaCampeoes(categoria: Categoria.master),
-      ))),
-    );
-    await t.tap(find.text('Juventus'));
-    await t.pumpAndSettle();
-    expect(find.text('Elenco'), findsOneWidget);
-    expect(find.text('Renato Caja, Daniel Diniz, Marcilio Guerreiro'), findsOneWidget);
-    expect(find.text('Premiações de 2021'), findsOneWidget);
-    expect(t.takeException(), isNull);
   });
 
   testWidgets('tocar no campeão abre o campinho com titulares e reservas', (t) async {
