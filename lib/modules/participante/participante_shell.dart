@@ -41,6 +41,7 @@ class ParticipanteShell extends StatelessWidget {
             onSelecionar: _ir,
             categoria: const BarraCategoriaDoApp(noMenu: true),
             perfil: 'Participante',
+            onSair: context.read<ParticipanteController>().sair,
           ),
           conteudo: navegacao,
         ),

@@ -116,6 +116,13 @@ void main() {
     }
   });
 
+  testWidgets('sair pelo menu lateral volta à escolha do perfil', (t) async {
+    await abrirNoComputador(t, '/participante', sessao: _sessao, usuarios: {'u1': _rafael});
+    await t.tap(find.descendant(of: find.byType(MenuLateral), matching: find.text('Sair')));
+    await t.pumpAndSettle();
+    expect(find.text('Como você quer entrar?'), findsOneWidget);
+  });
+
   testWidgets('no celular nada muda, mesmo com o layout ligado', (t) async {
     await abrirApp(t, inicio: '/torcedor');
     expect(find.byType(MenuLateral), findsNothing);

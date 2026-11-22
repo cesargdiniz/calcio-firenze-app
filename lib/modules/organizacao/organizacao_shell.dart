@@ -61,6 +61,7 @@ class OrganizacaoShell extends StatelessWidget {
                 onEscolher: context.read<OrganizacaoController>().escolherCategoria,
               ),
               perfil: 'Organização · ${categoria.nome}',
+              onSair: context.read<OrganizacaoController>().sair,
             ),
             conteudo: navegacao,
           ),
