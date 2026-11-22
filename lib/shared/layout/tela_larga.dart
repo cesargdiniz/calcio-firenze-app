@@ -160,9 +160,33 @@ class CabecalhoLargo extends StatelessWidget {
           ],
         ),
       ),
-      ?acao,
+      if (acao != null) _BotoesNaLinha(child: acao!),
     ],
   );
+}
+
+/// Os botões do app ocupam a largura toda (celular). Ao lado do título, eles
+/// ficam do tamanho do texto.
+class _BotoesNaLinha extends StatelessWidget {
+  final Widget child;
+  const _BotoesNaLinha({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    const tamanho = WidgetStatePropertyAll(Size(0, 44));
+    return Theme(
+      data: tema.copyWith(
+        filledButtonTheme: FilledButtonThemeData(
+          style: (tema.filledButtonTheme.style ?? const ButtonStyle()).copyWith(minimumSize: tamanho),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: (tema.outlinedButtonTheme.style ?? const ButtonStyle()).copyWith(minimumSize: tamanho),
+        ),
+      ),
+      child: child,
+    );
+  }
 }
 
 /// Cartão branco com título, usado nas colunas do computador.

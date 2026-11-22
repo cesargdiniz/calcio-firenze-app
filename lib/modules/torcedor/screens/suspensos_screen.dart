@@ -141,7 +141,7 @@ class _SuspensosState extends State<_Suspensos> {
     if (TelaLarga.de(context)) {
       return PaginaLarga(
         titulo: 'Suspensos',
-        subtitulo: '${p.categoria.nome} · ${subtitulo.toLowerCase()}',
+        subtitulo: '${p.categoria.nome} · $subtitulo',
         acao: compartilhar,
         topo: [Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: _filtros(p))],
         principal: [

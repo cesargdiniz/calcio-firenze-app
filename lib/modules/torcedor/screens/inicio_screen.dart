@@ -118,7 +118,7 @@ class _InicioLargo extends StatelessWidget {
     final suspensos = painel.suspensos.length;
     return PaginaLarga(
       titulo: 'Início',
-      subtitulo: '${painel.categoria.nome} · ${painel.nomeTemporada}',
+      subtitulo: painel.nomeTemporada,
       acao: BotaoCampeoes(categoria: painel.categoria),
       principal: [
         if (painel.partidas.isEmpty)
