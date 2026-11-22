@@ -96,8 +96,8 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
       ],
       premios: [
         PremioTemporada('Melhor jogador', 'Rudd'),
-        PremioTemporada('Artilheiro', 'Paulinho Macaco'),
-        PremioTemporada('Melhor goleiro', 'DiChapeu'),
+        PremioTemporada('Artilheiro', 'Paulinho Macaco', time: 'Sampdoria'),
+        PremioTemporada('Melhor goleiro', 'DiChapeu', time: 'Napoli'),
       ],
     ),
     TituloTemporada(
