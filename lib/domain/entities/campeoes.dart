@@ -45,7 +45,20 @@ class TituloTemporada {
   final List<JogadorCampeao> elenco;
   final List<PremioTemporada> premios;
 
-  const TituloTemporada(this.ano, this.campeao, {this.elenco = const [], this.premios = const []});
+  /// Cor da camisa no campinho (ARGB), a mesma do escudo na tabela.
+  final int? cor;
+
+  /// Cor do número na camisa. Sem ela, branco.
+  final int? corNumero;
+
+  const TituloTemporada(
+    this.ano,
+    this.campeao, {
+    this.elenco = const [],
+    this.premios = const [],
+    this.cor,
+    this.corNumero,
+  });
 
   List<JogadorCampeao> get titulares => [for (final j in elenco) if (j.titular) j];
   List<JogadorCampeao> get reservas => [for (final j in elenco) if (!j.titular) j];
@@ -63,10 +76,34 @@ const _a = PosicaoCampeao.ataque;
 /// Campeões de cada categoria, da temporada mais recente para a mais antiga.
 const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
   Categoria.master: [
-    TituloTemporada(2025, 'Inter'),
+    TituloTemporada(
+      2025,
+      'Inter',
+      cor: 0xFF0A3D91,
+      elenco: [
+        JogadorCampeao('Galvão', _g, titular: true, numero: 1),
+        JogadorCampeao('Berg', _z, titular: true, numero: 5),
+        JogadorCampeao('Fabrício', _z, titular: true, numero: 16),
+        JogadorCampeao('Marcelo Farias', _m, titular: true, numero: 11),
+        JogadorCampeao('Rudd Anaisse', _m, titular: true, numero: 89, curto: 'Rudd'),
+        JogadorCampeao('Carneiro', _a, titular: true, numero: 10),
+        JogadorCampeao('Paulo Anaisse', null),
+        JogadorCampeao('Marcelo Anaisse', null),
+        JogadorCampeao('Odilon', null),
+        JogadorCampeao('Dandara', null),
+        JogadorCampeao('Haroldo Carneiro', null),
+        JogadorCampeao('Enéas', null),
+      ],
+      premios: [
+        PremioTemporada('Melhor jogador', 'Rudd'),
+        PremioTemporada('Artilheiro', 'Paulinho Macaco'),
+        PremioTemporada('Melhor goleiro', 'DiChapeu'),
+      ],
+    ),
     TituloTemporada(
       2024,
       'Sampdoria',
+      cor: 0xFF1B5CC1,
       elenco: [
         JogadorCampeao('Marcos Júnior', _g, titular: true, numero: 94, curto: 'M Jr'),
         JogadorCampeao('Marcelo Paiva', _z, titular: true, numero: 4, curto: 'Marcelo'),
@@ -90,6 +127,7 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
     TituloTemporada(
       2023,
       'Foggia',
+      cor: 0xFFC8102E,
       elenco: [
         JogadorCampeao('Toupeira', _g, titular: true, numero: 1),
         JogadorCampeao('Cesar', _z, titular: true, numero: 3),
@@ -112,10 +150,35 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
         PremioTemporada('Melhor goleiro', 'Carmona', time: 'Sampdoria'),
       ],
     ),
-    TituloTemporada(2022, 'Brasil'),
+    TituloTemporada(
+      2022,
+      'Brasil',
+      cor: 0xFFFFDF00,
+      corNumero: 0xFF009C3B,
+      elenco: [
+        JogadorCampeao('Toupeira', _g, titular: true),
+        JogadorCampeao('Olavo', _z, titular: true, numero: 5),
+        JogadorCampeao('Maicon', _z, titular: true, numero: 4),
+        JogadorCampeao('Cesar', _z),
+        JogadorCampeao('Paulo Paiva', _z),
+        JogadorCampeao('Silas', _z),
+        JogadorCampeao('Claudio Barbalho', _z),
+        JogadorCampeao('Fabio', _m, titular: true, numero: 7),
+        JogadorCampeao('Macapá', _m, titular: true, numero: 10),
+        JogadorCampeao('Clayton', _m),
+        JogadorCampeao('Moraes', _m),
+        JogadorCampeao('Marcelo Cai Cai', _a, titular: true, numero: 9),
+        JogadorCampeao('Luizinho', _a),
+      ],
+      premios: [
+        PremioTemporada('Melhor jogador', 'Macapá'),
+        PremioTemporada('Melhor goleiro', 'Toupeira'),
+      ],
+    ),
     TituloTemporada(
       2021,
       'Juventus',
+      cor: 0xFF111111,
       elenco: [
         JogadorCampeao('Santana', _g, titular: true),
         JogadorCampeao('Sagica', _z, titular: true),

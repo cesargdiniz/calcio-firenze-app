@@ -41,6 +41,23 @@ void main() {
     expect(juve.premios.map((p) => p.nome).toSet(), {'Daniel Diniz'});
   });
 
+  test('Inter 2025 e Brasil 2022: titulares no 2-2-1, cores do time', () {
+    final master = campeoesDe(Categoria.master);
+    final inter = master.firstWhere((t) => t.ano == 2025);
+    expect(inter.titulares.map((j) => '${j.numero} ${j.noCampo}'), [
+      '1 Galvão', '5 Berg', '16 Fabrício', '11 Marcelo Farias', '89 Rudd', '10 Carneiro', //
+    ]);
+    expect(inter.reservas, hasLength(6));
+    expect(inter.cor, 0xFF0A3D91);
+    final brasil = master.firstWhere((t) => t.ano == 2022);
+    expect(brasil.titulares.map((j) => j.nome), [
+      'Toupeira', 'Olavo', 'Maicon', 'Fabio', 'Macapá', 'Marcelo Cai Cai', //
+    ]);
+    expect(brasil.reservas, hasLength(7));
+    // Todos os campeões do Master já têm elenco e cor.
+    expect(master.every((t) => t.elenco.isNotEmpty && t.cor != null), isTrue);
+  });
+
   testWidgets('tocar no campeão abre o campinho com titulares e reservas', (t) async {
     await t.pumpWidget(
       const MaterialApp(home: Scaffold(body: SingleChildScrollView(
