@@ -19,7 +19,23 @@ class JogadorCampeao {
   final bool titular;
   final int? numero;
 
-  const JogadorCampeao(this.nome, this.posicao, {this.titular = false, this.numero});
+  /// Nome curto no campinho (ex.: "M Jr"). Sem ele, vale [nome].
+  final String? curto;
+
+  const JogadorCampeao(this.nome, this.posicao, {this.titular = false, this.numero, this.curto});
+
+  String get noCampo => curto ?? nome;
+}
+
+/// Premiação individual da temporada (melhor jogador, artilheiro...).
+class PremioTemporada {
+  final String premio;
+  final String nome;
+
+  /// Time do premiado, quando não é o campeão.
+  final String? time;
+
+  const PremioTemporada(this.premio, this.nome, {this.time});
 }
 
 /// Campeão de uma temporada e, quando cadastrado, o elenco do título.
@@ -27,8 +43,9 @@ class TituloTemporada {
   final int ano;
   final String campeao;
   final List<JogadorCampeao> elenco;
+  final List<PremioTemporada> premios;
 
-  const TituloTemporada(this.ano, this.campeao, {this.elenco = const []});
+  const TituloTemporada(this.ano, this.campeao, {this.elenco = const [], this.premios = const []});
 
   List<JogadorCampeao> get titulares => [for (final j in elenco) if (j.titular) j];
   List<JogadorCampeao> get reservas => [for (final j in elenco) if (!j.titular) j];
@@ -47,7 +64,25 @@ const _a = PosicaoCampeao.ataque;
 const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
   Categoria.master: [
     TituloTemporada(2025, 'Inter'),
-    TituloTemporada(2024, 'Sampdoria'),
+    TituloTemporada(
+      2024,
+      'Sampdoria',
+      elenco: [
+        JogadorCampeao('Marcos Júnior', _g, titular: true, numero: 94, curto: 'M Jr'),
+        JogadorCampeao('Marcelo Paiva', _z, titular: true, numero: 4, curto: 'Marcelo'),
+        JogadorCampeao('Saymon', _z, titular: true, numero: 100),
+        JogadorCampeao('Ferreira', _z),
+        JogadorCampeao('Jamerson', _z),
+        JogadorCampeao('Tenório', _z),
+        JogadorCampeao('Marcio Pedreiro', _m, titular: true, numero: 10, curto: 'Pedreiro'),
+        JogadorCampeao('Eddy', _m, titular: true, numero: 20),
+        JogadorCampeao('Fran', _m),
+        JogadorCampeao('Eurico', _m),
+        JogadorCampeao('Paulinho Macaco', _a, titular: true, numero: 9, curto: 'Paulinho'),
+        JogadorCampeao('Hélio', _a),
+        JogadorCampeao('Alexandre Soberano', _a),
+      ],
+    ),
     TituloTemporada(
       2023,
       'Foggia',
@@ -66,6 +101,11 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
         JogadorCampeao('Ceará', _a),
         JogadorCampeao('Marcílio', _a),
         JogadorCampeao('Cleuby', null),
+      ],
+      premios: [
+        PremioTemporada('Melhor jogador', 'Klelio'),
+        PremioTemporada('Artilheiro', 'Klelio'),
+        PremioTemporada('Melhor goleiro', 'Carmona', time: 'Sampdoria'),
       ],
     ),
     TituloTemporada(2022, 'Brasil'),
