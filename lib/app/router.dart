@@ -8,6 +8,7 @@ import '../modules/campeoes/campeoes_screen.dart';
 import '../modules/entrada/entrada_screen.dart';
 import '../modules/entrada/splash_screen.dart';
 import '../modules/organizacao/organizacao_shell.dart';
+import '../modules/organizacao/screens/campeoes_gestao_screen.dart';
 import '../modules/organizacao/screens/decisoes_screen.dart';
 import '../modules/organizacao/screens/disciplina_screen.dart';
 import '../modules/organizacao/screens/gestao_screen.dart';
@@ -191,6 +192,18 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
                 GoRoute(path: 'pedidos', builder: (_, _) => const PedidosScreen()),
                 GoRoute(path: 'elencos', builder: (_, _) => const ImportarElencosScreen()),
                 GoRoute(path: 'parametros', builder: (_, _) => const ParametrosScreen()),
+                GoRoute(
+                  path: 'campeoes',
+                  builder: (_, _) => const CampeoesGestaoScreen(),
+                  routes: [
+                    GoRoute(path: 'novo', builder: (_, _) => const EditarCampeaoScreen()),
+                    GoRoute(
+                      path: ':ano',
+                      builder: (_, estado) =>
+                          EditarCampeaoScreen(ano: int.tryParse(estado.pathParameters['ano'] ?? '')),
+                    ),
+                  ],
+                ),
                 GoRoute(
                   path: 'movimentacoes',
                   builder: (_, _) => const MovimentacoesScreen(),

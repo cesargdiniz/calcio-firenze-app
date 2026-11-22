@@ -72,6 +72,10 @@ service cloud.firestore {
         allow update, delete: if false;
       }
       match /decisoes/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
+
+      // Campeões da categoria (elencos, titulares e premiações), cadastrados
+      // em Gestão: todos leem; só a Organização da categoria grava.
+      match /campeoes/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
       match /ajustes/{id}   { allow read: if true; allow write: if organizacaoDe(t); }
 
       // Elencos: nome e número são públicos (aparecem na súmula e na lista de

@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:calcio_regras/calcio_regras.dart';
 
 import '../../domain/entities/aviso_push.dart';
+import '../../domain/entities/campeoes.dart';
 import '../../domain/usecases/calendario_geral.dart';
 import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/campeoes_repository.dart';
 import '../../domain/repositories/organizacao_repository.dart';
 import '../../domain/repositories/preferencias_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
@@ -431,4 +433,25 @@ class MemoriaPreferencias implements PreferenciasRepository {
 
   @override
   Future<void> salvarCategoria(String temporadaId) async => _categoria = temporadaId;
+}
+
+/// Campeões em memória (testes e galeria). Começa sem nada gravado.
+class MemoriaCampeoesRepository implements CampeoesRepository {
+  final _gravados = <Categoria, List<TituloTemporada>>{};
+  final _mudou = StreamController<Categoria>.broadcast();
+
+  /// Lista gravada, para conferir nos testes.
+  List<TituloTemporada>? gravados(Categoria c) => _gravados[c];
+
+  @override
+  Stream<List<TituloTemporada>?> observar(Categoria categoria) async* {
+    yield _gravados[categoria];
+    yield* _mudou.stream.where((c) => c == categoria).map((c) => _gravados[c]);
+  }
+
+  @override
+  Future<void> salvarTodos(Categoria categoria, List<TituloTemporada> titulos) async {
+    _gravados[categoria] = List.unmodifiable(titulos);
+    _mudou.add(categoria);
+  }
 }

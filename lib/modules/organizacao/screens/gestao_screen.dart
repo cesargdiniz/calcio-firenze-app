@@ -64,6 +64,7 @@ class GestaoScreen extends StatelessWidget {
           grupo('Temporada', [
             item('Times da temporada', rota: '/organizacao/gestao/times'),
             item('Regulamento e parâmetros', rota: '/organizacao/gestao/parametros'),
+            item('Campeões', rota: '/organizacao/gestao/campeoes'),
           ]),
           grupo('Elencos', [
             item('Importar elencos do turno', rota: '/organizacao/gestao/elencos'),
