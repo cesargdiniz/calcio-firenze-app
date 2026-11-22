@@ -11,6 +11,7 @@ import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// O5 · Organização · Disciplina: pendências calculadas das súmulas.
 class DisciplinaScreen extends StatelessWidget {
@@ -71,7 +72,7 @@ class _DisciplinaState extends State<_Disciplina> {
     final total = abertas.fold(0, (s, p) => s + p.valor);
 
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         CabecalhoTela(
           'Disciplina',

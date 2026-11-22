@@ -9,6 +9,7 @@ import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// O6 · Organização · Gestão
 class GestaoScreen extends StatelessWidget {
@@ -35,7 +36,7 @@ class GestaoScreen extends StatelessWidget {
       );
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           CabecalhoTela('Gestão', subtitulo: o.dados.nome),
           const SizedBox(height: AppSpacing.md),

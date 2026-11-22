@@ -14,6 +14,7 @@ import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 import '../widgets/pendencia_card.dart';
 import 'participante_inicio_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// P2 · Participante · Meu time
 class MeuTimeScreen extends StatelessWidget {
@@ -27,7 +28,7 @@ class MeuTimeScreen extends StatelessWidget {
       final nomes = {for (final l in t.elenco) l.pessoa.id: l.pessoa.nome};
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           Row(
             children: [

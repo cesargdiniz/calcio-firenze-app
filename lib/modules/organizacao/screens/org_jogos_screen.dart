@@ -18,6 +18,7 @@ import '../../../shared/widgets/datas_copa.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import '../../../shared/widgets/seletor_fase.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// O9 · Organização · Jogos: calendário do turno e acesso à súmula.
 class OrgJogosScreen extends StatelessWidget {
@@ -133,7 +134,7 @@ class _JogosState extends State<_Jogos> {
     );
 
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         const CabecalhoTela('Jogos', subtitulo: 'Calendário e súmulas'),
         const SizedBox(height: AppSpacing.md),

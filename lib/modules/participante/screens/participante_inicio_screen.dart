@@ -16,6 +16,7 @@ import '../avisos.dart';
 import '../participante_controller.dart';
 import '../widgets/pendencia_card.dart';
 import '../../torcedor/screens/time_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// Entrega o estado "pronto" às telas do Participante.
 class ComParticipante extends StatelessWidget {
@@ -46,7 +47,7 @@ class ParticipanteInicioScreen extends StatelessWidget {
       final avisos = avisosDoParticipante(p).length;
 
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           Row(
             children: [

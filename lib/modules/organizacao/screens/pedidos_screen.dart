@@ -9,6 +9,7 @@ import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// Voltar padrão das telas de Gestão.
 class VoltarGestao extends StatelessWidget {
@@ -27,7 +28,7 @@ class PedidosScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ComOrg(
     builder: (context, o) => ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         const VoltarGestao(),
         CabecalhoTela(

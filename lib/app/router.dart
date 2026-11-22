@@ -1,7 +1,9 @@
 import 'package:calcio_regras/calcio_regras.dart';
 import 'package:go_router/go_router.dart';
 
+import '../domain/entities/categoria.dart';
 import '../modules/calendario/calendario_screen.dart';
+import '../modules/campeoes/campeoes_screen.dart';
 import '../modules/entrada/entrada_screen.dart';
 import '../modules/entrada/splash_screen.dart';
 import '../modules/organizacao/organizacao_shell.dart';
@@ -51,10 +53,27 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
 
     // Torcedor: sem login.
     StatefulShellRoute.indexedStack(
-      builder: (_, _, navegacao) => TorcedorShell(navegacao: navegacao),
+      builder: (_, estado, navegacao) =>
+          TorcedorShell(navegacao: navegacao, rota: estado.uri.path),
       branches: [
         StatefulShellBranch(
-          routes: [GoRoute(path: '/torcedor', builder: (_, _) => const InicioScreen())],
+          routes: [
+            GoRoute(
+              path: '/torcedor',
+              builder: (_, _) => const InicioScreen(),
+              routes: [
+                // Atalhos do menu lateral do computador.
+                GoRoute(
+                  path: 'campeoes',
+                  builder: (_, _) => const CampeoesScreen(categoria: Categoria.master),
+                ),
+                GoRoute(
+                  path: 'calendario',
+                  builder: (_, _) => const CalendarioScreen(voltarPara: '/torcedor'),
+                ),
+              ],
+            ),
+          ],
         ),
         StatefulShellBranch(routes: [_jogos('/torcedor/jogos')]),
         StatefulShellBranch(

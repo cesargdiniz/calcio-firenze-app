@@ -8,6 +8,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_spacing.dart';
 import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
+import '../../shared/layout/tela_larga.dart';
 
 /// Botão de troféu do Início: abre os campeões da categoria. Some nas
 /// categorias sem histórico.
@@ -42,7 +43,7 @@ class CampeoesScreen extends StatelessWidget {
       builder: (context, status) {
         final atual = status is CategoriaEscolhida ? status.categoria : categoria;
         return ListView(
-          padding: AppSpacing.tela,
+          padding: TelaLarga.margens(context),
           children: [
             CabecalhoTela('Campeões', subtitulo: 'Calcio Firenze · ${atual.nome}'),
             const SizedBox(height: AppSpacing.md),

@@ -15,6 +15,7 @@ import '../../../shared/widgets/logo_calcio.dart';
 import '../widgets/com_painel.dart';
 import '../widgets/tabela.dart';
 import 'time_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// T1 · Torcedor · Início
 class InicioScreen extends StatelessWidget {
@@ -25,7 +26,7 @@ class InicioScreen extends StatelessWidget {
     builder: (context, painel) {
       final suspensos = painel.suspensos.length;
       return ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           Row(
             children: [

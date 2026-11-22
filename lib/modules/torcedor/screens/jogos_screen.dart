@@ -15,6 +15,7 @@ import '../../../shared/widgets/datas_copa.dart';
 import '../widgets/com_painel.dart';
 import 'time_screen.dart';
 import '../../../shared/widgets/seletor_fase.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// T2 · Torcedor · Jogos
 class JogosScreen extends StatelessWidget {
@@ -135,7 +136,7 @@ class _JogosState extends State<_Jogos> {
     final datasPendentes = _eliminatorias &&
         datasMataMata(painel.categoria, _turno).any((d) => !criadas.contains(d.fase));
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         CabecalhoTela(
           'Jogos',

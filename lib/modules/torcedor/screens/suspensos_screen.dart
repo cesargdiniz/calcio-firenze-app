@@ -10,6 +10,7 @@ import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 import '../widgets/com_painel.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// T4 · Torcedor · Suspensos. Mostra quem NÃO joga a próxima rodada.
 class SuspensosScreen extends StatelessWidget {
@@ -72,7 +73,7 @@ class _SuspensosState extends State<_Suspensos> {
     final p = widget.painel;
     final etapa = p.proximaEtapa;
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         CabecalhoTela(
           'Suspensos',

@@ -14,6 +14,7 @@ import '../../organizacao/widgets/sorteio_empate.dart';
 import '../torcedor_controller.dart';
 import '../widgets/com_painel.dart';
 import '../widgets/tabela.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// Categorias da seção Estatísticas, na ordem dos botões.
 enum _Categoria {
@@ -75,7 +76,7 @@ class _ClassificacaoScreenState extends State<ClassificacaoScreen> {
   @override
   Widget build(BuildContext context) => ComPainel(
     builder: (context, painel) => ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         CabecalhoTela(
           _estatisticas ? 'Estatísticas' : 'Classificação',

@@ -13,6 +13,7 @@ import '../../../shared/widgets/escudo.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import 'pedidos_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// O3/O4 · Súmula: lançamento depois do jogo e encerramento.
 class SumulaScreen extends StatelessWidget {
@@ -190,7 +191,7 @@ class _SumulaState extends State<_Sumula> {
     final problema = _problema;
 
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         VoltarGestao(rotulo: 'Jogo', rota: '/organizacao/jogos/${p.id}'),
         CabecalhoTela(

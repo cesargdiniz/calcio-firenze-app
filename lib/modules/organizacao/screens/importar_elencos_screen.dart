@@ -10,6 +10,7 @@ import '../../../shared/widgets/escudo.dart';
 import '../organizacao_controller.dart';
 import '../organizacao_shell.dart';
 import 'pedidos_screen.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// G1 · Gestão · Importar elencos (colando as linhas da planilha).
 class ImportarElencosScreen extends StatelessWidget {
@@ -78,7 +79,7 @@ class _ImportarState extends State<_Importar> {
     final r = _resultado;
     final prontos = r?.prontos.length ?? 0;
     return ListView(
-      padding: AppSpacing.tela,
+      padding: TelaLarga.margens(context),
       children: [
         const VoltarGestao(),
         CabecalhoTela('Importar elencos', subtitulo: widget.o.dados.nome),

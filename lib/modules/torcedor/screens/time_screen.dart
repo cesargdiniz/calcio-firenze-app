@@ -10,6 +10,7 @@ import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
 import '../../../shared/widgets/escudo.dart';
 import '../widgets/grafico_evolucao.dart';
+import '../../../shared/layout/tela_larga.dart';
 
 /// Abre a tela do time (toque no escudo).
 void abrirTime(BuildContext context, Painel painel, String timeId) => Navigator.of(context).push(
@@ -62,7 +63,7 @@ class TimeScreen extends StatelessWidget {
       backgroundColor: AppColors.fundo,
       appBar: AppBar(backgroundColor: AppColors.fundo, surfaceTintColor: AppColors.fundo),
       body: ListView(
-        padding: AppSpacing.tela,
+        padding: TelaLarga.margens(context),
         children: [
           Center(child: Escudo(p.time, tamanho: 96)),
           const SizedBox(height: AppSpacing.md),
