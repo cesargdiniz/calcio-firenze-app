@@ -23,6 +23,7 @@ import '../shared/pdf/saida_pdf.dart';
 import '../shared/seletor_imagem.dart';
 import '../shared/theme/app_theme.dart';
 import 'router.dart';
+import '../shared/widgets/coluna_larga.dart';
 
 /// Raiz do app. As dependências chegam prontas (Firebase em produção,
 /// versões em memória nos testes).
@@ -140,10 +141,12 @@ class _CalcioAppState extends State<CalcioApp> {
         // Pedido de notificações, uma vez, depois da escolha da categoria.
         builder: (context, child) => BlocBuilder<CategoriaController, CategoriaStatus>(
           bloc: _categoria,
-          builder: (_, status) => PedidoNotificacoes(
-            push: widget.push,
-            pronto: status is CategoriaEscolhida,
-            child: child ?? const SizedBox.shrink(),
+          builder: (_, status) => ColunaLarga(
+            child: PedidoNotificacoes(
+              push: widget.push,
+              pronto: status is CategoriaEscolhida,
+              child: child ?? const SizedBox.shrink(),
+            ),
           ),
         ),
       ),
