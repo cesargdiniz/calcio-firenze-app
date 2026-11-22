@@ -181,10 +181,12 @@ void main() {
     await abrirApp(tester, inicio: '/torcedor/tabela');
     await tester.tap(find.byType(EscudoClicavel).first);
     await tester.pumpAndSettle();
-    expect(find.text('Destaques da temporada'), findsOneWidget);
     expect(find.text('Títulos'), findsOneWidget);
     expect(find.text('Evolução na tabela · 1º turno'), findsOneWidget);
     expect(find.byType(GraficoEvolucao), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Destaques da temporada'), 200);
+    expect(find.text('Destaques da temporada'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Mais indisciplinado'), 200);
     expect(find.text('Artilheiro'), findsOneWidget);
     expect(find.text('Mais indisciplinado'), findsOneWidget);
   });
