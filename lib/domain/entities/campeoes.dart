@@ -172,6 +172,7 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
       ],
       premios: [
         PremioTemporada('Melhor jogador', 'Macapá'),
+        PremioTemporada('Artilheiro', 'Nayron', time: 'França'),
         PremioTemporada('Melhor goleiro', 'Helielder', time: 'França'),
       ],
     ),
@@ -180,17 +181,17 @@ const campeoesPorCategoria = <Categoria, List<TituloTemporada>>{
       'Juventus',
       cor: 0xFF111111,
       elenco: [
-        JogadorCampeao('Santana', _g, titular: true),
-        JogadorCampeao('Sagica', _z, titular: true),
-        JogadorCampeao('Robledo', _z, titular: true),
+        JogadorCampeao('Santana', _g, titular: true, numero: 1),
+        JogadorCampeao('Sagica', _z, titular: true, numero: 3),
+        JogadorCampeao('Robledo', _z, titular: true, numero: 4),
         JogadorCampeao('Ivo Barbosa', _z),
         JogadorCampeao('Antonio Marcos', _z),
-        JogadorCampeao('Tárik Toda', _m, titular: true),
+        JogadorCampeao('Tárik Toda', _m, titular: true, numero: 8),
         // Atacante de origem; no time titular jogou no meio.
-        JogadorCampeao('Renato Cajá', _m, titular: true),
+        JogadorCampeao('Renato Cajá', _m, titular: true, numero: 10),
         JogadorCampeao('Jhovan', _m),
         JogadorCampeao('Henrique Bezerra', _m),
-        JogadorCampeao('Daniel Diniz', _a, titular: true),
+        JogadorCampeao('Daniel Diniz', _a, titular: true, numero: 9),
         JogadorCampeao('Marcilio Guerreiro', _a),
       ],
       premios: [
