@@ -31,10 +31,14 @@ void main() {
     await t.enterText(find.byKey(const Key('campeao-ano')), '2026');
     await t.enterText(find.byKey(const Key('campeao-time')), 'Teste FC');
     await t.scrollUntilVisible(find.byKey(const Key('adicionar-jogador')), 200, scrollable: _lista);
+    await t.ensureVisible(find.byKey(const Key('adicionar-jogador')));
+    await t.pumpAndSettle();
     await t.tap(find.byKey(const Key('adicionar-jogador')));
     await t.pumpAndSettle();
     await t.enterText(find.widgetWithText(TextField, 'Nome').first, 'Fulano');
     await t.scrollUntilVisible(find.byKey(const Key('salvar-campeao')), 200, scrollable: _lista);
+    await t.ensureVisible(find.byKey(const Key('salvar-campeao')));
+    await t.pumpAndSettle();
     await t.tap(find.byKey(const Key('salvar-campeao')));
     await t.pumpAndSettle();
     expect(find.text('2026 · Teste FC'), findsOneWidget);
@@ -46,6 +50,8 @@ void main() {
     await t.enterText(find.byKey(const Key('campeao-ano')), '2025');
     await t.enterText(find.byKey(const Key('campeao-time')), 'Outro');
     await t.scrollUntilVisible(find.byKey(const Key('salvar-campeao')), 200, scrollable: _lista);
+    await t.ensureVisible(find.byKey(const Key('salvar-campeao')));
+    await t.pumpAndSettle();
     await t.tap(find.byKey(const Key('salvar-campeao')));
     await t.pumpAndSettle();
     expect(find.text('Já existe um campeão em 2025.'), findsOneWidget);
