@@ -515,6 +515,14 @@ void main() {
       await _rolar(t, 700);
       await _capturar(t, '29_org_parametros_continuacao');
     });
+    _tela('29b campeões na gestão', (t) async {
+      await org(t, '/organizacao/gestao/campeoes');
+      await _capturar(t, '29b_org_campeoes');
+      await org(t, '/organizacao/gestao/campeoes/2023');
+      await _capturar(t, '29c_org_editar_campeao');
+      await _rolar(t, 700);
+      await _capturar(t, '29d_org_editar_campeao_elenco');
+    });
     _tela('30 importar elencos', (t) async {
       await org(t, '/organizacao/gestao/elencos');
       await _capturar(t, '30_org_importar_elencos');
