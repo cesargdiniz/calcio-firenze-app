@@ -278,7 +278,14 @@ void main() {
       const superconta = Sessao(uid: 'org1', email: 'cesargdiniz@gmail.com');
       await _abrir(t, '/organizacao/gestao', sessao: superconta, organizacao: {'org1'});
       await _capturar(t, '05r_gestao_superconta');
-      await _abrir(t, '/calendario/rearranjar', sessao: superconta, organizacao: {'org1'});
+      // Turnos ainda não sorteados: as etiquetas mostram as datas oficiais.
+      await _abrir(
+        t,
+        '/calendario/rearranjar',
+        sessao: superconta,
+        organizacao: {'org1'},
+        dados: montarTemporadaExemplo(),
+      );
       await _capturar(t, '05s_rearranjar_calendario');
       // Arrastando a abertura do Master (sexta 22/01) para a segunda 25/01.
       final gesto = await t.startGesture(t.getCenter(find.text('M 2').first));
