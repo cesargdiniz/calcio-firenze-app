@@ -21,7 +21,7 @@ void main() {
     for (var i = 1; i < jogos.length; i++) {
       expect(jogos[i].inicio.isBefore(jogos[i - 1].inicio), isFalse);
     }
-    expect(jogos.first.inicio, DateTime(2027, 1, 29, 20, 30));
+    expect(jogos.first.inicio, DateTime(2027, 1, 22, 20, 30));
     expect(jogos.first.etapa, 'Rodada 1');
     expect(jogos.last.etapa, 'Grande final');
   });

@@ -43,23 +43,23 @@ void main() {
     }
   });
 
-  test('horários oficiais: abertura em 29 e 30/01 e uma rodada por semana', () {
+  test('horários oficiais: abertura em 22 e 23/01', () {
     final p = gerar(turno: 1, times: times, horarios: turno1, sorteio: Random(3));
     List<DateTime> da(int r) => [
       for (final x in p)
         if (x.rodada == r) x.inicio,
     ];
     expect(da(1), [
-      DateTime(2027, 1, 29, 20, 30),
-      DateTime(2027, 1, 29, 21, 30),
-      DateTime(2027, 1, 30, 17),
-      DateTime(2027, 1, 30, 18),
-      DateTime(2027, 1, 30, 19),
+      DateTime(2027, 1, 22, 20, 30),
+      DateTime(2027, 1, 22, 21, 30),
+      DateTime(2027, 1, 23, 17),
+      DateTime(2027, 1, 23, 18),
+      DateTime(2027, 1, 23, 19),
     ]);
-    expect(da(2).first, DateTime(2027, 2, 2, 20, 30));
-    expect(da(2).last, DateTime(2027, 2, 5, 20, 30));
-    expect(da(6).first, DateTime(2027, 3, 30, 20, 30));
-    expect(da(9).last, DateTime(2027, 5, 14, 20, 30));
+    expect(da(2).first, DateTime(2027, 1, 26, 20, 30));
+    expect(da(2).last, DateTime(2027, 1, 29, 20, 30));
+    expect(da(7).first, DateTime(2027, 3, 30, 20, 30));
+    expect(da(9).last, DateTime(2027, 4, 30, 20, 30));
     expect(p.every((x) => x.local == 'Arena Gugu'), isTrue);
   });
 
@@ -101,7 +101,7 @@ void main() {
       final inicios = p.map((x) => x.inicio).toList()..sort();
       expect(inicios.first, DateTime(2027, 2, 27, 17));
       expect(inicios.last, DateTime(2027, 5, 21, 21, 30));
-      expect(horariosLivre2027[0], [DateTime(2027, 11, 27, 19)]);
+      expect(horariosLivre2027[0], [DateTime(2027, 12, 18, 19)]);
     });
 
     test('Super Master: 6 times, 5 rodadas de 3 jogos, semifinal e final', () {
@@ -117,9 +117,9 @@ void main() {
       );
       expect(p, hasLength(15));
       final inicios = p.map((x) => x.inicio).toList()..sort();
-      expect(inicios.first, DateTime(2027, 7, 24, 17));
-      expect(inicios.last, DateTime(2027, 9, 14, 21, 30));
-      expect(horariosSuperMaster2027[0], [DateTime(2027, 10, 23, 19)]);
+      expect(inicios.first, DateTime(2027, 8, 14, 17));
+      expect(inicios.last, DateTime(2027, 11, 3, 21, 30));
+      expect(horariosSuperMaster2027[0], [DateTime(2027, 12, 16, 20, 30)]);
     });
 
     test('cada categoria usa o próprio calendário', () {
@@ -129,7 +129,7 @@ void main() {
     });
   });
 
-  test('Copa Master: 9 jogos em 5 datas reservadas, de 24/05 a 29/06', () {
+  test('Copa Master: 9 jogos em 5 datas reservadas, de 15/05 a 16/06', () {
     expect(datasCopaMaster2027.map((d) => d.etapa), [
       'Preliminar',
       'Quartas de final',
@@ -139,24 +139,34 @@ void main() {
     ]);
     expect(datasCopaMaster2027.expand((d) => d.horarios), hasLength(9));
     expect(datasCopaMaster2027.first.horarios, [
-      DateTime(2027, 5, 24, 20, 30),
-      DateTime(2027, 5, 24, 21, 30),
+      DateTime(2027, 5, 15, 17),
+      DateTime(2027, 5, 15, 18),
     ]);
-    expect(datasCopaMaster2027.last.horarios, [DateTime(2027, 6, 29, 20, 30)]);
+    // Final em dia de semana: os sábados são das finais de turno.
+    expect(datasCopaMaster2027.last.horarios, [DateTime(2027, 6, 16, 20, 30)]);
     // Nenhuma data da Copa cai em horário do Master.
     final master = {...horariosMaster2027[1]!, ...horariosMaster2027[2]!};
     expect(datasCopaMaster2027.expand((d) => d.horarios).where(master.contains), isEmpty);
   });
 
+  test('nenhum jogo em julho, em nenhuma categoria nem na Copa', () {
+    final todos = [
+      for (final c in Categoria.values)
+        for (final l in horariosDe(c).values) ...l,
+      for (final d in datasCopaMaster2027) ...d.horarios,
+    ];
+    expect(todos.where((h) => h.month == DateTime.july), isEmpty);
+  });
+
   group('datas do mata-mata', () {
-    test('Master 1º turno: quartas 28/05, semis 10/06 e final 03/07', () {
+    test('Master 1º turno: quartas 11/05, semis 24/05 e final no sábado 12/06', () {
       final d = datasMataMata(Categoria.master, 1);
       expect(d.map((e) => e.fase), [Fase.quartas, Fase.semifinal, Fase.finalTurno]);
       expect(d.map((e) => e.etapa), ['Quartas de final', 'Semifinais', 'Final do 1º turno']);
       expect(d.map((e) => e.horarios.length), [2, 2, 1]);
-      expect(d[0].horarios.first, DateTime(2027, 5, 28, 20, 30));
-      expect(d[2].horarios.single.day, 3);
-      expect(d[2].horarios.single.month, 7);
+      expect(d[0].horarios.first, DateTime(2027, 5, 11, 20, 30));
+      expect(d[1].horarios.first, DateTime(2027, 5, 24, 20, 30));
+      expect(d[2].horarios.single, DateTime(2027, 6, 12, 19));
     });
 
     test('2º turno inclui a grande final', () {

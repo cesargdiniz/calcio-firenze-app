@@ -34,7 +34,10 @@ void main() {
     );
     expect(find.text('Inconsistência no calendário'), findsOneWidget);
     expect(
-      find.text('Regra 5 · Finais de turno e grandes finais sempre aos sábados.'),
+      find.text(
+        'Regra 5 · Finais de turno e grandes finais do Master aos sábados; do Livre, na sexta '
+        'ou no sábado; do Super Master, na quinta, na sexta ou no sábado.',
+      ),
       findsOneWidget,
     );
     expect(find.text('• Qua 15/12: L · Grande final.'), findsOneWidget);
