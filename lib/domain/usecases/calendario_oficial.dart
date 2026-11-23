@@ -7,24 +7,30 @@ import 'gerar_calendario.dart';
 /// (os do código, sem as mudanças feitas na Gestão). Devolve só os que
 /// mudam: id → novo início. Jogos com súmula encerrada ficam onde estão.
 ///
-/// Cada rodada volta para os horários oficiais dela, na ordem em que os jogos
-/// estão hoje; cada etapa do mata-mata, para o dia oficial da etapa.
+/// Cada rodada volta para os horários oficiais dela; cada etapa do mata-mata,
+/// para o dia oficial da etapa.
 Map<String, DateTime> voltarAoOficial(Categoria c, List<Partida> partidas) {
   final oficiais = horariosOficiaisDe(c);
   final porRodada = c.times ~/ 2;
   final classificatorios = c.rodadas * porRodada;
   final mudancas = <String, DateTime>{};
 
+  // Quem já está num horário oficial da etapa fica; os demais ocupam, na
+  // ordem em que estão hoje, os horários oficiais que sobraram.
   void encaixar(Iterable<Partida> jogos, List<DateTime> horarios) {
-    final lista = jogos.where((p) => !p.encerrada).toList()
-      ..sort((a, b) {
-        final porData = a.inicio.compareTo(b.inicio);
-        return porData != 0 ? porData : a.id.compareTo(b.id);
-      });
-    final ordenados = [...horarios]..sort();
-    for (final (i, p) in lista.indexed) {
-      if (i >= ordenados.length) break;
-      if (p.inicio != ordenados[i]) mudancas[p.id] = ordenados[i];
+    final livres = [...horarios]..sort();
+    final fora = <Partida>[];
+    for (final p in jogos) {
+      if (livres.remove(p.inicio)) continue;
+      if (!p.encerrada) fora.add(p);
+    }
+    fora.sort((a, b) {
+      final porData = a.inicio.compareTo(b.inicio);
+      return porData != 0 ? porData : a.id.compareTo(b.id);
+    });
+    for (final (i, p) in fora.indexed) {
+      if (i >= livres.length) break;
+      mudancas[p.id] = livres[i];
     }
   }
 

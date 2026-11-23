@@ -836,6 +836,10 @@ class _GradeMes extends StatelessWidget {
   Widget _conteudo(BuildContext context, DateTime dia, {required bool destacar}) {
     final feriado = feriados[dia];
     final jogos = porDia[dia] ?? const {};
+    final todos = [for (final l in jogos.values) ...l];
+    final abrir = onDia;
+    final VoidCallback? aoTocar =
+        abrir == null || todos.length < 2 ? null : () => abrir(dia, todos);
     final domingo = dia.weekday == DateTime.sunday;
     final rotulo = [
       if (feriado != null) feriado.nome,
@@ -880,9 +884,13 @@ class _GradeMes extends StatelessWidget {
                     _Selo(c, '${c.sigla} ${l.length}')
                   else if (desmembrados.contains(dia) && l.length > 1)
                     for (final j in l)
-                      _SeloArrastavel(_Arraste(c, dia, [j]), texto: '${c.sigla} ${_hora(j.inicio)}')
+                      _SeloArrastavel(
+                        _Arraste(c, dia, [j]),
+                        texto: '${c.sigla} ${_hora(j.inicio)}',
+                        onTap: aoTocar,
+                      )
                   else
-                    _SeloArrastavel(_Arraste(c, dia, l)),
+                    _SeloArrastavel(_Arraste(c, dia, l), onTap: aoTocar),
               ],
             ),
             if (feriado != null)
@@ -918,7 +926,10 @@ class _SeloArrastavel extends StatelessWidget {
 
   /// Texto da etiqueta; sem ele, sigla e número de jogos ("M 2").
   final String? texto;
-  const _SeloArrastavel(this.arraste, {this.texto});
+
+  /// Toque na etiqueta (abre o dia).
+  final VoidCallback? onTap;
+  const _SeloArrastavel(this.arraste, {this.texto, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -931,9 +942,12 @@ class _SeloArrastavel extends StatelessWidget {
         '${arraste.jogos.length == 1 ? 'jogo' : 'jogos'} ($etapas). Arraste para outro dia.';
     final arrastando = Material(color: Colors.transparent, child: Transform.scale(scale: 1.15, child: selo));
     final noLugar = Opacity(opacity: 0.35, child: selo);
-    final alvo = MouseRegion(
-      cursor: SystemMouseCursors.grab,
-      child: Tooltip(message: rotulo, child: selo),
+    final alvo = GestureDetector(
+      onTap: onTap,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.grab,
+        child: Tooltip(message: rotulo, child: selo),
+      ),
     );
     return Semantics(
       label: rotulo,
