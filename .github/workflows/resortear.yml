@@ -3,8 +3,6 @@ name: Refazer sorteio
 # Refaz o sorteio dos turnos já sorteados cujas datas não batem com o
 # calendário oficial. Sem "gravar", só mostra o que faria.
 on:
-  push:
-    branches: [claude/resortear]
   workflow_dispatch:
     inputs:
       gravar:
@@ -30,7 +28,7 @@ jobs:
       - name: Sorteia
         env:
           CONTA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          GRAVAR: ${{ github.event_name == 'push' || inputs.gravar }}
+          GRAVAR: ${{ inputs.gravar }}
         run: |
           printf '%s' "$CONTA" > "$RUNNER_TEMP/conta.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/conta.json"
