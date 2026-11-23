@@ -88,6 +88,9 @@ void main() {
 
     // Só o jogo das 19h vai para quinta 25/02 (fevereiro, ao lado: a grade de
     // janeiro cresce com as etiquetas separadas).
+    // ignore: avoid_print
+    print('DEBUG chip ${t.getCenter(find.text('M 19:00'))} alvo ${t.getCenter(find.text('25').last)} '
+        'tela ${t.view.physicalSize}');
     final gesto = await t.startGesture(t.getCenter(find.text('M 19:00')));
     await t.pump();
     await gesto.moveBy(const Offset(10, 10));
@@ -96,6 +99,10 @@ void main() {
     await t.pump();
     await gesto.up();
     await t.pumpAndSettle();
+    // ignore: avoid_print
+    print('DEBUG snack ${find.byType(SnackBar).evaluate().length} '
+        '${find.textContaining('jogo de').evaluate().map((e) => (e.widget as Text).data).toList()} '
+        'ajustes ${AjustesCalendario.atual}');
     expect(AjustesCalendario.atual, {DateTime(2027, 1, 23, 19): DateTime(2027, 2, 25, 20, 30)});
   });
 
