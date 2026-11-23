@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/categoria.dart';
 import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/usecases/calendario_geral.dart';
+import '../../domain/usecases/gerar_calendario.dart';
 
 sealed class CalendarioStatus {
   const CalendarioStatus();
@@ -30,6 +31,8 @@ class CalendarioController extends Cubit<CalendarioStatus> {
   CalendarioController(this._repository) : super(const CalendarioCarregando());
 
   void iniciar() {
+    // Dias mudados na Gestão: refaz o calendário.
+    _subs.add(AjustesCalendario.mudancas.listen((_) => _emitir()));
     for (final c in Categoria.values) {
       var respondeu = false;
       void contar() {

@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../domain/repositories/auth_repository.dart';
+import '../domain/repositories/calendario_repository.dart';
+import '../domain/usecases/gerar_calendario.dart';
 import '../domain/repositories/organizacao_repository.dart';
 import '../domain/repositories/preferencias_repository.dart';
 import '../domain/repositories/push_repository.dart';
@@ -46,6 +48,9 @@ class CalcioApp extends StatefulWidget {
 
   /// Campeões gravados pela Organização. Sem ele (testes), só os do app.
   final CampeoesRepository? campeoes;
+
+  /// Dias mudados por uma superconta. Sem ele (testes), em memória.
+  final CalendarioRepository? calendario;
   final String initialLocation;
 
   const CalcioApp({
@@ -63,6 +68,7 @@ class CalcioApp extends StatefulWidget {
     this.seletorImagem = const SeletorImagemDoAparelho(),
     this.push = const PushDesligado(),
     this.campeoes,
+    this.calendario,
     this.initialLocation = '/',
   });
 
@@ -80,6 +86,13 @@ class _CalcioAppState extends State<CalcioApp> {
     _categoria.observar(),
   );
   StreamSubscription<String>? _rotas;
+  late final CalendarioRepository _calendario = widget.calendario ??
+      MemoriaCalendarioRepository(
+        widget.temporada is MemoriaTemporadaRepository
+            ? widget.temporada as MemoriaTemporadaRepository
+            : null,
+      );
+  StreamSubscription<Map<DateTime, DateTime>>? _ajustes;
 
   @override
   void initState() {
@@ -87,11 +100,14 @@ class _CalcioAppState extends State<CalcioApp> {
     _sincronizador.iniciar();
     // Toque na notificação abre o jogo ou a tela do aviso.
     _rotas = widget.push.rotasAbertas.listen(_router.go);
+    // Dias mudados na Gestão valem para o app todo.
+    _ajustes = _calendario.observarAjustes().listen(AjustesCalendario.definir, onError: (Object _) {});
   }
 
   @override
   void dispose() {
     _rotas?.cancel();
+    _ajustes?.cancel();
     _sincronizador.encerrar();
     _router.dispose();
     _categoria.close();
@@ -103,6 +119,7 @@ class _CalcioAppState extends State<CalcioApp> {
     providers: [
       RepositoryProvider<TemporadaRepository>.value(value: widget.temporada),
       RepositoryProvider<AuthRepository>.value(value: widget.auth),
+      RepositoryProvider<CalendarioRepository>.value(value: _calendario),
       RepositoryProvider<UsuarioRepository>.value(value: widget.usuarios),
       RepositoryProvider<PreferenciasRepository>.value(value: widget.preferencias),
       RepositoryProvider<SaidaPdf>.value(value: widget.saidaPdf),

@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../domain/entities/categoria.dart';
 import '../modules/calendario/calendario_screen.dart';
+import '../modules/calendario/rearranjar_calendario_screen.dart';
 import '../modules/campeoes/campeoes_screen.dart';
 import '../modules/entrada/entrada_screen.dart';
 import '../modules/entrada/splash_screen.dart';
@@ -52,7 +53,14 @@ GoRouter criarRouter({String initialLocation = '/'}) => GoRouter(
     GoRoute(path: '/', builder: (_, _) => const SplashScreen()),
     GoRoute(path: '/entrar', builder: (_, _) => const EntradaScreen()),
     // Calendário de todas as categorias: aberto de qualquer perfil, por cima.
-    GoRoute(path: '/calendario', builder: (_, _) => const CalendarioScreen()),
+    GoRoute(
+      path: '/calendario',
+      builder: (_, _) => const CalendarioScreen(),
+      routes: [
+        // Gestão (superconta): mudar jogos de dia arrastando.
+        GoRoute(path: 'rearranjar', builder: (_, _) => const RearranjarCalendarioScreen()),
+      ],
+    ),
 
     // Torcedor: sem login.
     StatefulShellRoute.indexedStack(

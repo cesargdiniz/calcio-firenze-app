@@ -2,8 +2,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../domain/repositories/calendario_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
 import '../../domain/usecases/calendario_geral.dart';
+import '../../domain/usecases/gerar_calendario.dart';
+import '../../domain/usecases/verificar_calendario.dart';
 import '../../shared/format.dart';
 import '../../shared/pdf/saida_pdf.dart';
 import '../../shared/layout/tela_larga.dart';
@@ -13,6 +16,7 @@ import '../../shared/theme/app_text_styles.dart';
 import '../../shared/widgets/basicos.dart';
 import '../../shared/widgets/escudo.dart';
 import 'calendario_controller.dart';
+import 'consistencia_calendario.dart';
 
 const _meses = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', //
@@ -31,7 +35,10 @@ Color corDa(Competicao c) => switch (c) {
 class CalendarioScreen extends StatelessWidget {
   /// Para onde volta se a tela foi aberta direto.
   final String voltarPara;
-  const CalendarioScreen({super.key, this.voltarPara = '/torcedor/jogos'});
+
+  /// Gestão (superconta): arrastar as etiquetas muda os jogos de dia.
+  final bool editavel;
+  const CalendarioScreen({super.key, this.voltarPara = '/torcedor/jogos', this.editavel = false});
 
   @override
   Widget build(BuildContext context) => BlocProvider(
@@ -51,7 +58,15 @@ class CalendarioScreen extends StatelessWidget {
                 ),
               ],
             ),
-            CalendarioPronto(:final jogos) => _Calendario(jogos: jogos, voltarPara: voltarPara),
+            CalendarioPronto(:final jogos) => editavel
+                ? _CalendarioLargo(
+                    jogos: jogos,
+                    filtro: null,
+                    onFiltro: (_) {},
+                    voltarPara: voltarPara,
+                    editavel: true,
+                  )
+                : _Calendario(jogos: jogos, voltarPara: voltarPara),
           },
         ),
       ),
@@ -304,12 +319,14 @@ class _CalendarioLargo extends StatefulWidget {
   final Competicao? filtro;
   final ValueChanged<Competicao?> onFiltro;
   final String voltarPara;
+  final bool editavel;
 
   const _CalendarioLargo({
     required this.jogos,
     required this.filtro,
     required this.onFiltro,
     required this.voltarPara,
+    this.editavel = false,
   });
 
   @override
@@ -322,6 +339,65 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
   /// Primeiro mês do par em exibição (1, 3, 5 ... 11).
   late int _mes = _parInicial();
 
+  /// Filtro próprio no modo de edição (lá a tela não guarda o filtro).
+  Competicao? _filtroEdicao;
+  Competicao? get _filtro => widget.editavel ? _filtroEdicao : widget.filtro;
+  void _filtrar(Competicao? c) =>
+      widget.editavel ? setState(() => _filtroEdicao = c) : widget.onFiltro(c);
+
+  /// Leva os jogos de uma etiqueta para [destino], depois dos que já estão
+  /// lá, e oferece desfazer.
+  Future<void> _mover(_Arraste a, DateTime destino) async {
+    final repo = context.read<CalendarioRepository>();
+    final aviso = ScaffoldMessenger.of(context);
+    final jaNoDia = widget.jogos
+        .where((j) => !j.ehDraft && _mesmoDia(j.inicio, destino) && !a.jogos.contains(j))
+        .length;
+    final novos = horariosNoDia(destino, jaNoDia, a.jogos.length);
+    final antes = {for (final j in a.jogos) j: j.inicio};
+    try {
+      await _aplicar(repo, {for (final (i, j) in a.jogos.indexed) j: novos[i]});
+      aviso
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              '${a.competicao.sigla}: ${a.jogos.length} '
+              '${a.jogos.length == 1 ? 'jogo' : 'jogos'} de ${dataCurta(a.dia)} para ${dataCurta(destino)}.',
+            ),
+            action: SnackBarAction(label: 'Desfazer', onPressed: () => _aplicar(repo, antes)),
+          ),
+        );
+    } catch (e) {
+      aviso.showSnackBar(SnackBar(content: Text('Não foi possível mudar o dia: $e')));
+    }
+  }
+
+  /// Grava os novos horários: jogos já sorteados mudam no banco da categoria;
+  /// datas ainda a definir (e da Copa) viram ajustes do calendário oficial.
+  static Future<void> _aplicar(CalendarioRepository repo, Map<JogoDoCalendario, DateTime> destinos) async {
+    final ajustes = {...AjustesCalendario.atual};
+    var mudouAjuste = false;
+    final porTemporada = <String, Map<String, DateTime>>{};
+    for (final MapEntry(key: j, value: h) in destinos.entries) {
+      final categoria = j.competicao.categoria;
+      if (j.partida case final p? when categoria != null) {
+        (porTemporada[categoria.temporadaId] ??= {})[p.id] = h;
+      } else if (j.oficial case final o?) {
+        mudouAjuste = true;
+        if (h == o) {
+          ajustes.remove(o);
+        } else {
+          ajustes[o] = h;
+        }
+      }
+    }
+    for (final MapEntry(key: t, value: inicios) in porTemporada.entries) {
+      await repo.moverPartidas(t, inicios);
+    }
+    if (mudouAjuste) await repo.salvarAjustes(ajustes);
+  }
+
   static int _parInicial() {
     final hoje = DateTime.now();
     if (hoje.year != _ano) return 1;
@@ -330,12 +406,11 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
 
   @override
   Widget build(BuildContext context) {
-    final porDia = <DateTime, Map<Competicao, int>>{};
+    final porDia = <DateTime, Map<Competicao, List<JogoDoCalendario>>>{};
     for (final j in widget.jogos) {
-      if (j.ehDraft || (widget.filtro != null && j.competicao != widget.filtro)) continue;
+      if (j.ehDraft || (_filtro != null && j.competicao != _filtro)) continue;
       final d = DateTime(j.inicio.year, j.inicio.month, j.inicio.day);
-      final m = porDia.putIfAbsent(d, () => {});
-      m[j.competicao] = (m[j.competicao] ?? 0) + 1;
+      (porDia.putIfAbsent(d, () => {})[j.competicao] ??= []).add(j);
     }
     final feriados = {
       for (final f in feriados2027) DateTime(f.data.year, f.data.month, f.data.day): f,
@@ -346,22 +421,28 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
       icon: Icon(icone),
     );
     return PaginaLarga(
-      antes: context.canPop() ? BotaoVoltar(rotulo: 'Voltar', rota: widget.voltarPara) : null,
-      titulo: 'Calendário completo',
-      subtitulo: 'Todas as categorias e a Copa · temporada $_ano',
+      antes: context.canPop() || widget.editavel
+          ? BotaoVoltar(rotulo: 'Voltar', rota: widget.voltarPara)
+          : null,
+      titulo: widget.editavel ? 'Rearranjar calendário' : 'Calendário completo',
+      subtitulo: widget.editavel
+          ? 'Arraste uma etiqueta (ex.: M 2) para outro dia: os jogos dela vão juntos, nos '
+                'horários do dia. Vale para todas as categorias e a Copa.'
+          : 'Todas as categorias e a Copa · temporada $_ano',
       acao: OutlinedButton.icon(
         onPressed: () => abrirCalendarioPdf(context, widget.jogos),
         icon: const Icon(Icons.download_rounded),
         label: const Text('Baixar PDF do ano'),
       ),
       topo: [
+        if (widget.editavel) QuadroInconsistencias(verificarCalendario(widget.jogos)),
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
-            ChipFiltro('Todas', ativo: widget.filtro == null, onTap: () => widget.onFiltro(null)),
+            ChipFiltro('Todas', ativo: _filtro == null, onTap: () => _filtrar(null)),
             for (final c in Competicao.values)
-              ChipFiltro(c.nome, ativo: widget.filtro == c, onTap: () => widget.onFiltro(c)),
+              ChipFiltro(c.nome, ativo: _filtro == c, onTap: () => _filtrar(c)),
           ],
         ),
         Wrap(
@@ -417,7 +498,13 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
           espaco: AppSpacing.xl,
           children: [
             for (final m in [_mes, _mes + 1])
-              _GradeMes(ano: _ano, mes: m, porDia: porDia, feriados: feriados),
+              _GradeMes(
+                ano: _ano,
+                mes: m,
+                porDia: porDia,
+                feriados: feriados,
+                onMover: widget.editavel ? _mover : null,
+              ),
           ],
         ),
       ],
@@ -484,14 +571,18 @@ class _LegendaFeriado extends StatelessWidget {
 class _GradeMes extends StatelessWidget {
   final int ano;
   final int mes;
-  final Map<DateTime, Map<Competicao, int>> porDia;
+  final Map<DateTime, Map<Competicao, List<JogoDoCalendario>>> porDia;
   final Map<DateTime, Feriado> feriados;
+
+  /// Modo de edição: recebe a etiqueta solta num dia.
+  final void Function(_Arraste arraste, DateTime destino)? onMover;
 
   const _GradeMes({
     required this.ano,
     required this.mes,
     required this.porDia,
     required this.feriados,
+    this.onMover,
   });
 
   @override
@@ -508,7 +599,7 @@ class _GradeMes extends StatelessWidget {
           ),
         ),
       for (var i = 0; i < vazios; i++) const SizedBox.shrink(),
-      for (var d = 1; d <= dias; d++) _celula(DateTime(ano, mes, d)),
+      for (var d = 1; d <= dias; d++) _celula(context, DateTime(ano, mes, d)),
     ];
     final linhas = <TableRow>[];
     for (var i = 0; i < celulas.length; i += 7) {
@@ -528,18 +619,29 @@ class _GradeMes extends StatelessWidget {
     );
   }
 
-  Widget _celula(DateTime dia) {
+  Widget _celula(BuildContext context, DateTime dia) {
+    final mover = onMover;
+    if (mover == null) return _conteudo(context, dia, destacar: false);
+    return DragTarget<_Arraste>(
+      onWillAcceptWithDetails: (d) => !_mesmoDia(d.data.dia, dia),
+      onAcceptWithDetails: (d) => mover(d.data, dia),
+      builder: (context, candidatos, _) =>
+          _conteudo(context, dia, destacar: candidatos.isNotEmpty),
+    );
+  }
+
+  Widget _conteudo(BuildContext context, DateTime dia, {required bool destacar}) {
     final feriado = feriados[dia];
     final jogos = porDia[dia] ?? const {};
     final domingo = dia.weekday == DateTime.sunday;
     final rotulo = [
       if (feriado != null) feriado.nome,
-      for (final MapEntry(key: c, value: n) in jogos.entries)
-        '$n ${n == 1 ? 'jogo' : 'jogos'} ${c == Competicao.copaMaster ? 'da' : 'do'} ${c.nome}',
+      for (final MapEntry(key: c, value: l) in jogos.entries)
+        '${l.length} ${l.length == 1 ? 'jogo' : 'jogos'} ${c == Competicao.copaMaster ? 'da' : 'do'} ${c.nome}',
     ];
     return Semantics(
       label: '${dia.day}${rotulo.isEmpty ? '' : ': ${rotulo.join(', ')}'}',
-      excludeSemantics: true,
+      excludeSemantics: onMover == null,
       child: Container(
         constraints: const BoxConstraints(minHeight: 76),
         padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
@@ -547,7 +649,10 @@ class _GradeMes extends StatelessWidget {
           color: feriado != null && !feriado.oficial ? AppColors.vermelhoSuave : AppColors.cartao,
           borderRadius: AppRadius.botao,
           border: Border.all(
-            color: feriado != null && feriado.oficial ? AppColors.vermelho : AppColors.linha,
+            color: destacar
+                ? AppColors.verde
+                : (feriado != null && feriado.oficial ? AppColors.vermelho : AppColors.linha),
+            width: destacar ? 2 : 1,
           ),
         ),
         child: Column(
@@ -567,7 +672,11 @@ class _GradeMes extends StatelessWidget {
               spacing: 4,
               runSpacing: 4,
               children: [
-                for (final MapEntry(key: c, value: n) in jogos.entries) _Selo(c, '${c.sigla} $n'),
+                for (final MapEntry(key: c, value: l) in jogos.entries)
+                  if (onMover == null)
+                    _Selo(c, '${c.sigla} ${l.length}')
+                  else
+                    _SeloArrastavel(_Arraste(c, dia, l)),
               ],
             ),
             if (feriado != null)
@@ -583,6 +692,52 @@ class _GradeMes extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+bool _mesmoDia(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+
+/// Jogos de uma competição num dia, levados juntos ao arrastar a etiqueta.
+class _Arraste {
+  final Competicao competicao;
+  final DateTime dia;
+  final List<JogoDoCalendario> jogos;
+  const _Arraste(this.competicao, this.dia, this.jogos);
+}
+
+/// Etiqueta que se arrasta para outro dia (no celular, segurando).
+class _SeloArrastavel extends StatelessWidget {
+  final _Arraste arraste;
+  const _SeloArrastavel(this.arraste);
+
+  @override
+  Widget build(BuildContext context) {
+    final selo = _Selo(arraste.competicao, '${arraste.competicao.sigla} ${arraste.jogos.length}');
+    final etapas = {for (final j in arraste.jogos) j.etapa}.join(', ');
+    final rotulo = '${arraste.competicao.nome}, ${arraste.jogos.length} '
+        '${arraste.jogos.length == 1 ? 'jogo' : 'jogos'} ($etapas). Arraste para outro dia.';
+    final arrastando = Material(color: Colors.transparent, child: Transform.scale(scale: 1.15, child: selo));
+    final noLugar = Opacity(opacity: 0.35, child: selo);
+    final alvo = MouseRegion(
+      cursor: SystemMouseCursors.grab,
+      child: Tooltip(message: rotulo, child: selo),
+    );
+    return Semantics(
+      label: rotulo,
+      child: TelaLarga.computador(context)
+          ? Draggable<_Arraste>(
+              data: arraste,
+              feedback: arrastando,
+              childWhenDragging: noLugar,
+              child: alvo,
+            )
+          : LongPressDraggable<_Arraste>(
+              data: arraste,
+              feedback: arrastando,
+              childWhenDragging: noLugar,
+              child: alvo,
+            ),
     );
   }
 }
