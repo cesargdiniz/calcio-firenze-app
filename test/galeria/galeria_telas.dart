@@ -18,6 +18,7 @@ import 'package:calcio_firenze/domain/usecases/montar_painel.dart';
 import 'package:calcio_firenze/domain/usecases/montar_situacao.dart';
 import 'package:calcio_firenze/domain/usecases/montar_sumula_impressa.dart';
 import 'package:calcio_firenze/domain/usecases/calendario_geral.dart';
+import 'package:calcio_firenze/domain/usecases/gerar_calendario.dart';
 import 'package:calcio_firenze/shared/pdf/calendario_pdf.dart';
 import 'package:calcio_firenze/shared/pdf/sumula_pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -272,6 +273,25 @@ void main() {
       await t.tap(find.text('Livre').first);
       await t.pumpAndSettle();
       await _capturar(t, '05c_calendario_livre');
+    });
+    _tela('05r rearranjar calendário (superconta)', (t) async {
+      const superconta = Sessao(uid: 'org1', email: 'cesargdiniz@gmail.com');
+      await _abrir(t, '/organizacao/gestao', sessao: superconta, organizacao: {'org1'});
+      await _capturar(t, '05r_gestao_superconta');
+      await _abrir(t, '/calendario/rearranjar', sessao: superconta, organizacao: {'org1'});
+      await _capturar(t, '05s_rearranjar_calendario');
+      // Arrastando a abertura do Master (sexta 22/01) para a segunda 25/01.
+      final gesto = await t.startGesture(t.getCenter(find.text('M 2').first));
+      await t.pump();
+      await gesto.moveBy(const Offset(10, 10));
+      await t.pump();
+      await gesto.moveTo(t.getCenter(find.text('25').first));
+      await t.pump();
+      await _capturar(t, '05t_rearranjar_arrastando');
+      await gesto.up();
+      await t.pumpAndSettle();
+      await _capturar(t, '05u_rearranjar_solto');
+      AjustesCalendario.definir(const {});
     });
   });
 
