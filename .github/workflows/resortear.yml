@@ -30,7 +30,7 @@ jobs:
       - name: Sorteia
         env:
           CONTA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          GRAVAR: ${{ inputs.gravar }}
+          GRAVAR: ${{ github.event_name == 'push' || inputs.gravar }}
         run: |
           printf '%s' "$CONTA" > "$RUNNER_TEMP/conta.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/conta.json"
