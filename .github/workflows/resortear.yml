@@ -1,0 +1,42 @@
+name: Refazer sorteio
+
+# Refaz o sorteio dos turnos já sorteados cujas datas não batem com o
+# calendário oficial. Sem "gravar", só mostra o que faria.
+on:
+  workflow_dispatch:
+    inputs:
+      gravar:
+        description: Gravar no Firestore
+        type: boolean
+        default: false
+
+jobs:
+  resortear:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: flutter pub get
+      - run: npm install --no-audit --no-fund
+        working-directory: tool/resortear
+      - name: Sorteia
+        env:
+          CONTA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GRAVAR: ${{ inputs.gravar }}
+        run: |
+          printf '%s' "$CONTA" > "$RUNNER_TEMP/conta.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/conta.json"
+          trap 'rm -f "$RUNNER_TEMP/conta.json"' EXIT
+          node tool/resortear/firestore.js ler "$RUNNER_TEMP/entrada.json"
+          TZ=America/Sao_Paulo dart run tool/resortear.dart "$RUNNER_TEMP/entrada.json" "$RUNNER_TEMP/plano.json"
+          if [ "$GRAVAR" = "true" ]; then
+            node tool/resortear/firestore.js gravar "$RUNNER_TEMP/plano.json"
+          else
+            echo "Simulação: nada gravado."
+          fi
