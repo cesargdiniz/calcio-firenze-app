@@ -71,7 +71,7 @@ void main() {
     }
     final s = mm.turno(t.dados, 1);
     expect(s.dataProvisoria, isTrue);
-    expect(s.propostos.first.inicio, DateTime(2027, 5, 21, 20, 30));
+    expect(s.propostos.first.inicio, DateTime(2027, 5, 7, 20, 30));
   });
 
   test('sem calendário, pede para gerar', () {
@@ -100,8 +100,8 @@ void main() {
     ]);
     expect(s.propostos.map((p) => p.id), ['t1-quartas-1', 't1-quartas-2']);
     expect(s.propostos.map((p) => p.inicio), [
-      DateTime(2027, 5, 28, 20, 30),
-      DateTime(2027, 5, 28, 21, 30),
+      DateTime(2027, 5, 11, 20, 30),
+      DateTime(2027, 5, 11, 21, 30),
     ]);
     expect(s.dataProvisoria, isFalse);
     expect(s.vantagem.keys, [t.pos(3), t.pos(4)]);
@@ -123,7 +123,7 @@ void main() {
       '${t.pos(1)} x ${t.pos(5)}',
       '${t.pos(2)} x ${t.pos(3)}',
     ]);
-    expect(s.propostos.first.inicio, DateTime(2027, 6, 10, 20, 30));
+    expect(s.propostos.first.inicio, DateTime(2027, 5, 24, 20, 30));
 
     t.criar(s);
     t.resultado('t1-semi-1', const Sumula(golsMandante: 3));
@@ -132,14 +132,14 @@ void main() {
       const Sumula(golsMandante: 1, golsVisitante: 1, penaltis: Penaltis(3, 4)),
     );
 
-    // Final: 1º x 3º, no horário oficial de 19/06.
+    // Final: 1º x 3º, no horário oficial de 12/06.
     s = mm.turno(t.dados, 1);
     expect(s.proxima, Fase.finalTurno);
     expect(s.propostos.single.id, 't1-final');
     expect('${s.propostos.single.mandanteId} x ${s.propostos.single.visitanteId}',
         '${t.pos(1)} x ${t.pos(3)}');
     expect(s.dataProvisoria, isFalse);
-    expect(s.propostos.single.inicio, DateTime(2027, 7, 3, 19));
+    expect(s.propostos.single.inicio, DateTime(2027, 6, 12, 19));
 
     t.criar(s);
     t.resultado('t1-final', const Sumula(golsVisitante: 1));

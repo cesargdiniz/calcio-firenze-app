@@ -11,7 +11,10 @@ enum RegraCalendario {
     'Aos sábados, só aberturas de turno e mata-mata: nenhuma rodada classificatória, '
     'em nenhuma categoria, fora a 1ª de cada turno.',
   ),
-  finalNoSabado('Finais de turno e grandes finais sempre aos sábados.'),
+  finalNoSabado(
+    'Finais de turno e grandes finais do Master aos sábados; do Livre, na sexta ou no '
+    'sábado; do Super Master, na quinta, na sexta ou no sábado.',
+  ),
   tresNaSemana('Nenhum time joga três vezes na mesma semana.'),
   descanso(
     'Entre dois jogos do mesmo time, pelo menos 4 dias: quem joga segunda volta na sexta; '
@@ -254,7 +257,8 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
         ),
       );
     }
-    if ((j.fase == Fase.finalTurno || j.fase == Fase.grandeFinal) && !sabado) {
+    if ((j.fase == Fase.finalTurno || j.fase == Fase.grandeFinal) &&
+        !_diasDeFinal(j.competicao).contains(j.inicio.weekday)) {
       saida.add(
         Inconsistencia(RegraCalendario.finalNoSabado, '${_data(j.inicio)}: ${_jogo(j)}.', [j]),
       );
@@ -266,6 +270,14 @@ List<Inconsistencia> verificarCalendario(List<JogoDoCalendario> eventos) {
     for (final r in RegraCalendario.values) ...saida.where((i) => i.regra == r),
   ];
 }
+
+/// Dias da semana em que cada categoria pode ter final de turno ou grande
+/// final (regra 5).
+Set<int> _diasDeFinal(Competicao c) => switch (c) {
+  Competicao.livre => const {DateTime.friday, DateTime.saturday},
+  Competicao.superMaster => const {DateTime.thursday, DateTime.friday, DateTime.saturday},
+  _ => const {DateTime.saturday},
+};
 
 /// Dias de calendário entre dois jogos (segunda → sexta = 4).
 const _minimo = 4;

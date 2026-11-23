@@ -30,18 +30,18 @@ List<DateTime> _dias(List<(int, int, int)> dias) => [
 /// semis (2) e final (1). A chave 0 é a grande final.
 final horariosMaster2027 = <int, List<DateTime>>{
   1: _dias(const [
-    (1, 29, 2), (1, 30, 3), // 1ª rodada
-    (2, 2, 2), (2, 4, 2), (2, 5, 1), // 2ª rodada
-    (2, 16, 2), (2, 18, 2), (2, 19, 1), // 3ª rodada
-    (3, 2, 2), (3, 4, 2), (3, 5, 1), // 4ª rodada
-    (3, 16, 2), (3, 18, 2), (3, 19, 1), // 5ª rodada
-    (3, 30, 2), (4, 1, 2), (4, 2, 1), // 6ª rodada
-    (4, 13, 2), (4, 15, 2), (4, 16, 1), // 7ª rodada
-    (4, 27, 2), (4, 29, 2), (4, 30, 1), // 8ª rodada
-    (5, 11, 2), (5, 13, 2), (5, 14, 1), // 9ª rodada
-    (5, 28, 2), // quartas
-    (6, 10, 2), // semifinais
-    (7, 3, 1), // final do 1º turno
+    (1, 22, 2), (1, 23, 3), // 1ª rodada
+    (1, 26, 2), (1, 28, 2), (1, 29, 1), // 2ª rodada
+    (2, 2, 2), (2, 4, 2), (2, 5, 1), // 3ª rodada
+    (2, 16, 2), (2, 18, 2), (2, 19, 1), // 4ª rodada
+    (3, 2, 2), (3, 4, 2), (3, 5, 1), // 5ª rodada
+    (3, 16, 2), (3, 18, 2), (3, 19, 1), // 6ª rodada
+    (3, 30, 2), (4, 1, 2), (4, 2, 1), // 7ª rodada
+    (4, 13, 2), (4, 15, 2), (4, 16, 1), // 8ª rodada
+    (4, 27, 2), (4, 29, 2), (4, 30, 1), // 9ª rodada
+    (5, 11, 2), // quartas
+    (5, 24, 2), // semifinais
+    (6, 12, 1), // final do 1º turno (nenhum jogo em julho)
   ]),
   2: _dias(const [
     (8, 6, 2), (8, 7, 3), // 1ª rodada
@@ -75,18 +75,18 @@ final horariosLivre2027 = <int, List<DateTime>>{
     (6, 26, 1), // final do 1º turno
   ]),
   2: _dias(const [
-    (7, 31, 4), // 1ª rodada
-    (8, 9, 2), (8, 11, 2), // 2ª rodada
-    (8, 13, 2), (8, 23, 2), // 3ª rodada
-    (8, 25, 2), (8, 27, 2), // 4ª rodada
-    (9, 15, 2), (9, 17, 2), // 5ª rodada
-    (10, 11, 2), (10, 13, 2), // 6ª rodada
-    (10, 15, 2), (10, 18, 2), // 7ª rodada
-    (10, 22, 2), // quartas
-    (11, 1, 2), // semifinais
-    (11, 6, 1), // final do 2º turno
+    (8, 9, 2), (8, 11, 2), // 1ª rodada
+    (8, 13, 2), (8, 23, 2), // 2ª rodada
+    (8, 25, 2), (8, 27, 2), // 3ª rodada
+    (9, 13, 2), (9, 15, 2), // 4ª rodada
+    (10, 11, 2), (10, 13, 2), // 5ª rodada
+    (10, 15, 2), (10, 18, 2), // 6ª rodada
+    (10, 20, 2), (10, 22, 2), // 7ª rodada
+    (11, 1, 2), // quartas
+    (11, 5, 2), // semifinais
+    (11, 27, 1), // final do 2º turno
   ]),
-  0: _dias(const [(11, 27, 1)]), // grande final
+  0: _dias(const [(12, 18, 1)]), // grande final
 };
 
 /// Super Master 2027: 6 times, 5 rodadas de 3 jogos por turno, semifinal
@@ -102,15 +102,15 @@ final horariosSuperMaster2027 = <int, List<DateTime>>{
     (6, 5, 1), // final do 1º turno
   ]),
   2: _dias(const [
-    (7, 24, 2), (7, 26, 1), // 1ª rodada
-    (7, 29, 1), (7, 30, 2), // 2ª rodada
-    (8, 10, 1), (8, 12, 2), // 3ª rodada
-    (8, 24, 1), (8, 26, 2), // 4ª rodada
-    (9, 13, 1), (9, 14, 2), // 5ª rodada
-    (9, 18, 2), // semifinais
-    (10, 16, 1), // final do 2º turno
+    (8, 14, 3), // 1ª rodada
+    (8, 24, 1), (8, 26, 2), // 2ª rodada
+    (9, 14, 1), (9, 16, 2), // 3ª rodada
+    (10, 14, 1), (10, 19, 2), // 4ª rodada
+    (10, 21, 1), (11, 3, 2), // 5ª rodada
+    (11, 22, 2), // semifinais
+    (11, 26, 1), // final do 2º turno (sexta)
   ]),
-  0: _dias(const [(10, 23, 1)]), // grande final
+  0: _dias(const [(12, 16, 1)]), // grande final (quinta)
 };
 
 /// Um dia reservado no calendário, com os horários dos jogos. Os confrontos
@@ -128,13 +128,13 @@ class DiaReservado {
 /// Copa Master 2027: mata-mata exclusivo dos times do Master. Por enquanto
 /// só as datas ficam reservadas; quem joga é definido depois.
 final datasCopaMaster2027 = [
-  // Entre maio e junho, em semanas sem Livre e sem Super Master e com 4
-  // dias de folga para os jogos do Master.
-  DiaReservado('Preliminar', _dia(5, 24, 2)),
-  DiaReservado('Quartas de final', _dia(6, 14, 2)),
-  DiaReservado('Quartas de final', _dia(6, 15, 2)),
-  DiaReservado('Semifinais', _dia(6, 19, 2)),
-  DiaReservado('Final', _dia(6, 29, 1)),
+  // Entre maio e junho, nas semanas do Master. A final é em dia de semana:
+  // os sábados ficam para as finais de turno.
+  DiaReservado('Preliminar', _dia(5, 15, 2)),
+  DiaReservado('Quartas de final', _dia(5, 28, 2)),
+  DiaReservado('Quartas de final', _dia(5, 29, 2)),
+  DiaReservado('Semifinais', _dia(6, 8, 2)),
+  DiaReservado('Final', _dia(6, 16, 1)),
 ];
 
 /// Datas já reservadas para o mata-mata de um turno: quartas (se houver),
