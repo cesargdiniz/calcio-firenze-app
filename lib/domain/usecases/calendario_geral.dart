@@ -28,6 +28,14 @@ enum Competicao {
   final String sigla;
   const Competicao(this.nome, this.sigla);
 
+  /// Categoria da competição (nula na Copa Master, que não tem temporada própria).
+  Categoria? get categoria => switch (this) {
+    Competicao.master => Categoria.master,
+    Competicao.superMaster => Categoria.superMaster,
+    Competicao.livre => Categoria.livre,
+    Competicao.copaMaster => null,
+  };
+
   static Competicao de(Categoria c) => switch (c) {
     Categoria.master => Competicao.master,
     Categoria.superMaster => Competicao.superMaster,
@@ -61,6 +69,10 @@ class JogoDoCalendario {
   /// 1 ou 2 quando não é jogo, e sim o Draft-1 ou o Draft-2 da categoria.
   final int? draft;
 
+  /// Horário do calendário oficial (no código) de onde veio um jogo ainda a
+  /// definir. É a chave da mudança de dia feita na Gestão.
+  final DateTime? oficial;
+
   const JogoDoCalendario({
     required this.inicio,
     required this.competicao,
@@ -72,6 +84,7 @@ class JogoDoCalendario {
     this.fase,
     this.rodada,
     this.draft,
+    this.oficial,
   });
 
   /// O mesmo evento em outro horário (para simular uma mudança de data).
@@ -86,6 +99,7 @@ class JogoDoCalendario {
     fase: fase,
     rodada: rodada,
     draft: draft,
+    oficial: oficial,
   );
 
   bool get ehDraft => draft != null;
@@ -126,9 +140,14 @@ List<JogoDoCalendario> montarCalendarioGeral(Map<Categoria, DadosCalendario> dad
     for (final c in Categoria.values)
       for (final MapEntry(key: n, value: data) in (dados[c]?.drafts ?? const {}).entries)
         JogoDoCalendario(inicio: data, competicao: Competicao.de(c), etapa: 'Draft-$n', draft: n),
-    for (final d in datasCopaMaster2027)
+    for (final d in datasCopaOficiais2027)
       for (final h in d.horarios)
-        JogoDoCalendario(inicio: h, competicao: Competicao.copaMaster, etapa: d.etapa),
+        JogoDoCalendario(
+          inicio: AjustesCalendario.aplicar(h),
+          competicao: Competicao.copaMaster,
+          etapa: d.etapa,
+          oficial: h,
+        ),
   ];
   return jogos..sort((a, b) => a.inicio.compareTo(b.inicio));
 }
@@ -136,7 +155,8 @@ List<JogoDoCalendario> montarCalendarioGeral(Map<Categoria, DadosCalendario> dad
 List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
   final competicao = Competicao.de(c);
   final times = {for (final t in d.times) t.id: t};
-  final horarios = horariosDe(c);
+  // Horários oficiais, na ordem do código; cada um no dia em que está hoje.
+  final horarios = horariosOficiaisDe(c);
   final porRodada = c.times ~/ 2;
   final classificatoria = c.rodadas * porRodada;
 
@@ -153,12 +173,13 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
   );
   JogoDoCalendario vago(DateTime h, String etapa, int turno, Fase fase, [int? rodada]) =>
       JogoDoCalendario(
-        inicio: h,
+        inicio: AjustesCalendario.aplicar(h),
         competicao: competicao,
         etapa: etapa,
         turno: turno,
         fase: fase,
         rodada: rodada,
+        oficial: h,
       );
 
   final etapasMataMata = [
@@ -169,7 +190,7 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
 
   final saida = <JogoDoCalendario>[];
   for (final turno in [1, 2]) {
-    final slots = [...?horarios[turno]]..sort();
+    final slots = [...?horarios[turno]];
     final doTurno = d.partidas.where((p) => p.turno == turno).toList();
     final sorteados = doTurno.where((p) => p.fase == Fase.classificatoria);
     if (sorteados.isNotEmpty) {
@@ -202,4 +223,16 @@ List<JogoDoCalendario> _daCategoria(Categoria c, DadosCalendario d) {
     }
   }
   return saida;
+}
+
+/// Horários de [quantos] jogos levados para [dia], depois dos [jaNoDia] que
+/// já estão lá: dia de semana às 20:30, 21:30...; sábado a partir das 17h, um
+/// por hora, e jogo único às 19h.
+List<DateTime> horariosNoDia(DateTime dia, int jaNoDia, int quantos) {
+  final d = DateTime(dia.year, dia.month, dia.day);
+  if (dia.weekday == DateTime.saturday || dia.weekday == DateTime.sunday) {
+    if (jaNoDia == 0 && quantos == 1) return [d.add(const Duration(hours: 19))];
+    return [for (var i = 0; i < quantos; i++) d.add(Duration(hours: 17 + jaNoDia + i))];
+  }
+  return [for (var i = 0; i < quantos; i++) d.add(Duration(hours: 20 + jaNoDia + i, minutes: 30))];
 }

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'app/app.dart';
+import 'data/firebase/firestore_calendario_repository.dart';
 import 'data/firebase/firestore_campeoes_repository.dart';
 import 'data/firebase/firebase_auth_repository.dart';
 import 'data/firebase/firebase_push_repository.dart';
@@ -62,6 +63,7 @@ Future<void> main() async {
       preferencias: const PreferenciasDoAparelho(),
       push: push,
       campeoes: FirestoreCampeoesRepository(db),
+      calendario: FirestoreCalendarioRepository(db),
       initialLocation: inicio,
     ),
   );

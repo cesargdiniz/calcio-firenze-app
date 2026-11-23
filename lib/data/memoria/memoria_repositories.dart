@@ -9,6 +9,7 @@ import '../../domain/entities/categoria.dart';
 import '../../domain/entities/temporada.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/calendario_repository.dart';
 import '../../domain/repositories/campeoes_repository.dart';
 import '../../domain/repositories/organizacao_repository.dart';
 import '../../domain/repositories/preferencias_repository.dart';
@@ -453,5 +454,56 @@ class MemoriaCampeoesRepository implements CampeoesRepository {
   Future<void> salvarTodos(Categoria categoria, List<TituloTemporada> titulos) async {
     _gravados[categoria] = List.unmodifiable(titulos);
     _mudou.add(categoria);
+  }
+}
+
+/// Mudanças de dia no calendário, em memória (testes).
+class MemoriaCalendarioRepository implements CalendarioRepository {
+  /// Onde ficam os jogos já sorteados (para mudar o horário deles).
+  final MemoriaTemporadaRepository? temporada;
+  MemoriaCalendarioRepository([this.temporada]);
+
+  Map<DateTime, DateTime> ajustes = const {};
+  final _mudou = StreamController<Map<DateTime, DateTime>>.broadcast();
+
+  @override
+  Stream<Map<DateTime, DateTime>> observarAjustes() async* {
+    yield ajustes;
+    yield* _mudou.stream;
+  }
+
+  @override
+  Future<void> salvarAjustes(Map<DateTime, DateTime> ajustes) async {
+    this.ajustes = Map.unmodifiable(ajustes);
+    _mudou.add(this.ajustes);
+  }
+
+  @override
+  Future<void> moverPartidas(String temporadaId, Map<String, DateTime> inicios) async {
+    final t = temporada;
+    if (t == null) return;
+    final d = t.daTemporada(temporadaId);
+    t.substituir(
+      MemoriaGestaoRepository._copiar(
+        d,
+        partidas: [
+          for (final p in d.partidas)
+            if (inicios[p.id] case final novo?)
+              Partida(
+                id: p.id,
+                turno: p.turno,
+                fase: p.fase,
+                rodada: p.rodada,
+                mandanteId: p.mandanteId,
+                visitanteId: p.visitanteId,
+                inicio: novo,
+                local: p.local,
+                sumula: p.sumula,
+              )
+            else
+              p,
+        ],
+      ),
+    );
   }
 }

@@ -16,6 +16,12 @@ service cloud.firestore {
     function organizacao() {
       return logado() && exists(/databases/$(database)/documents/organizacao/$(request.auth.uid));
     }
+    // Supercontas: rearranjam o calendário de todas as categorias e da Copa.
+    // A mesma lista está em lib/domain/entities/superconta.dart.
+    function superconta() {
+      return logado() && request.auth.token.email_verified == true
+        && request.auth.token.email in ['cesargdiniz@gmail.com'];
+    }
     function organizacaoDe(t) {
       return organizacao()
         && t in get(/databases/$(database)/documents/organizacao/$(request.auth.uid)).data.get('temporadas', []);
@@ -58,7 +64,13 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escudo']));
         allow delete: if organizacaoDe(t);
       }
-      match /partidas/{id}  { allow read: if true; allow write: if organizacaoDe(t); }
+      // A superconta só muda o horário (Gestão › Rearranjar calendário).
+      match /partidas/{id}  {
+        allow read: if true;
+        allow write: if organizacaoDe(t);
+        allow update: if superconta()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['inicio']);
+      }
 
       // Notificações pedidas pelo app da Organização ao encerrar uma súmula.
       // O serviço do Firebase (functions/) envia e marca como enviado.
@@ -98,6 +110,13 @@ service cloud.firestore {
         allow create, update: if organizacaoDe(t) || (proprio() && pedidoValido());
         allow delete: if organizacaoDe(t) || proprio();
       }
+    }
+
+    // Dias mudados no calendário oficial (calendario/ajustes): todos leem,
+    // só as supercontas gravam.
+    match /calendario/{id} {
+      allow read: if true;
+      allow write: if superconta();
     }
 
     // Cadastro da conta (nome e e-mail). Os vínculos ficam em cada categoria

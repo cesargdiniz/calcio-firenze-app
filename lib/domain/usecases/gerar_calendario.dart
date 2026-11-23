@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:calcio_regras/calcio_regras.dart';
@@ -127,7 +128,7 @@ class DiaReservado {
 
 /// Copa Master 2027: mata-mata exclusivo dos times do Master. Por enquanto
 /// só as datas ficam reservadas; quem joga é definido depois.
-final datasCopaMaster2027 = [
+final datasCopaOficiais2027 = [
   // Entre maio e junho, nas semanas do Master. A final é em dia de semana:
   // os sábados ficam para as finais de turno.
   DiaReservado('Preliminar', _dia(5, 15, 2)),
@@ -137,12 +138,20 @@ final datasCopaMaster2027 = [
   DiaReservado('Final', _dia(6, 16, 1)),
 ];
 
+/// Datas da Copa Master com as mudanças de dia feitas na Gestão.
+List<DiaReservado> get datasCopaMaster2027 => [
+  for (final d in datasCopaOficiais2027)
+    DiaReservado(d.etapa, [for (final h in d.horarios) AjustesCalendario.aplicar(h)], fase: d.fase),
+];
+
 /// Datas já reservadas para o mata-mata de um turno: quartas (se houver),
 /// semifinais e final do turno, e no 2º turno também a grande final. Os
 /// confrontos dependem da classificação, mas as datas já são conhecidas.
 List<DiaReservado> datasMataMata(Categoria c, int turno) {
   final classificatorios = c.rodadas * (c.times ~/ 2);
-  final slots = [...?horariosDe(c)[turno]]..sort();
+  // Na ordem do calendário oficial: um dia mudado na Gestão continua na
+  // mesma etapa.
+  final slots = [...?horariosDe(c)[turno]];
   final dias = <DateTime, List<DateTime>>{};
   for (final h in slots.skip(classificatorios)) {
     (dias[DateTime(h.year, h.month, h.day)] ??= []).add(h);
@@ -172,12 +181,48 @@ List<DiaReservado> datasMataMata(Categoria c, int turno) {
   return reservados;
 }
 
-/// Horários oficiais da categoria, por turno (0 = grande final).
-Map<int, List<DateTime>> horariosDe(Categoria c) => switch (c) {
+/// Horários oficiais da categoria, por turno (0 = grande final), como estão
+/// no código.
+Map<int, List<DateTime>> horariosOficiaisDe(Categoria c) => switch (c) {
   Categoria.master => horariosMaster2027,
   Categoria.superMaster => horariosSuperMaster2027,
   Categoria.livre => horariosLivre2027,
 };
+
+/// Horários da categoria, por turno (0 = grande final), com os dias mudados
+/// na Gestão. Cada horário fica na mesma posição do oficial.
+Map<int, List<DateTime>> horariosDe(Categoria c) {
+  final oficiais = horariosOficiaisDe(c);
+  if (AjustesCalendario.atual.isEmpty) return oficiais;
+  return {
+    for (final MapEntry(key: t, value: l) in oficiais.entries)
+      t: [for (final h in l) AjustesCalendario.aplicar(h)],
+  };
+}
+
+/// Datas oficiais (das categorias e da Copa) que uma superconta mudou de dia
+/// no calendário da Gestão: horário oficial → novo horário. Vem do banco e
+/// vale para o app todo; vazio, o calendário fica como está no código.
+abstract final class AjustesCalendario {
+  static Map<DateTime, DateTime> _atual = const {};
+  static final _mudancas = StreamController<void>.broadcast();
+
+  static Map<DateTime, DateTime> get atual => _atual;
+
+  /// Avisa a cada mudança (para refazer o calendário na tela).
+  static Stream<void> get mudancas => _mudancas.stream;
+
+  static void definir(Map<DateTime, DateTime> ajustes) {
+    _atual = Map.unmodifiable({
+      for (final MapEntry(:key, :value) in ajustes.entries)
+        if (key != value) key: value,
+    });
+    _mudancas.add(null);
+  }
+
+  /// Onde está hoje o horário oficial [h].
+  static DateTime aplicar(DateTime h) => _atual[h] ?? h;
+}
 
 /// Sorteia a tabela da fase classificatória de um turno (todos contra todos,
 /// art. 16) e ocupa os horários na ordem: os primeiros jogos (metade do

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../calendario/consistencia_calendario.dart';
+import '../../../domain/entities/superconta.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text_styles.dart';
 import '../../../shared/widgets/basicos.dart';
@@ -61,6 +62,19 @@ class GestaoScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           const ConsistenciaCalendario(),
+          if (ehSuperconta(o.sessao.email))
+            grupo('Calendário', [
+              ListTile(
+                leading: const Icon(Icons.edit_calendar_rounded, color: AppColors.verde),
+                title: const Text('Rearranjar calendário', style: AppTextStyles.rotulo),
+                subtitle: const Text(
+                  'Arraste os jogos de todas as categorias para outros dias',
+                  style: AppTextStyles.pequeno,
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.dica),
+                onTap: () => context.push('/calendario/rearranjar'),
+              ),
+            ]),
           grupo('Temporada', [
             item('Times da temporada', rota: '/organizacao/gestao/times'),
             item('Regulamento e parâmetros', rota: '/organizacao/gestao/parametros'),
