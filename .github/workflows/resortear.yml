@@ -3,6 +3,8 @@ name: Refazer sorteio
 # Refaz o sorteio dos turnos já sorteados cujas datas não batem com o
 # calendário oficial. Sem "gravar", só mostra o que faria.
 on:
+  push:
+    branches: [claude/resortear]
   workflow_dispatch:
     inputs:
       gravar:
