@@ -77,8 +77,8 @@ void main() {
 
   testWidgets('desmembrar um dia: uma etiqueta por jogo', (t) async {
     await abrir(t, sessao: _super);
-    // Sábado 23/01: 3 jogos do Master.
-    await t.tap(find.text('M 3').first);
+    // Sábado 23/01: 3 jogos do Master (a primeira etiqueta "M 3" é a da legenda).
+    await t.tap(find.text('M 3').last);
     await t.pumpAndSettle();
     await t.tap(find.text('Desmembrar'));
     await t.pumpAndSettle();
