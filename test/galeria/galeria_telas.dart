@@ -303,6 +303,29 @@ void main() {
       await _capturar(t, '05u_rearranjar_solto');
       AjustesCalendario.definir(const {});
     });
+    _tela('05v rearranjar: quatro meses e desmembrar', (t) async {
+      const superconta = Sessao(uid: 'org1', email: 'cesargdiniz@gmail.com');
+      await _abrir(
+        t,
+        '/calendario/rearranjar',
+        sessao: superconta,
+        organizacao: {'org1'},
+        dados: montarTemporadaExemplo(),
+      );
+      await t.tap(find.text('M 3').last);
+      await t.pumpAndSettle();
+      await _capturar(t, '05v_rearranjar_dia');
+      await t.tap(find.text('Desmembrar'));
+      await t.pumpAndSettle();
+      await _rolar(t, 380);
+      await _capturar(t, '05w_rearranjar_desmembrado');
+      await t.ensureVisible(find.byTooltip('Ver mais 2 meses'));
+      await t.pumpAndSettle();
+      await t.tap(find.byTooltip('Ver mais 2 meses'));
+      await t.pumpAndSettle();
+      await _rolar(t, 500);
+      await _capturar(t, '05x_rearranjar_quatro_meses');
+    });
   });
 
   group('Compartilhar', () {
