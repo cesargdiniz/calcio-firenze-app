@@ -86,16 +86,17 @@ void main() {
     expect(find.text('M 18:00'), findsOneWidget);
     expect(find.text('M 19:00'), findsOneWidget);
 
-    // Só o jogo das 19h vai para segunda 25/01.
+    // Só o jogo das 19h vai para quinta 25/02 (fevereiro, ao lado: a grade de
+    // janeiro cresce com as etiquetas separadas).
     final gesto = await t.startGesture(t.getCenter(find.text('M 19:00')));
     await t.pump();
     await gesto.moveBy(const Offset(10, 10));
     await t.pump();
-    await gesto.moveTo(t.getCenter(find.text('25').first));
+    await gesto.moveTo(t.getCenter(find.text('25').last));
     await t.pump();
     await gesto.up();
     await t.pumpAndSettle();
-    expect(AjustesCalendario.atual, {DateTime(2027, 1, 23, 19): DateTime(2027, 1, 25, 20, 30)});
+    expect(AjustesCalendario.atual, {DateTime(2027, 1, 23, 19): DateTime(2027, 2, 25, 20, 30)});
   });
 
   testWidgets('conta comum não rearranja', (t) async {
