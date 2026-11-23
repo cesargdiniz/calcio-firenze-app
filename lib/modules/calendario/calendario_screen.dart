@@ -6,7 +6,9 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../domain/repositories/calendario_repository.dart';
 import '../../domain/repositories/temporada_repository.dart';
+import '../../domain/entities/categoria.dart';
 import '../../domain/usecases/calendario_geral.dart';
+import '../../domain/usecases/calendario_oficial.dart';
 import '../../domain/usecases/gerar_calendario.dart';
 import '../../domain/usecases/verificar_calendario.dart';
 import '../../shared/format.dart';
@@ -344,6 +346,136 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
   /// Passa o mês quando uma etiqueta fica parada sobre a seta.
   Timer? _virar;
 
+  /// Na edição: quatro meses (2 x 2) em vez de dois.
+  bool _quatro = false;
+
+  /// Dias com os jogos desmembrados: uma etiqueta por jogo.
+  final _desmembrados = <DateTime>{};
+
+  /// Toque num dia com mais de um jogo: ver os jogos e desmembrar ou juntar.
+  Future<void> _abrirDia(DateTime dia, List<JogoDoCalendario> jogos) async {
+    final separado = _desmembrados.contains(dia);
+    final escolha = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(dataCurta(dia)),
+        content: SizedBox(
+          width: 420,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final j in jogos)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      _Selo(j.competicao, '${j.competicao.sigla} ${_hora(j.inicio)}'),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          j.mandante != null && j.visitante != null
+                              ? '${j.etapa} · ${j.mandante!.sigla} x ${j.visitante!.sigla}'
+                              : j.etapa,
+                          style: AppTextStyles.corpo,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                separado
+                    ? 'Os jogos deste dia estão separados: cada um tem a própria etiqueta.'
+                    : 'Desmembrar mostra uma etiqueta por jogo, para levar só parte deles '
+                          'para outro dia.',
+                style: AppTextStyles.pequeno,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: const Text('Fechar')),
+          FilledButton(
+            onPressed: () => Navigator.pop(c, true),
+            child: Text(separado ? 'Juntar' : 'Desmembrar'),
+          ),
+        ],
+      ),
+    );
+    if (escolha != true || !mounted) return;
+    setState(() => separado ? _desmembrados.remove(dia) : _desmembrados.add(dia));
+  }
+
+  /// Seta abaixo da grade: mostra (ou esconde) os dois meses seguintes.
+  /// Arrastando uma etiqueta, parar sobre ela também abre os meses.
+  Widget _setaVertical() {
+    final rotulo = _quatro ? 'Ver só 2 meses' : 'Ver mais 2 meses';
+    final botao = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton.outlined(
+          tooltip: rotulo,
+          onPressed: () => setState(() => _quatro = !_quatro),
+          icon: Icon(_quatro ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded),
+        ),
+        Text(rotulo, style: AppTextStyles.pequeno),
+      ],
+    );
+    return Center(
+      child: _quatro
+          ? botao
+          : DragTarget<_Arraste>(
+              onWillAcceptWithDetails: (_) {
+                _virar?.cancel();
+                _virar = Timer(const Duration(milliseconds: 600), () {
+                  if (mounted) setState(() => _quatro = true);
+                });
+                return false;
+              },
+              onLeave: (_) => _virar?.cancel(),
+              builder: (_, _, _) => botao,
+            ),
+    );
+  }
+
+  /// Volta todos os jogos e datas aos horários oficiais (do código).
+  Future<void> _voltarAoOficial() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Voltar ao calendário oficial?'),
+        content: const Text(
+          'Todos os jogos, de todas as categorias e da Copa, voltam às datas oficiais. '
+          'As mudanças de dia feitas aqui são desfeitas. Os confrontos sorteados continuam os '
+          'mesmos; jogos com súmula encerrada não mudam.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancelar')),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Voltar ao oficial')),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    final repo = context.read<CalendarioRepository>();
+    final aviso = ScaffoldMessenger.of(context);
+    try {
+      for (final c in Categoria.values) {
+        final partidas = [
+          for (final j in widget.jogos)
+            if (j.competicao.categoria == c && j.partida != null) j.partida!,
+        ];
+        final mudancas = voltarAoOficial(c, partidas);
+        if (mudancas.isNotEmpty) await repo.moverPartidas(c.temporadaId, mudancas);
+      }
+      await repo.salvarAjustes(const {});
+      setState(_desmembrados.clear);
+      aviso.showSnackBar(const SnackBar(content: Text('Calendário de volta às datas oficiais.')));
+    } catch (e) {
+      aviso.showSnackBar(SnackBar(content: Text('Não foi possível voltar ao oficial: $e')));
+    }
+  }
+
   @override
   void dispose() {
     _virar?.cancel();
@@ -458,10 +590,22 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
           ? 'Arraste uma etiqueta (ex.: M 2) para outro dia: os jogos dela vão juntos, nos '
                 'horários do dia. Vale para todas as categorias e a Copa.'
           : 'Todas as categorias e a Copa · temporada $_ano',
-      acao: OutlinedButton.icon(
-        onPressed: () => abrirCalendarioPdf(context, widget.jogos),
-        icon: const Icon(Icons.download_rounded),
-        label: const Text('Baixar PDF do ano'),
+      acao: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: [
+          if (widget.editavel)
+            OutlinedButton.icon(
+              onPressed: _voltarAoOficial,
+              icon: const Icon(Icons.restart_alt_rounded),
+              label: const Text('Voltar ao oficial'),
+            ),
+          OutlinedButton.icon(
+            onPressed: () => abrirCalendarioPdf(context, widget.jogos),
+            icon: const Icon(Icons.download_rounded),
+            label: const Text('Baixar PDF do ano'),
+          ),
+        ],
       ),
       topo: [
         if (widget.editavel) QuadroInconsistencias(verificarCalendario(widget.jogos)),
@@ -512,9 +656,11 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
               _mes > 1 ? (_mes - passo).clamp(1, 11) : null,
             ),
             SizedBox(
-              width: 260,
+              width: 320,
               child: Text(
-                '${_meses[_mes - 1]} e ${_meses[_mes]} de $_ano',
+                _quatro && _mes < 12
+                    ? '${_meses[_mes - 1]} a ${_meses[(_mes + 3).clamp(1, 12) - 1]} de $_ano'
+                    : '${_meses[_mes - 1]} e ${_meses[_mes]} de $_ano',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.tituloSecao,
               ),
@@ -534,16 +680,20 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
           minimo: 460,
           espaco: AppSpacing.xl,
           children: [
-            for (final m in [_mes, _mes + 1])
+            for (final m in [_mes, _mes + 1, if (_quatro) ...[_mes + 2, _mes + 3]])
+              if (m <= 12)
               _GradeMes(
                 ano: _ano,
                 mes: m,
                 porDia: porDia,
                 feriados: feriados,
                 onMover: widget.editavel ? _mover : null,
+                desmembrados: _desmembrados,
+                onDia: widget.editavel ? _abrirDia : null,
               ),
           ],
         ),
+        if (widget.editavel && _mes < 11) _setaVertical(),
       ],
     );
   }
@@ -614,12 +764,20 @@ class _GradeMes extends StatelessWidget {
   /// Modo de edição: recebe a etiqueta solta num dia.
   final void Function(_Arraste arraste, DateTime destino)? onMover;
 
+  /// Dias com uma etiqueta por jogo.
+  final Set<DateTime> desmembrados;
+
+  /// Toque num dia com mais de um jogo (modo de edição).
+  final void Function(DateTime dia, List<JogoDoCalendario> jogos)? onDia;
+
   const _GradeMes({
     required this.ano,
     required this.mes,
     required this.porDia,
     required this.feriados,
     this.onMover,
+    this.desmembrados = const {},
+    this.onDia,
   });
 
   @override
@@ -659,11 +817,19 @@ class _GradeMes extends StatelessWidget {
   Widget _celula(BuildContext context, DateTime dia) {
     final mover = onMover;
     if (mover == null) return _conteudo(context, dia, destacar: false);
+    final todos = [for (final l in (porDia[dia] ?? const {}).values) ...l];
+    final abrir = onDia;
     return DragTarget<_Arraste>(
       onWillAcceptWithDetails: (d) => !_mesmoDia(d.data.dia, dia),
       onAcceptWithDetails: (d) => mover(d.data, dia),
-      builder: (context, candidatos, _) =>
-          _conteudo(context, dia, destacar: candidatos.isNotEmpty),
+      builder: (context, candidatos, _) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: abrir == null || todos.length < 2 ? null : () => abrir(dia, todos),
+        child: MouseRegion(
+          cursor: todos.length < 2 ? MouseCursor.defer : SystemMouseCursors.click,
+          child: _conteudo(context, dia, destacar: candidatos.isNotEmpty),
+        ),
+      ),
     );
   }
 
@@ -712,6 +878,9 @@ class _GradeMes extends StatelessWidget {
                 for (final MapEntry(key: c, value: l) in jogos.entries)
                   if (onMover == null)
                     _Selo(c, '${c.sigla} ${l.length}')
+                  else if (desmembrados.contains(dia) && l.length > 1)
+                    for (final j in l)
+                      _SeloArrastavel(_Arraste(c, dia, [j]), texto: '${c.sigla} ${_hora(j.inicio)}')
                   else
                     _SeloArrastavel(_Arraste(c, dia, l)),
               ],
@@ -746,11 +915,17 @@ class _Arraste {
 /// Etiqueta que se arrasta para outro dia (no celular, segurando).
 class _SeloArrastavel extends StatelessWidget {
   final _Arraste arraste;
-  const _SeloArrastavel(this.arraste);
+
+  /// Texto da etiqueta; sem ele, sigla e número de jogos ("M 2").
+  final String? texto;
+  const _SeloArrastavel(this.arraste, {this.texto});
 
   @override
   Widget build(BuildContext context) {
-    final selo = _Selo(arraste.competicao, '${arraste.competicao.sigla} ${arraste.jogos.length}');
+    final selo = _Selo(
+      arraste.competicao,
+      texto ?? '${arraste.competicao.sigla} ${arraste.jogos.length}',
+    );
     final etapas = {for (final j in arraste.jogos) j.etapa}.join(', ');
     final rotulo = '${arraste.competicao.nome}, ${arraste.jogos.length} '
         '${arraste.jogos.length == 1 ? 'jogo' : 'jogos'} ($etapas). Arraste para outro dia.';
@@ -778,3 +953,6 @@ class _SeloArrastavel extends StatelessWidget {
     );
   }
 }
+
+/// "20:30" (hora do jogo nas etiquetas desmembradas).
+String _hora(DateTime h) => '${h.hour.toString().padLeft(2, '0')}:${h.minute.toString().padLeft(2, '0')}';

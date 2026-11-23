@@ -63,6 +63,41 @@ void main() {
     expect(find.text('Janeiro e Fevereiro de 2027'), findsOneWidget);
   });
 
+  testWidgets('seta para baixo mostra quatro meses', (t) async {
+    await abrir(t, sessao: _super);
+    expect(find.text('Março 2027'), findsNothing);
+    await t.ensureVisible(find.byTooltip('Ver mais 2 meses'));
+    await t.pumpAndSettle();
+    await t.tap(find.byTooltip('Ver mais 2 meses'));
+    await t.pumpAndSettle();
+    expect(find.text('Janeiro a Abril de 2027'), findsOneWidget);
+    expect(find.text('Março 2027'), findsOneWidget);
+    expect(find.text('Abril 2027'), findsOneWidget);
+  });
+
+  testWidgets('desmembrar um dia: uma etiqueta por jogo', (t) async {
+    await abrir(t, sessao: _super);
+    // Sábado 23/01: 3 jogos do Master.
+    await t.tap(find.text('M 3').first);
+    await t.pumpAndSettle();
+    await t.tap(find.text('Desmembrar'));
+    await t.pumpAndSettle();
+    expect(find.text('M 17:00'), findsOneWidget);
+    expect(find.text('M 18:00'), findsOneWidget);
+    expect(find.text('M 19:00'), findsOneWidget);
+
+    // Só o jogo das 19h vai para segunda 25/01.
+    final gesto = await t.startGesture(t.getCenter(find.text('M 19:00')));
+    await t.pump();
+    await gesto.moveBy(const Offset(10, 10));
+    await t.pump();
+    await gesto.moveTo(t.getCenter(find.text('25').first));
+    await t.pump();
+    await gesto.up();
+    await t.pumpAndSettle();
+    expect(AjustesCalendario.atual, {DateTime(2027, 1, 23, 19): DateTime(2027, 1, 25, 20, 30)});
+  });
+
   testWidgets('conta comum não rearranja', (t) async {
     await abrir(t, sessao: const Sessao(uid: 'org1', email: 'cesar@exemplo.com'));
     expect(find.text('Acesso restrito'), findsOneWidget);
