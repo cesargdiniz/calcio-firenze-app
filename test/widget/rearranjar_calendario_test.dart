@@ -52,6 +52,17 @@ void main() {
     expect(AjustesCalendario.atual, isEmpty);
   });
 
+  testWidgets('na edição o mês anda de um em um', (t) async {
+    await abrir(t, sessao: _super);
+    expect(find.text('Janeiro e Fevereiro de 2027'), findsOneWidget);
+    await t.tap(find.byTooltip('Próximo mês'));
+    await t.pumpAndSettle();
+    expect(find.text('Fevereiro e Março de 2027'), findsOneWidget);
+    await t.tap(find.byTooltip('Mês anterior'));
+    await t.pumpAndSettle();
+    expect(find.text('Janeiro e Fevereiro de 2027'), findsOneWidget);
+  });
+
   testWidgets('conta comum não rearranja', (t) async {
     await abrir(t, sessao: const Sessao(uid: 'org1', email: 'cesar@exemplo.com'));
     expect(find.text('Acesso restrito'), findsOneWidget);

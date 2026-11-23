@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -339,6 +341,15 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
   /// Primeiro mês do par em exibição (1, 3, 5 ... 11).
   late int _mes = _parInicial();
 
+  /// Passa o mês quando uma etiqueta fica parada sobre a seta.
+  Timer? _virar;
+
+  @override
+  void dispose() {
+    _virar?.cancel();
+    super.dispose();
+  }
+
   /// Filtro próprio no modo de edição (lá a tela não guarda o filtro).
   Competicao? _filtroEdicao;
   Competicao? get _filtro => widget.editavel ? _filtroEdicao : widget.filtro;
@@ -415,11 +426,29 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
     final feriados = {
       for (final f in feriados2027) DateTime(f.data.year, f.data.month, f.data.day): f,
     };
-    Widget seta(IconData icone, String rotulo, int? destino) => IconButton.outlined(
-      tooltip: rotulo,
-      onPressed: destino == null ? null : () => setState(() => _mes = destino),
-      icon: Icon(icone),
-    );
+    Widget seta(IconData icone, String rotulo, int? destino) {
+      final botao = IconButton.outlined(
+        tooltip: rotulo,
+        onPressed: destino == null ? null : () => setState(() => _mes = destino),
+        icon: Icon(icone),
+      );
+      if (!widget.editavel || destino == null) return botao;
+      // Arrastando uma etiqueta: parar sobre a seta passa o mês.
+      return DragTarget<_Arraste>(
+        onWillAcceptWithDetails: (_) {
+          _virar?.cancel();
+          _virar = Timer(const Duration(milliseconds: 600), () {
+            if (mounted) setState(() => _mes = destino);
+          });
+          return false;
+        },
+        onLeave: (_) => _virar?.cancel(),
+        builder: (_, _, _) => botao,
+      );
+    }
+
+    // Na edição o mês anda de um em um, para levar jogos de um mês ao seguinte.
+    final passo = widget.editavel ? 1 : 2;
     return PaginaLarga(
       antes: context.canPop() || widget.editavel
           ? BotaoVoltar(rotulo: 'Voltar', rota: widget.voltarPara)
@@ -477,7 +506,11 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
         ),
         Row(
           children: [
-            seta(Icons.chevron_left_rounded, 'Meses anteriores', _mes > 1 ? _mes - 2 : null),
+            seta(
+              Icons.chevron_left_rounded,
+              widget.editavel ? 'Mês anterior' : 'Meses anteriores',
+              _mes > 1 ? (_mes - passo).clamp(1, 11) : null,
+            ),
             SizedBox(
               width: 260,
               child: Text(
@@ -486,7 +519,11 @@ class _CalendarioLargoState extends State<_CalendarioLargo> {
                 style: AppTextStyles.tituloSecao,
               ),
             ),
-            seta(Icons.chevron_right_rounded, 'Próximos meses', _mes < 11 ? _mes + 2 : null),
+            seta(
+              Icons.chevron_right_rounded,
+              widget.editavel ? 'Próximo mês' : 'Próximos meses',
+              _mes < 11 ? (_mes + passo).clamp(1, 11) : null,
+            ),
             const Spacer(),
             const _LegendaFeriado(),
           ],

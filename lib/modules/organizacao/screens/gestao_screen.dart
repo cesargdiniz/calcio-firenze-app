@@ -61,7 +61,6 @@ class GestaoScreen extends StatelessWidget {
             style: AppTextStyles.pequeno,
           ),
           const SizedBox(height: AppSpacing.md),
-          const ConsistenciaCalendario(),
           if (ehSuperconta(o.sessao.email))
             grupo('Calendário', [
               ListTile(
@@ -75,6 +74,7 @@ class GestaoScreen extends StatelessWidget {
                 onTap: () => context.push('/calendario/rearranjar'),
               ),
             ]),
+          const ConsistenciaCalendario(),
           grupo('Temporada', [
             item('Times da temporada', rota: '/organizacao/gestao/times'),
             item('Regulamento e parâmetros', rota: '/organizacao/gestao/parametros'),
