@@ -278,6 +278,9 @@ void main() {
       const superconta = Sessao(uid: 'org1', email: 'cesargdiniz@gmail.com');
       await _abrir(t, '/organizacao/gestao', sessao: superconta, organizacao: {'org1'});
       await _capturar(t, '05r_gestao_superconta');
+    });
+    _tela('05s rearranjar calendário arrastando', (t) async {
+      const superconta = Sessao(uid: 'org1', email: 'cesargdiniz@gmail.com');
       // Turnos ainda não sorteados: as etiquetas mostram as datas oficiais.
       await _abrir(
         t,
