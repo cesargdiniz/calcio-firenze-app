@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:calcio_firenze/domain/entities/categoria.dart';
 import 'package:calcio_firenze/domain/usecases/calendario_geral.dart';
 import 'package:calcio_firenze/domain/usecases/gerar_calendario.dart';
+import 'package:calcio_firenze/domain/usecases/verificar_calendario.dart';
 import 'package:calcio_regras/calcio_regras.dart';
 
 const _sem = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado', 'domingo'];
@@ -71,7 +72,13 @@ void main(List<String> args) {
       stdout.writeln('${partes.last} | $txt');
     }
   }
-  final drafts = montarCalendarioGeral(dados).where((j) => j.ehDraft);
+  final geral = montarCalendarioGeral(dados);
+  final problemas = verificarCalendario(geral);
+  stdout.writeln('INCONSISTENCIAS ${problemas.length}');
+  for (final p in problemas) {
+    stdout.writeln('R${p.regra.index + 1} ${p.detalhe}');
+  }
+  final drafts = geral.where((j) => j.ehDraft);
   for (final d in drafts) {
     stdout.writeln('DRAFT ${d.competicao.sigla} ${d.etapa} ${d.inicio}');
   }
