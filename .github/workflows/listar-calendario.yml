@@ -1,0 +1,36 @@
+name: Listar calendário
+
+# Só leitura: lista o calendário como está no banco.
+on:
+  push:
+    branches: [claude/listar-calendario]
+
+jobs:
+  listar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: flutter pub get
+      - run: npm install --no-audit --no-fund
+        working-directory: tool/listar
+      - name: Lista
+        env:
+          CONTA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$CONTA" > "$RUNNER_TEMP/conta.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/conta.json"
+          trap 'rm -f "$RUNNER_TEMP/conta.json"' EXIT
+          node tool/listar/firestore.js "$RUNNER_TEMP/entrada.json"
+          TZ=America/Sao_Paulo dart run tool/listar_calendario.dart "$RUNNER_TEMP/entrada.json" > calendario.txt
+          cat calendario.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: calendario
+          path: calendario.txt
